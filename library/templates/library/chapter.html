@@ -16,6 +16,9 @@
 
 <div class="verses" x-data="{ open: null }">
     {% for verse in verses %}
+    {% ifchanged verse.chapter %}
+    <h2 class="chapter-marker" id="chapter-{{ verse.chapter }}">Глава {{ verse.chapter }}</h2>
+    {% endifchanged %}
     <div class="verse-row {% if verse.materials.all %}has-materials{% endif %}"
          {% if verse.materials.all %}@click="open = (open === {{ verse.id }} ? null : {{ verse.id }})"{% endif %}>
         <span class="verse-num">{{ verse.chapter }}:{{ verse.verse }}</span>

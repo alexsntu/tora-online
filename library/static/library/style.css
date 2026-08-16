@@ -46,6 +46,15 @@ main {
 .breadcrumbs { margin-bottom: 1rem; }
 .breadcrumbs a { color: var(--accent); text-decoration: none; }
 
+.chapter-marker {
+    margin: 2rem 0 .5rem 0;
+    padding-bottom: .3rem;
+    border-bottom: 2px solid var(--accent);
+    color: var(--accent);
+    font-size: 1.2rem;
+}
+.chapter-marker:first-child { margin-top: 0; }
+
 .chapter-nav {
     display: flex;
     justify-content: space-between;
