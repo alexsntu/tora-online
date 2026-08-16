@@ -1,0 +1,18 @@
+{% load static %}<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Tora Online для Бней Ноах{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'library/style.css' %}">
+    <script defer src="https://unpkg.com/alpinejs@3/dist/cdn.min.js"></script>
+</head>
+<body>
+    <header class="site-header">
+        <a class="site-title" href="{% url 'library:home' %}">Tora Online для Бней Ноах</a>
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

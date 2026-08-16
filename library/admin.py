@@ -18,7 +18,8 @@ class VerseAdmin(admin.ModelAdmin):
 
 @admin.register(Parasha)
 class ParashaAdmin(admin.ModelAdmin):
-    list_display = ("name_ru", "name_he", "order", "start_verse", "end_verse")
+    list_display = ("name_ru", "name_he", "slug", "order", "start_verse", "end_verse")
+    prepopulated_fields = {"slug": ("name_ru",)}
 
 
 @admin.register(Material)

@@ -1,0 +1,48 @@
+{% extends "library/base.html" %}
+{% block title %}{{ title }} — Tora Online{% endblock %}
+{% block content %}
+<nav class="breadcrumbs">
+    <a href="{% url 'library:home' %}">← Оглавление</a>
+</nav>
+
+<h1>{{ title }}</h1>
+
+{% if prev_chapter or next_chapter %}
+<div class="chapter-nav">
+    {% if prev_chapter %}<a href="{% url 'library:chapter' book.slug prev_chapter %}">← Глава {{ prev_chapter }}</a>{% endif %}
+    {% if next_chapter %}<a href="{% url 'library:chapter' book.slug next_chapter %}">Глава {{ next_chapter }} →</a>{% endif %}
+</div>
+{% endif %}
+
+<div class="verses" x-data="{ open: null }">
+    {% for verse in verses %}
+    <div class="verse-row {% if verse.materials.all %}has-materials{% endif %}"
+         {% if verse.materials.all %}@click="open = (open === {{ verse.id }} ? null : {{ verse.id }})"{% endif %}>
+        <span class="verse-num">{{ verse.chapter }}:{{ verse.verse }}</span>
+        <span class="verse-he" dir="rtl" lang="he">{{ verse.text_he }}</span>
+        <span class="verse-ru" lang="ru">{{ verse.text_ru }}</span>
+    </div>
+    {% if verse.materials.all %}
+    <div class="materials-panel" x-show="open === {{ verse.id }}" x-cloak>
+        {% for m in verse.materials.all %}
+        <div class="material material-{{ m.type }}">
+            <h3>{{ m.title }}</h3>
+            {% if m.type == "video" %}
+                {% if m.youtube_embed_url %}
+                <div class="video-embed">
+                    <iframe src="{{ m.youtube_embed_url }}" title="{{ m.title }}" frameborder="0" allowfullscreen></iframe>
+                </div>
+                {% else %}
+                <a href="{{ m.url }}" target="_blank" rel="noopener">Смотреть видеоурок →</a>
+                {% endif %}
+            {% else %}
+                {% if m.url %}<a href="{{ m.url }}" target="_blank" rel="noopener">Читать статью →</a>{% endif %}
+                {% if m.body %}<p class="material-body">{{ m.body }}</p>{% endif %}
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>
+{% endblock %}

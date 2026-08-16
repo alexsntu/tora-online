@@ -1,0 +1,34 @@
+{% extends "library/base.html" %}
+{% block content %}
+<section class="nav-section">
+    <h2>По книгам и главам</h2>
+    <ul class="book-list">
+        {% for book in books %}
+        <li>
+            <strong>{{ book.name_ru }}</strong> ({{ book.name_he }})
+            <div class="chapter-links">
+                {% for chapter in book.chapters %}
+                <a href="{% url 'library:chapter' book.slug chapter %}">Глава {{ chapter }}</a>
+                {% endfor %}
+            </div>
+        </li>
+        {% empty %}
+        <li>Книги ещё не загружены.</li>
+        {% endfor %}
+    </ul>
+</section>
+
+<section class="nav-section">
+    <h2>По недельным главам (парашот)</h2>
+    <ul class="parasha-list">
+        {% for parasha in parashot %}
+        <li>
+            <a href="{% url 'library:parasha' parasha.slug %}">{{ parasha.order }}. {{ parasha.name_ru }}</a>
+            <span class="range">{{ parasha.start_verse }} — {{ parasha.end_verse }}</span>
+        </li>
+        {% empty %}
+        <li>Недельные главы ещё не загружены.</li>
+        {% endfor %}
+    </ul>
+</section>
+{% endblock %}

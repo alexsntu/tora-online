@@ -1,4 +1,8 @@
+import re
+
 from django.db import models
+
+YOUTUBE_ID_RE = re.compile(r"(?:v=|youtu\.be/|embed/)([A-Za-z0-9_-]{11})")
 
 
 class Book(models.Model):
@@ -30,6 +34,7 @@ class Verse(models.Model):
 
 
 class Parasha(models.Model):
+    slug = models.SlugField(unique=True)
     name_ru = models.CharField(max_length=100)
     name_he = models.CharField(max_length=100, blank=True)
     order = models.PositiveSmallIntegerField(default=0)
@@ -67,6 +72,15 @@ class Material(models.Model):
 
     def __str__(self):
         return self.title
+
+    @property
+    def youtube_embed_url(self):
+        if self.type != self.TYPE_VIDEO or not self.url:
+            return ""
+        m = YOUTUBE_ID_RE.search(self.url)
+        if not m:
+            return ""
+        return f"https://www.youtube.com/embed/{m.group(1)}"
 
 
 class Topic(models.Model):
