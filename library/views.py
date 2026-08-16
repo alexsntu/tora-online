@@ -38,11 +38,23 @@ def home(request):
 
     top_categories = children_by_parent.get(None, [])
 
-    parashot = Parasha.objects.select_related("start_verse", "end_verse").all()
+    parashot = list(
+        Parasha.objects.select_related("start_verse__book", "end_verse").order_by("order")
+    )
+    parashot_by_book_id = {}
+    for p in parashot:
+        parashot_by_book_id.setdefault(p.start_verse.book_id, []).append(p)
+
+    parasha_groups = [
+        (book, parashot_by_book_id[book.id])
+        for book in books
+        if book.id in parashot_by_book_id
+    ]
+
     return render(
         request,
         "library/home.html",
-        {"top_categories": top_categories, "parashot": parashot},
+        {"top_categories": top_categories, "parasha_groups": parasha_groups},
     )
 
 
