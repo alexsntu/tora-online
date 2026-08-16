@@ -44,8 +44,8 @@
                 </div>
             {% else %}
                 {% if m.url %}<a href="{{ m.url }}" target="_blank" rel="noopener">Читать статью →</a>{% endif %}
-                {% if m.body %}<p class="material-body">{{ m.body }}</p>{% endif %}
             {% endif %}
+            {% if m.body %}<p class="material-body">{{ m.body|linebreaksbr }}</p>{% endif %}
         </div>
         {% endfor %}
     </div>
