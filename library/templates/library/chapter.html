@@ -23,22 +23,20 @@
     <div class="verse-row {% if verse.materials.all %}has-materials{% endif %}"
          id="v-{{ verse.chapter }}-{{ verse.verse }}"
          {% if verse.materials.all %}@click="open = (open === {{ verse.id }} ? null : {{ verse.id }})"{% endif %}>
-        <span class="verse-num">{{ verse.chapter }}:{{ verse.verse }}</span>
+        <span class="verse-num">
+            {{ verse.chapter }}:{{ verse.verse }}
+            {% for c in verse.commentaries.all %}
+            <button type="button" class="rashi-toggle" @click.stop="openRashi = (openRashi === {{ c.id }} ? null : {{ c.id }})">{{ c.source }}</button>
+            {% endfor %}
+        </span>
         <span class="verse-he" dir="rtl" lang="he">{{ verse.text_he }}</span>
         <span class="verse-ru" lang="ru">{{ verse.text_ru }}</span>
-    </div>
-    {% if verse.commentaries.all %}
-    <div class="rashi-row">
-        {% for c in verse.commentaries.all %}
-        <button type="button" class="rashi-toggle" @click="openRashi = (openRashi === {{ c.id }} ? null : {{ c.id }})">{{ c.source }} ›</button>
-        {% endfor %}
     </div>
     {% for c in verse.commentaries.all %}
     <div class="rashi-panel" x-show="openRashi === {{ c.id }}" x-cloak dir="rtl" lang="he">
         {{ c.text_he|linebreaksbr }}
     </div>
     {% endfor %}
-    {% endif %}
     {% if verse.materials.all %}
     <div class="materials-panel" x-show="open === {{ verse.id }}" x-cloak>
         {% for m in verse.materials.all %}

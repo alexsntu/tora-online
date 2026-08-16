@@ -329,6 +329,10 @@ summary::marker { color: var(--gold); }
 
 .verse-num {
     position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .4rem;
     color: #a3936a;
     font-size: .85rem;
     padding-top: .3rem;
@@ -360,7 +364,7 @@ summary::marker { color: var(--gold); }
         gap: .3rem;
         padding: .8rem .6rem;
     }
-    .verse-num { padding-top: 0; }
+    .verse-num { flex-direction: row; align-items: center; padding-top: 0; }
     .has-materials .verse-num::after { display: inline-block; margin: 0 0 0 .4rem; }
     .verse-he { font-size: 1.35rem; }
     .verse-ru { font-size: 1.05rem; padding-top: .2rem; border-top: 1px dashed var(--border); margin-top: .3rem; }
@@ -387,21 +391,17 @@ summary::marker { color: var(--gold); }
     box-shadow: 0 2px 8px rgba(56, 41, 15, 0.08);
 }
 
-.rashi-row {
-    display: flex;
-    justify-content: flex-end;
-    gap: .4rem;
-    margin: -.3rem 0 .4rem 0;
-}
 .rashi-toggle {
     font-family: var(--font-hebrew);
-    font-size: .8rem;
+    font-size: .72rem;
+    line-height: 1.3;
     color: #8a7a55;
     background: none;
     border: 1px solid var(--border);
     border-radius: 3px;
-    padding: .15rem .5rem;
+    padding: .1rem .4rem;
     cursor: pointer;
+    white-space: nowrap;
 }
 .rashi-toggle:hover { background: #f2ede0; color: var(--text); }
 .rashi-panel {
