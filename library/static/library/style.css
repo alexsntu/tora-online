@@ -14,6 +14,7 @@ body {
     font-family: "Georgia", "Times New Roman", serif;
     background: var(--bg);
     color: var(--text);
+    font-size: 18px;
     line-height: 1.5;
 }
 
@@ -31,9 +32,9 @@ body {
 }
 
 main {
-    max-width: 900px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 1.5rem;
+    padding: 1.5rem 2.5rem;
 }
 
 .nav-section { margin-bottom: 2rem; }
@@ -136,26 +137,28 @@ summary::marker { color: var(--accent); }
 
 .verse-row {
     display: grid;
-    grid-template-columns: 3rem 1fr 1fr;
-    gap: 1rem;
-    padding: .6rem .5rem;
+    grid-template-columns: 3.5rem 1fr 1fr;
+    gap: 1.5rem;
+    padding: .8rem .5rem;
     border-bottom: 1px solid var(--border);
     align-items: start;
 }
 
 .verse-num {
     color: #999;
-    font-size: .8rem;
-    padding-top: .2rem;
+    font-size: .85rem;
+    padding-top: .3rem;
 }
 
 .verse-he {
-    font-size: 1.15rem;
+    font-size: 1.5rem;
+    line-height: 1.6;
     text-align: right;
 }
 
 .verse-ru {
-    font-size: 1rem;
+    font-size: 1.2rem;
+    line-height: 1.6;
 }
 
 .has-materials {
