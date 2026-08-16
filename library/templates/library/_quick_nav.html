@@ -4,6 +4,10 @@
     <div class="nav-row nav-chapters"></div>
     <div class="nav-row-label">Стих</div>
     <div class="nav-row nav-verses"></div>
+    <label class="filter-toggle">
+        <input type="checkbox" class="filter-materials-checkbox">
+        Показывать только стихи с комментариями <span class="filter-star">✦</span>
+    </label>
 </div>
 <script>
 (function () {
@@ -61,5 +65,27 @@
 
     renderChapters();
     renderVerses();
+
+    var filterCheckbox = container.querySelector('.filter-materials-checkbox');
+    filterCheckbox.addEventListener('change', function () {
+        var filterOn = this.checked;
+        var rows = document.querySelectorAll('.verse-row');
+        rows.forEach(function (row) {
+            row.style.display = (filterOn && !row.classList.contains('has-materials')) ? 'none' : '';
+        });
+        var markers = document.querySelectorAll('.chapter-marker');
+        markers.forEach(function (marker) {
+            var el = marker.nextElementSibling;
+            var hasVisible = false;
+            while (el && !el.classList.contains('chapter-marker')) {
+                if (el.classList.contains('verse-row') && el.style.display !== 'none') {
+                    hasVisible = true;
+                    break;
+                }
+                el = el.nextElementSibling;
+            }
+            marker.style.display = (filterOn && !hasVisible) ? 'none' : '';
+        });
+    });
 })();
 </script>

@@ -193,6 +193,20 @@ summary::marker { color: var(--gold); }
     border-radius: 6px;
     box-shadow: 0 2px 8px rgba(56, 41, 15, 0.08);
 }
+
+.filter-toggle {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin-top: .9rem;
+    padding-top: .8rem;
+    border-top: 1px dashed var(--border);
+    font-size: .95rem;
+    color: var(--text);
+    cursor: pointer;
+}
+.filter-toggle input { width: 1.1rem; height: 1.1rem; accent-color: var(--maroon); cursor: pointer; }
+.filter-star { color: var(--gold); }
 .nav-row-label {
     font-size: .75rem;
     color: #8a7a55;
