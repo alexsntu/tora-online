@@ -19,10 +19,19 @@
 
     var chapters = Object.keys(navData).map(Number).sort(function (a, b) { return a - b; });
     var activeChapter = Number(container.dataset.currentChapter) || chapters[0];
+    var filterOn = false;
+
+    function chapterHasMaterials(ch) {
+        return (navData[ch] || []).some(function (pair) { return pair[1]; });
+    }
 
     function renderChapters() {
         chaptersRow.innerHTML = '';
-        chapters.forEach(function (ch) {
+        var visibleChapters = filterOn ? chapters.filter(chapterHasMaterials) : chapters;
+        if (filterOn && visibleChapters.length && visibleChapters.indexOf(activeChapter) === -1) {
+            activeChapter = visibleChapters[0];
+        }
+        visibleChapters.forEach(function (ch) {
             var btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'nav-btn' + (ch === activeChapter ? ' active' : '');
@@ -49,7 +58,9 @@
 
     function renderVerses() {
         versesRow.innerHTML = '';
-        (navData[activeChapter] || []).forEach(function (pair) {
+        var verses = navData[activeChapter] || [];
+        if (filterOn) { verses = verses.filter(function (pair) { return pair[1]; }); }
+        verses.forEach(function (pair) {
             var verse = pair[0], hasMaterials = pair[1];
             var btn = document.createElement('button');
             btn.type = 'button';
@@ -68,7 +79,10 @@
 
     var filterCheckbox = container.querySelector('.filter-materials-checkbox');
     filterCheckbox.addEventListener('change', function () {
-        var filterOn = this.checked;
+        filterOn = this.checked;
+        renderChapters();
+        renderVerses();
+
         var rows = document.querySelectorAll('.verse-row');
         rows.forEach(function (row) {
             row.style.display = (filterOn && !row.classList.contains('has-materials')) ? 'none' : '';
