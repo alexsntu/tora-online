@@ -67,27 +67,21 @@ main {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: .8rem;
+    gap: 1.2rem;
     margin-bottom: 1rem;
     padding: .6rem .8rem;
     background: #fff;
     border: 1px solid var(--border);
     border-radius: 4px;
 }
-.chapter-pills { display: flex; flex-wrap: wrap; gap: .4rem; }
-.chapter-pill {
-    display: inline-block;
-    min-width: 1.6rem;
-    text-align: center;
-    padding: .15rem .5rem;
-    border: 1px solid var(--accent);
-    border-radius: 3px;
-    color: var(--accent);
-    text-decoration: none;
+.quick-nav label {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
     font-size: .85rem;
+    color: #666;
 }
-.chapter-pill:hover { background: var(--highlight); }
-.verse-jump {
+.quick-nav select {
     font-family: inherit;
     font-size: .9rem;
     padding: .25rem .4rem;

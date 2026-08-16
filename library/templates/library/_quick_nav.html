@@ -1,18 +1,61 @@
-{% regroup verses by chapter as chapter_groups %}
-<div class="quick-nav">
-    <div class="chapter-pills">
-        {% for group in chapter_groups %}
-        <a class="chapter-pill" href="#chapter-{{ group.grouper }}">{{ group.grouper }}</a>
-        {% endfor %}
-    </div>
-    <select class="verse-jump" onchange="if(this.value){window.location.hash=this.value;} this.selectedIndex=0;">
-        <option value="">Перейти к стиху…</option>
-        {% for group in chapter_groups %}
-        <optgroup label="Глава {{ group.grouper }}">
-            {% for v in group.list %}
-            <option value="#v-{{ v.chapter }}-{{ v.verse }}">{{ v.chapter }}:{{ v.verse }}{% if v.materials.all %} ★{% endif %}</option>
-            {% endfor %}
-        </optgroup>
-        {% endfor %}
-    </select>
+{{ nav_data|json_script:"nav-data" }}
+<div class="quick-nav" data-book-slug="{{ book.slug }}" data-current-chapter="{{ current_chapter|default:'' }}">
+    <label>Глава
+        <select class="nav-chapter"></select>
+    </label>
+    <label>Стих
+        <select class="nav-verse">
+            <option value="">Стих…</option>
+        </select>
+    </label>
 </div>
+<script>
+(function () {
+    var container = document.currentScript.previousElementSibling;
+    var navData = JSON.parse(document.getElementById('nav-data').textContent);
+    var bookSlug = container.dataset.bookSlug;
+    var chapterSelect = container.querySelector('.nav-chapter');
+    var verseSelect = container.querySelector('.nav-verse');
+
+    var chapters = Object.keys(navData).map(Number).sort(function (a, b) { return a - b; });
+    chapters.forEach(function (ch) {
+        var opt = document.createElement('option');
+        opt.value = ch;
+        opt.textContent = 'Глава ' + ch;
+        chapterSelect.appendChild(opt);
+    });
+
+    function fillVerses(chapter) {
+        verseSelect.innerHTML = '<option value="">Стих…</option>';
+        (navData[chapter] || []).forEach(function (pair) {
+            var verse = pair[0], hasMaterials = pair[1];
+            var opt = document.createElement('option');
+            opt.value = verse;
+            opt.textContent = chapter + ':' + verse + (hasMaterials ? ' ★' : '');
+            verseSelect.appendChild(opt);
+        });
+    }
+
+    var initialChapter = container.dataset.currentChapter || chapters[0];
+    chapterSelect.value = initialChapter;
+    fillVerses(initialChapter);
+
+    chapterSelect.addEventListener('change', function () {
+        fillVerses(this.value);
+    });
+
+    verseSelect.addEventListener('change', function () {
+        if (!this.value) return;
+        var chapter = chapterSelect.value;
+        var verse = this.value;
+        var anchorId = 'v-' + chapter + '-' + verse;
+        var el = document.getElementById(anchorId);
+        if (el) {
+            el.scrollIntoView({ behavior: 'auto', block: 'center' });
+            history.replaceState(null, '', '#' + anchorId);
+        } else {
+            window.location.href = '/' + bookSlug + '/' + chapter + '/#' + anchorId;
+        }
+    });
+})();
+</script>

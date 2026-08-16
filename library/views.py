@@ -5,6 +5,14 @@ from django.shortcuts import get_object_or_404, render
 from .models import Book, Category, Parasha, Verse
 
 
+def build_nav_data(verses):
+    """chapter (str) -> [[verse, has_materials], ...] для каскадных селектов "Глава/Стих"."""
+    data = {}
+    for v in verses:
+        data.setdefault(str(v.chapter), []).append([v.verse, bool(v.materials.all())])
+    return data
+
+
 def home(request):
     categories = list(Category.objects.order_by("order"))
     books = list(Book.objects.select_related("category").order_by("order"))
@@ -51,6 +59,8 @@ def chapter_view(request, book_slug, chapter):
     last_verse = Verse.objects.filter(book=book).order_by("-chapter").first()
     max_chapter = last_verse.chapter if last_verse else chapter
 
+    nav_verses = Verse.objects.filter(book=book).prefetch_related("materials").order_by("chapter", "verse")
+
     context = {
         "book": book,
         "chapter": chapter,
@@ -58,6 +68,8 @@ def chapter_view(request, book_slug, chapter):
         "title": f"{book.name_ru}, глава {chapter}",
         "prev_chapter": chapter - 1 if chapter > 1 else None,
         "next_chapter": chapter + 1 if chapter < max_chapter else None,
+        "nav_data": build_nav_data(nav_verses),
+        "current_chapter": chapter,
     }
     return render(request, "library/chapter.html", context)
 
@@ -88,5 +100,6 @@ def parasha_view(request, parasha_slug):
         "title": f"Недельная глава «{parasha.name_ru}»",
         "prev_parasha": prev_parasha,
         "next_parasha": next_parasha,
+        "nav_data": build_nav_data(verses),
     }
     return render(request, "library/chapter.html", context)
