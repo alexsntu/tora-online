@@ -4,9 +4,18 @@
 Дополняется по мере добавления новых книг/парашот.
 """
 
-# slug -> (name_ru, name_he, sefaria_name, order)
+# slug -> (name_ru, name_he, parent_slug, order) — иерархия разделов библиотеки, как на Sefaria
+CATEGORIES = {
+    "tanakh": ("Танах", "תָּנָ״ךְ", None, 1),
+    "torah": ("Тора", "תּוֹרָה", "tanakh", 1),
+    "neviim": ("Пророки (Невиим)", "נְבִיאִים", "tanakh", 2),
+    "ketuvim": ("Писания (Ктувим)", "כְּתוּבִים", "tanakh", 3),
+    "talmud": ("Талмуд", "תַּלְמוּד", None, 2),
+}
+
+# slug -> (name_ru, name_he, sefaria_name, order, category_slug)
 BOOKS = {
-    "bereshit": ("Берешит", "בְּרֵאשִׁית", "Genesis", 1),
+    "bereshit": ("Берешит", "בְּרֵאשִׁית", "Genesis", 1, "torah"),
 }
 
 # slug -> (name_ru, name_he, order) — порядок сквозной по всей Торе (1..54)

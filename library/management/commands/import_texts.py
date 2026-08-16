@@ -8,8 +8,8 @@ from pathlib import Path
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
-from library.models import Book, Parasha, Verse
-from library.torah_data import BOOKS, PARASHOT
+from library.models import Book, Category, Parasha, Verse
+from library.torah_data import BOOKS, CATEGORIES, PARASHOT
 
 VERSE_LINE_RE = re.compile(r"^(\d+):(\d+)\s+(.+)$")
 HTML_TAG_RE = re.compile(r"<[^>]+>")
@@ -47,6 +47,17 @@ def fetch_hebrew_chapter(sefaria_name: str, chapter: int, cache_dir: Path):
     return he_verses
 
 
+def seed_categories():
+    """Создаёт/обновляет иерархию разделов библиотеки (Танах/Тора/Талмуд и т.д.)."""
+    # сначала родительские (без parent_slug), потом дочерние — порядок в словаре это гарантирует
+    for slug, (name_ru, name_he, parent_slug, order) in CATEGORIES.items():
+        parent = Category.objects.get(slug=parent_slug) if parent_slug else None
+        Category.objects.update_or_create(
+            slug=slug,
+            defaults={"name_ru": name_ru, "name_he": name_he, "parent": parent, "order": order},
+        )
+
+
 class Command(BaseCommand):
     help = (
         "Импортирует русский текст из texts/ru/<книга>/<парашот>.txt "
@@ -56,6 +67,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         if not TEXTS_RU_DIR.exists():
             raise CommandError(f"Нет каталога {TEXTS_RU_DIR}")
+
+        seed_categories()
 
         for book_dir in sorted(TEXTS_RU_DIR.iterdir()):
             if not book_dir.is_dir():
@@ -67,10 +80,16 @@ class Command(BaseCommand):
                 ))
                 continue
 
-            name_ru, name_he, sefaria_name, order = BOOKS[book_slug]
+            name_ru, name_he, sefaria_name, order, category_slug = BOOKS[book_slug]
+            category = Category.objects.get(slug=category_slug)
             book, _ = Book.objects.update_or_create(
                 slug=book_slug,
-                defaults={"name_ru": name_ru, "name_he": name_he, "order": order},
+                defaults={
+                    "name_ru": name_ru,
+                    "name_he": name_he,
+                    "order": order,
+                    "category": category,
+                },
             )
 
             for txt_file in sorted(book_dir.glob("*.txt")):

@@ -1,0 +1,18 @@
+{% regroup verses by chapter as chapter_groups %}
+<div class="quick-nav">
+    <div class="chapter-pills">
+        {% for group in chapter_groups %}
+        <a class="chapter-pill" href="#chapter-{{ group.grouper }}">{{ group.grouper }}</a>
+        {% endfor %}
+    </div>
+    <select class="verse-jump" onchange="if(this.value){window.location.hash=this.value;} this.selectedIndex=0;">
+        <option value="">Перейти к стиху…</option>
+        {% for group in chapter_groups %}
+        <optgroup label="Глава {{ group.grouper }}">
+            {% for v in group.list %}
+            <option value="#v-{{ v.chapter }}-{{ v.verse }}">{{ v.chapter }}:{{ v.verse }}{% if v.materials.all %} ★{% endif %}</option>
+            {% endfor %}
+        </optgroup>
+        {% endfor %}
+    </select>
+</div>

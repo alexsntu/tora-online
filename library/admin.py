@@ -1,11 +1,18 @@
 from django.contrib import admin
 
-from .models import Book, Verse, Parasha, Material, Topic
+from .models import Book, Category, Verse, Parasha, Material, Topic
+
+
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ("name_ru", "name_he", "slug", "parent", "order")
+    prepopulated_fields = {"slug": ("name_ru",)}
 
 
 @admin.register(Book)
 class BookAdmin(admin.ModelAdmin):
-    list_display = ("name_ru", "name_he", "slug", "order")
+    list_display = ("name_ru", "name_he", "slug", "category", "order")
+    list_filter = ("category",)
     prepopulated_fields = {"slug": ("name_ru",)}
 
 

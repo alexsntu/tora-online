@@ -7,12 +7,8 @@
 
 <h1>{{ title }}</h1>
 
-{% if prev_chapter or next_chapter %}
-<div class="chapter-nav">
-    {% if prev_chapter %}<a href="{% url 'library:chapter' book.slug prev_chapter %}">← Глава {{ prev_chapter }}</a>{% endif %}
-    {% if next_chapter %}<a href="{% url 'library:chapter' book.slug next_chapter %}">Глава {{ next_chapter }} →</a>{% endif %}
-</div>
-{% endif %}
+{% include "library/_quick_nav.html" %}
+{% include "library/_nav.html" %}
 
 <div class="verses" x-data="{ open: null }">
     {% for verse in verses %}
@@ -20,6 +16,7 @@
     <h2 class="chapter-marker" id="chapter-{{ verse.chapter }}">Глава {{ verse.chapter }}</h2>
     {% endifchanged %}
     <div class="verse-row {% if verse.materials.all %}has-materials{% endif %}"
+         id="v-{{ verse.chapter }}-{{ verse.verse }}"
          {% if verse.materials.all %}@click="open = (open === {{ verse.id }} ? null : {{ verse.id }})"{% endif %}>
         <span class="verse-num">{{ verse.chapter }}:{{ verse.verse }}</span>
         <span class="verse-he" dir="rtl" lang="he">{{ verse.text_he }}</span>
@@ -48,4 +45,6 @@
     {% endif %}
     {% endfor %}
 </div>
+
+{% include "library/_nav.html" %}
 {% endblock %}

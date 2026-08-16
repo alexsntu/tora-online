@@ -5,7 +5,29 @@ from django.db import models
 YOUTUBE_ID_RE = re.compile(r"(?:v=|youtu\.be/|embed/)([A-Za-z0-9_-]{11})")
 
 
+class Category(models.Model):
+    """Раздел библиотеки: Танах, Тора/Невиим/Ктувим внутри него, Талмуд и т.д. (как на Sefaria)."""
+
+    name_ru = models.CharField(max_length=100)
+    name_he = models.CharField(max_length=100, blank=True)
+    slug = models.SlugField(unique=True)
+    parent = models.ForeignKey(
+        "self", null=True, blank=True, related_name="children", on_delete=models.CASCADE
+    )
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order"]
+        verbose_name_plural = "categories"
+
+    def __str__(self):
+        return self.name_ru
+
+
 class Book(models.Model):
+    category = models.ForeignKey(
+        Category, related_name="books", on_delete=models.PROTECT, null=True, blank=True
+    )
     name_ru = models.CharField(max_length=100)
     name_he = models.CharField(max_length=100, blank=True)
     slug = models.SlugField(unique=True)

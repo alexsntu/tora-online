@@ -1,21 +1,43 @@
 {% extends "library/base.html" %}
 {% block content %}
 <section class="nav-section">
-    <h2>По книгам и главам</h2>
-    <ul class="book-list">
-        {% for book in books %}
-        <li>
+    <h2>Библиотека</h2>
+    {% for cat in top_categories %}
+    <div class="category-block">
+        <h3>{{ cat.name_ru }}{% if cat.name_he %} <span class="he-label" dir="rtl">({{ cat.name_he }})</span>{% endif %}</h3>
+
+        {% for book in cat.own_books %}
+        <div class="book-entry">
             <strong>{{ book.name_ru }}</strong> ({{ book.name_he }})
             <div class="chapter-links">
                 {% for chapter in book.chapters %}
                 <a href="{% url 'library:chapter' book.slug chapter %}">Глава {{ chapter }}</a>
                 {% endfor %}
             </div>
-        </li>
-        {% empty %}
-        <li>Книги ещё не загружены.</li>
+        </div>
         {% endfor %}
-    </ul>
+
+        {% for child in cat.child_categories %}
+        <div class="subcategory-block">
+            <h4>{{ child.name_ru }}{% if child.name_he %} <span class="he-label" dir="rtl">({{ child.name_he }})</span>{% endif %}</h4>
+            {% for book in child.own_books %}
+            <div class="book-entry">
+                <strong>{{ book.name_ru }}</strong> ({{ book.name_he }})
+                <div class="chapter-links">
+                    {% for chapter in book.chapters %}
+                    <a href="{% url 'library:chapter' book.slug chapter %}">Глава {{ chapter }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% empty %}
+            <p class="empty-note">Пока нет текстов.</p>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+    {% empty %}
+    <p>Разделы библиотеки ещё не загружены.</p>
+    {% endfor %}
 </section>
 
 <section class="nav-section">
