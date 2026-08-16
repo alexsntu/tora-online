@@ -1,8 +1,17 @@
+from pathlib import Path
+
+from django.conf import settings
 from django.db.models import Q
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, render
 
 from .models import Book, Category, Parasha, Verse
+
+
+def service_worker(request):
+    """Отдаём service worker с корня сайта, чтобы его scope покрывал весь домен."""
+    path = Path(settings.BASE_DIR) / "library" / "static" / "library" / "service-worker.js"
+    return HttpResponse(path.read_text(encoding="utf-8"), content_type="application/javascript")
 
 
 def build_nav_data(verses):

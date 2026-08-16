@@ -118,6 +118,13 @@ h1 { font-family: var(--font-display); color: var(--maroon); }
 
 @media (max-width: 640px) {
     .promo-section { grid-template-columns: 1fr; }
+    main { padding: 1rem 1rem 3rem; }
+    body { font-size: 16px; }
+    .site-header { padding: .9rem 1rem 1.1rem; }
+    .site-title { font-size: 1.15rem; gap: .4rem; }
+    .site-emblem { width: 1.4rem; height: 1.4rem; }
+    h1 { font-size: 1.4rem; }
+    .verses { padding: .3rem .8rem; border-radius: 4px; }
 }
 
 .nav-section { margin-bottom: 2rem; font-size: 1.15rem; }
@@ -308,6 +315,18 @@ summary::marker { color: var(--gold); }
     line-height: 1.6;
 }
 
+@media (max-width: 640px) {
+    .verse-row {
+        grid-template-columns: 1fr;
+        gap: .3rem;
+        padding: .8rem .6rem;
+    }
+    .verse-num { padding-top: 0; }
+    .has-materials .verse-num::after { display: inline-block; margin: 0 0 0 .4rem; }
+    .verse-he { font-size: 1.35rem; }
+    .verse-ru { font-size: 1.05rem; padding-top: .2rem; border-top: 1px dashed var(--border); margin-top: .3rem; }
+}
+
 .has-materials {
     cursor: pointer;
     background: var(--highlight);
@@ -327,6 +346,12 @@ summary::marker { color: var(--gold); }
     border-left: 3px solid var(--highlight-border);
     border-radius: 4px;
     box-shadow: 0 2px 8px rgba(56, 41, 15, 0.08);
+}
+
+@media (max-width: 640px) {
+    .materials-panel { padding: 1rem; }
+    .material a.platform-link { width: 100%; justify-content: center; }
+    .nav-btn { width: 2.3rem; height: 2.3rem; font-size: .9rem; }
 }
 
 [x-cloak] { display: none !important; }

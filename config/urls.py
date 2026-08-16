@@ -17,7 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
+from library.views import service_worker
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('service-worker.js', service_worker, name='service-worker'),
     path('', include('library.urls')),
 ]
