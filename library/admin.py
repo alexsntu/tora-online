@@ -2,6 +2,10 @@ from django.contrib import admin
 
 from .models import Book, Category, Verse, Parasha, Material, Topic
 
+admin.site.site_header = "Tora Online — панель управления"
+admin.site.site_title = "Tora Online"
+admin.site.index_title = "Управление сайтом"
+
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):

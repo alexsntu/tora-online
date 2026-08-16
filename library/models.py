@@ -8,17 +8,19 @@ YOUTUBE_ID_RE = re.compile(r"(?:v=|youtu\.be/|embed/)([A-Za-z0-9_-]{11})")
 class Category(models.Model):
     """Раздел библиотеки: Танах, Тора/Невиим/Ктувим внутри него, Талмуд и т.д. (как на Sefaria)."""
 
-    name_ru = models.CharField(max_length=100)
-    name_he = models.CharField(max_length=100, blank=True)
-    slug = models.SlugField(unique=True)
+    name_ru = models.CharField("Название (рус.)", max_length=100)
+    name_he = models.CharField("Название (иврит)", max_length=100, blank=True)
+    slug = models.SlugField("Слаг (для ссылки)", unique=True)
     parent = models.ForeignKey(
-        "self", null=True, blank=True, related_name="children", on_delete=models.CASCADE
+        "self", verbose_name="Родительский раздел",
+        null=True, blank=True, related_name="children", on_delete=models.CASCADE,
     )
-    order = models.PositiveSmallIntegerField(default=0)
+    order = models.PositiveSmallIntegerField("Порядок", default=0)
 
     class Meta:
         ordering = ["order"]
-        verbose_name_plural = "categories"
+        verbose_name = "раздел"
+        verbose_name_plural = "Разделы библиотеки"
 
     def __str__(self):
         return self.name_ru
@@ -26,49 +28,56 @@ class Category(models.Model):
 
 class Book(models.Model):
     category = models.ForeignKey(
-        Category, related_name="books", on_delete=models.PROTECT, null=True, blank=True
+        Category, verbose_name="Раздел",
+        related_name="books", on_delete=models.PROTECT, null=True, blank=True,
     )
-    name_ru = models.CharField(max_length=100)
-    name_he = models.CharField(max_length=100, blank=True)
-    slug = models.SlugField(unique=True)
-    order = models.PositiveSmallIntegerField(default=0)
+    name_ru = models.CharField("Название (рус.)", max_length=100)
+    name_he = models.CharField("Название (иврит)", max_length=100, blank=True)
+    slug = models.SlugField("Слаг (для ссылки)", unique=True)
+    order = models.PositiveSmallIntegerField("Порядок", default=0)
 
     class Meta:
         ordering = ["order"]
+        verbose_name = "книга"
+        verbose_name_plural = "Книги"
 
     def __str__(self):
         return self.name_ru
 
 
 class Verse(models.Model):
-    book = models.ForeignKey(Book, related_name="verses", on_delete=models.CASCADE)
-    chapter = models.PositiveSmallIntegerField()
-    verse = models.PositiveSmallIntegerField()
-    text_he = models.TextField(blank=True)
-    text_ru = models.TextField(blank=True)
+    book = models.ForeignKey(Book, verbose_name="Книга", related_name="verses", on_delete=models.CASCADE)
+    chapter = models.PositiveSmallIntegerField("Глава")
+    verse = models.PositiveSmallIntegerField("Стих")
+    text_he = models.TextField("Текст (иврит)", blank=True)
+    text_ru = models.TextField("Текст (рус.)", blank=True)
 
     class Meta:
         ordering = ["book", "chapter", "verse"]
         unique_together = ("book", "chapter", "verse")
+        verbose_name = "стих"
+        verbose_name_plural = "Стихи"
 
     def __str__(self):
         return f"{self.book.name_ru} {self.chapter}:{self.verse}"
 
 
 class Parasha(models.Model):
-    slug = models.SlugField(unique=True)
-    name_ru = models.CharField(max_length=100)
-    name_he = models.CharField(max_length=100, blank=True)
-    order = models.PositiveSmallIntegerField(default=0)
+    slug = models.SlugField("Слаг (для ссылки)", unique=True)
+    name_ru = models.CharField("Название (рус.)", max_length=100)
+    name_he = models.CharField("Название (иврит)", max_length=100, blank=True)
+    order = models.PositiveSmallIntegerField("Порядок", default=0)
     start_verse = models.ForeignKey(
-        Verse, related_name="parasha_start_of", on_delete=models.PROTECT
+        Verse, verbose_name="Первый стих", related_name="parasha_start_of", on_delete=models.PROTECT,
     )
     end_verse = models.ForeignKey(
-        Verse, related_name="parasha_end_of", on_delete=models.PROTECT
+        Verse, verbose_name="Последний стих", related_name="parasha_end_of", on_delete=models.PROTECT,
     )
 
     class Meta:
         ordering = ["order"]
+        verbose_name = "недельная глава"
+        verbose_name_plural = "Недельные главы"
 
     def __str__(self):
         return self.name_ru
@@ -82,16 +91,18 @@ class Material(models.Model):
         (TYPE_ARTICLE, "Статья"),
     ]
 
-    type = models.CharField(max_length=10, choices=TYPE_CHOICES)
-    title = models.CharField(max_length=255)
-    url = models.URLField(blank=True, help_text="Ссылка на YouTube (для видеоурока) или на статью")
-    url_rutube = models.URLField(blank=True, help_text="Ссылка на RuTube (если есть, для видеоурока)")
-    body = models.TextField(blank=True, help_text="Текст статьи или комментарий")
-    verses = models.ManyToManyField(Verse, related_name="materials", blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    type = models.CharField("Тип", max_length=10, choices=TYPE_CHOICES)
+    title = models.CharField("Заголовок", max_length=255)
+    url = models.URLField("Ссылка (YouTube / статья)", blank=True, help_text="Ссылка на YouTube (для видеоурока) или на статью")
+    url_rutube = models.URLField("Ссылка (RuTube)", blank=True, help_text="Ссылка на RuTube (если есть, для видеоурока)")
+    body = models.TextField("Текст статьи / комментарий", blank=True, help_text="Текст статьи или комментарий")
+    verses = models.ManyToManyField(Verse, verbose_name="Стихи", related_name="materials", blank=True)
+    created_at = models.DateTimeField("Дата создания", auto_now_add=True)
 
     class Meta:
         ordering = ["-created_at"]
+        verbose_name = "материал"
+        verbose_name_plural = "Материалы (комментарии)"
 
     def __str__(self):
         return self.title
@@ -107,12 +118,14 @@ class Material(models.Model):
 
 
 class Topic(models.Model):
-    title = models.CharField(max_length=255)
-    slug = models.SlugField(unique=True)
-    materials = models.ManyToManyField(Material, related_name="topics", blank=True)
+    title = models.CharField("Заголовок", max_length=255)
+    slug = models.SlugField("Слаг (для ссылки)", unique=True)
+    materials = models.ManyToManyField(Material, verbose_name="Материалы", related_name="topics", blank=True)
 
     class Meta:
         ordering = ["title"]
+        verbose_name = "тема / вопрос"
+        verbose_name_plural = "Темы и вопросы"
 
     def __str__(self):
         return self.title
