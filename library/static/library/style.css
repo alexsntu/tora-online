@@ -279,9 +279,10 @@ summary::marker { color: var(--gold); }
 }
 .nav-btn:hover { background: #f2e6c4; transform: translateY(-1px); box-shadow: 0 2px 4px rgba(56, 41, 15, 0.15); }
 .nav-btn.active {
-    background: var(--maroon);
-    border-color: var(--maroon);
-    color: #fff;
+    background: var(--highlight);
+    border: 2px solid var(--maroon);
+    color: var(--text);
+    font-weight: bold;
 }
 .nav-btn.has-materials {
     background: var(--highlight);
@@ -290,9 +291,9 @@ summary::marker { color: var(--gold); }
 }
 .nav-btn.has-materials:hover { filter: brightness(0.95); }
 .nav-btn.active.has-materials {
-    background: var(--maroon);
-    border: 2px solid var(--gold);
-    color: #fff;
+    background: var(--highlight);
+    border: 2px solid var(--maroon);
+    color: var(--text);
 }
 
 .chapter-nav {

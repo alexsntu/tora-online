@@ -28,23 +28,8 @@ self.addEventListener("fetch", (event) => {
 
     const url = new URL(request.url);
 
-    // Статика: сначала кэш, потом сеть (быстро и работает офлайн)
-    if (url.pathname.startsWith("/static/")) {
-        event.respondWith(
-            caches.match(request).then((cached) => {
-                if (cached) return cached;
-                return fetch(request).then((response) => {
-                    const copy = response.clone();
-                    caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
-                    return response;
-                });
-            })
-        );
-        return;
-    }
-
-    // Страницы: сначала сеть (чтобы видеть свежие тексты/комментарии),
-    // при отсутствии сети - последняя закэшированная версия страницы
+    // Всё, включая статику: сначала сеть (чтобы правки дизайна/текста были видны сразу),
+    // при отсутствии сети - последняя закэшированная версия
     event.respondWith(
         fetch(request)
             .then((response) => {
