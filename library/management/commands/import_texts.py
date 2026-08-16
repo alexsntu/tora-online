@@ -8,7 +8,7 @@ from pathlib import Path
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 
-from library.models import Book, Category, Parasha, Verse
+from library.models import Book, Category, Commentary, Parasha, Verse
 from library.torah_data import BOOKS, CATEGORIES, PARASHOT
 
 VERSE_LINE_RE = re.compile(r"^(\d+):(\d+)\s+(.+)$")
@@ -45,6 +45,27 @@ def fetch_hebrew_chapter(sefaria_name: str, chapter: int, cache_dir: Path):
     with open(cache_file, "w", encoding="utf-8") as f:
         json.dump(he_verses, f, ensure_ascii=False, indent=2)
     return he_verses
+
+
+def fetch_rashi_verse(sefaria_name: str, chapter: int, verse: int, cache_dir: Path):
+    """Возвращает список сегментов комментария Раши для стиха (иврит), с локальным кэшем."""
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    cache_file = cache_dir / f"{chapter}-{verse}.json"
+    if cache_file.exists():
+        with open(cache_file, encoding="utf-8") as f:
+            return json.load(f)
+
+    url = f"https://www.sefaria.org/api/texts/Rashi_on_{sefaria_name}.{chapter}.{verse}?context=0"
+    try:
+        with urllib.request.urlopen(url, timeout=15) as resp:
+            data = json.load(resp)
+    except (urllib.error.URLError, TimeoutError, OSError):
+        return None
+
+    segments = [clean_hebrew(s) for s in data.get("he", []) if clean_hebrew(s)]
+    with open(cache_file, "w", encoding="utf-8") as f:
+        json.dump(segments, f, ensure_ascii=False, indent=2)
+    return segments
 
 
 def seed_categories():
@@ -129,6 +150,9 @@ class Command(BaseCommand):
                 ))
             he_by_chapter[chapter] = he_verses
 
+        rashi_cache_dir = TEXTS_HE_CACHE_DIR / book.slug / "rashi"
+        rashi_found = 0
+
         verse_objs = []
         for chapter, verse, text_ru in parsed:
             he_verses = he_by_chapter.get(chapter)
@@ -143,6 +167,17 @@ class Command(BaseCommand):
                 defaults={"text_ru": text_ru, "text_he": text_he},
             )
             verse_objs.append(obj)
+
+            segments = fetch_rashi_verse(sefaria_name, chapter, verse, rashi_cache_dir)
+            if segments:
+                Commentary.objects.update_or_create(
+                    verse=obj, source="Раши",
+                    defaults={
+                        "text_he": "\n\n".join(segments),
+                        "sefaria_ref": f"Rashi on {sefaria_name} {chapter}:{verse}",
+                    },
+                )
+                rashi_found += 1
 
         verse_objs.sort(key=lambda v: (v.chapter, v.verse))
         start_verse, end_verse = verse_objs[0], verse_objs[-1]
@@ -163,5 +198,6 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.SUCCESS(
             f"{txt_file.name}: импортировано {len(verse_objs)} стихов "
-            f"({start_verse} — {end_verse}), недельная глава '{name_ru}'"
+            f"({start_verse} — {end_verse}), недельная глава '{name_ru}', "
+            f"Раши найден к {rashi_found} стихам"
         ))
