@@ -209,6 +209,22 @@ summary::marker { color: var(--gold); }
     border-top: 2px dotted var(--gold);
 }
 
+.parasha-marker {
+    display: block;
+    margin: 1.5rem 0;
+    padding: .6rem 1rem;
+    background: var(--maroon);
+    color: #fff;
+    text-decoration: none;
+    text-align: center;
+    border-radius: 4px;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: .02em;
+}
+.parasha-marker:hover { background: var(--accent-dark); }
+
 .quick-nav {
     margin-bottom: 1rem;
     padding: .9rem 1.1rem;
@@ -273,6 +289,11 @@ summary::marker { color: var(--gold); }
     font-weight: bold;
 }
 .nav-btn.has-materials:hover { filter: brightness(0.95); }
+.nav-btn.active.has-materials {
+    background: var(--maroon);
+    border: 2px solid var(--gold);
+    color: #fff;
+}
 
 .chapter-nav {
     display: flex;

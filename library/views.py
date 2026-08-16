@@ -22,6 +22,18 @@ def build_nav_data(verses):
     return data
 
 
+def attach_parasha_starts(verses, book):
+    """Помечает стихи, с которых начинается недельная глава (verse.starts_parasha)."""
+    starts = {
+        (p.start_verse.chapter, p.start_verse.verse): p
+        for p in Parasha.objects.filter(start_verse__book=book).select_related("start_verse")
+    }
+    verses = list(verses)
+    for v in verses:
+        v.starts_parasha = starts.get((v.chapter, v.verse))
+    return verses
+
+
 def home(request):
     categories = list(Category.objects.order_by("order"))
     books = list(Book.objects.select_related("category").order_by("order"))
@@ -81,6 +93,7 @@ def chapter_view(request, book_slug, chapter):
     max_chapter = last_verse.chapter if last_verse else chapter
 
     nav_verses = Verse.objects.filter(book=book).prefetch_related("materials").order_by("chapter", "verse")
+    verses = attach_parasha_starts(verses, book)
 
     context = {
         "book": book,
@@ -106,6 +119,7 @@ def parasha_view(request, parasha_slug):
         .order_by("chapter", "verse")
         .prefetch_related("materials")
     )
+    verses = attach_parasha_starts(verses, start.book)
 
     prev_parasha = (
         Parasha.objects.filter(order__lt=parasha.order).order_by("-order").first()

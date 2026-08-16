@@ -12,6 +12,11 @@
 
 <div class="verses" x-data="{ open: null }">
     {% for verse in verses %}
+    {% if verse.starts_parasha %}
+    <a class="parasha-marker" href="{% url 'library:parasha' verse.starts_parasha.slug %}">
+        Начало недельной главы «{{ verse.starts_parasha.name_ru }}»
+    </a>
+    {% endif %}
     {% ifchanged verse.chapter %}
     <h2 class="chapter-marker" id="chapter-{{ verse.chapter }}">Глава {{ verse.chapter }}</h2>
     {% endifchanged %}

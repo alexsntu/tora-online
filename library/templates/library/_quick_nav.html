@@ -32,10 +32,14 @@
             activeChapter = visibleChapters[0];
         }
         visibleChapters.forEach(function (ch) {
+            var hasMaterials = chapterHasMaterials(ch);
             var btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'nav-btn' + (ch === activeChapter ? ' active' : '');
+            btn.className = 'nav-btn'
+                + (ch === activeChapter ? ' active' : '')
+                + (hasMaterials ? ' has-materials' : '');
             btn.textContent = ch;
+            if (hasMaterials) { btn.title = 'В этой главе есть комментарии'; }
             btn.addEventListener('click', function () {
                 activeChapter = ch;
                 renderChapters();
