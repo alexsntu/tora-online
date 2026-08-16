@@ -1,3 +1,4 @@
+from itertools import groupby
 from pathlib import Path
 
 from django.conf import settings
@@ -5,7 +6,7 @@ from django.db.models import Q
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, render
 
-from .models import Book, Category, Parasha, Verse
+from .models import Book, Category, Material, Parasha, Verse
 
 
 def service_worker(request):
@@ -138,3 +139,23 @@ def parasha_view(request, parasha_slug):
         "nav_data": build_nav_data(verses),
     }
     return render(request, "library/chapter.html", context)
+
+
+def topics_view(request):
+    """Указатель тем: все наши комментарии (Material) по порядку следования в тексте."""
+    materials = Material.objects.prefetch_related("verses__book").all()
+
+    entries = []
+    for m in materials:
+        for v in m.verses.all():
+            entries.append({"verse": v, "material": m})
+    entries.sort(key=lambda e: (e["verse"].book.order, e["verse"].chapter, e["verse"].verse))
+
+    grouped = [
+        {"book": book, "chapter": chapter, "entries": list(group)}
+        for (book, chapter), group in groupby(
+            entries, key=lambda e: (e["verse"].book, e["verse"].chapter)
+        )
+    ]
+
+    return render(request, "library/topics.html", {"grouped": grouped})
