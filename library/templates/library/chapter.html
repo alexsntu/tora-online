@@ -10,7 +10,7 @@
 {% include "library/_quick_nav.html" %}
 {% include "library/_nav.html" %}
 
-<div class="verses" x-data="{ open: null }">
+<div class="verses" x-data="{ open: null, openRashi: null }">
     {% for verse in verses %}
     {% if verse.starts_parasha %}
     <a class="parasha-marker" href="{% url 'library:parasha' verse.starts_parasha.slug %}">
@@ -27,6 +27,18 @@
         <span class="verse-he" dir="rtl" lang="he">{{ verse.text_he }}</span>
         <span class="verse-ru" lang="ru">{{ verse.text_ru }}</span>
     </div>
+    {% if verse.commentaries.all %}
+    <div class="rashi-row">
+        {% for c in verse.commentaries.all %}
+        <button type="button" class="rashi-toggle" @click="openRashi = (openRashi === {{ c.id }} ? null : {{ c.id }})">{{ c.source }} ›</button>
+        {% endfor %}
+    </div>
+    {% for c in verse.commentaries.all %}
+    <div class="rashi-panel" x-show="openRashi === {{ c.id }}" x-cloak dir="rtl" lang="he">
+        {{ c.text_he|linebreaksbr }}
+    </div>
+    {% endfor %}
+    {% endif %}
     {% if verse.materials.all %}
     <div class="materials-panel" x-show="open === {{ verse.id }}" x-cloak>
         {% for m in verse.materials.all %}

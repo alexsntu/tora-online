@@ -387,6 +387,36 @@ summary::marker { color: var(--gold); }
     box-shadow: 0 2px 8px rgba(56, 41, 15, 0.08);
 }
 
+.rashi-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: .4rem;
+    margin: -.3rem 0 .4rem 0;
+}
+.rashi-toggle {
+    font-family: var(--font-hebrew);
+    font-size: .8rem;
+    color: #8a7a55;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: .15rem .5rem;
+    cursor: pointer;
+}
+.rashi-toggle:hover { background: #f2ede0; color: var(--text); }
+.rashi-panel {
+    margin: 0 0 .8rem 0;
+    padding: .9rem 1.1rem;
+    background: #faf6ea;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: var(--font-hebrew);
+    font-size: 1.05rem;
+    line-height: 1.8;
+    text-align: right;
+    color: #4a3d24;
+}
+
 @media (max-width: 640px) {
     .materials-panel { padding: 1rem; }
     .material a.platform-link { width: 100%; justify-content: center; }

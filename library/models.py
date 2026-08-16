@@ -117,6 +117,23 @@ class Material(models.Model):
         return f"https://www.youtube.com/embed/{m.group(1)}"
 
 
+class Commentary(models.Model):
+    """Классический комментарий (Раши и т.п.), подтягиваемый с Sefaria - только на иврите."""
+
+    verse = models.ForeignKey(Verse, verbose_name="Стих", related_name="commentaries", on_delete=models.CASCADE)
+    source = models.CharField("Источник", max_length=100, help_text="Например, Раши")
+    text_he = models.TextField("Текст (иврит)")
+    sefaria_ref = models.CharField("Ссылка на Sefaria (тех.)", max_length=255, blank=True)
+
+    class Meta:
+        ordering = ["verse", "source"]
+        verbose_name = "классический комментарий"
+        verbose_name_plural = "Классические комментарии (Раши и т.п.)"
+
+    def __str__(self):
+        return f"{self.source} — {self.verse}"
+
+
 class Topic(models.Model):
     title = models.CharField("Заголовок", max_length=255)
     slug = models.SlugField("Слаг (для ссылки)", unique=True)

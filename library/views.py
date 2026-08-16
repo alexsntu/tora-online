@@ -83,7 +83,7 @@ def chapter_view(request, book_slug, chapter):
     book = get_object_or_404(Book, slug=book_slug)
     verses = (
         Verse.objects.filter(book=book, chapter=chapter)
-        .prefetch_related("materials")
+        .prefetch_related("materials", "commentaries")
         .order_by("verse")
     )
     if not verses.exists():
@@ -117,7 +117,7 @@ def parasha_view(request, parasha_slug):
         .filter(Q(chapter__gt=start.chapter) | Q(chapter=start.chapter, verse__gte=start.verse))
         .filter(Q(chapter__lt=end.chapter) | Q(chapter=end.chapter, verse__lte=end.verse))
         .order_by("chapter", "verse")
-        .prefetch_related("materials")
+        .prefetch_related("materials", "commentaries")
     )
     verses = attach_parasha_starts(verses, start.book)
 
