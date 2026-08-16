@@ -84,7 +84,8 @@ class Material(models.Model):
 
     type = models.CharField(max_length=10, choices=TYPE_CHOICES)
     title = models.CharField(max_length=255)
-    url = models.URLField(blank=True, help_text="Ссылка на YouTube (для видеоурока)")
+    url = models.URLField(blank=True, help_text="Ссылка на YouTube (для видеоурока) или на статью")
+    url_rutube = models.URLField(blank=True, help_text="Ссылка на RuTube (если есть, для видеоурока)")
     body = models.TextField(blank=True, help_text="Текст статьи или комментарий")
     verses = models.ManyToManyField(Verse, related_name="materials", blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

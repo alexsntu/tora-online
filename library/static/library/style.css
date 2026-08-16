@@ -276,3 +276,21 @@ summary::marker { color: var(--gold); }
     position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 2px;
 }
 .material-body { color: #4a3d24; font-size: .95rem; }
+
+.material-links { display: flex; flex-direction: column; gap: .5rem; align-items: flex-start; }
+.material a.platform-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .5rem .9rem;
+    background: var(--accent-dark);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 3px;
+    font-size: .95rem;
+    font-weight: bold;
+}
+.material a.platform-link:hover { background: var(--maroon); }
+.platform-icon { width: 1.3rem; height: 1.3rem; flex-shrink: 0; }
+.platform-youtube .platform-icon rect { fill: #d3312b; }
+.platform-rutube .platform-icon rect { fill: #1c1c1e; }
