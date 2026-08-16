@@ -1,53 +1,38 @@
 {{ nav_data|json_script:"nav-data" }}
 <div class="quick-nav" data-book-slug="{{ book.slug }}" data-current-chapter="{{ current_chapter|default:'' }}">
-    <label>Глава
-        <select class="nav-chapter"></select>
-    </label>
-    <label>Стих
-        <select class="nav-verse">
-            <option value="">Стих…</option>
-        </select>
-    </label>
+    <div class="nav-row-label">Глава</div>
+    <div class="nav-row nav-chapters"></div>
+    <div class="nav-row-label">Стих</div>
+    <div class="nav-row nav-verses"></div>
 </div>
 <script>
 (function () {
     var container = document.currentScript.previousElementSibling;
     var navData = JSON.parse(document.getElementById('nav-data').textContent);
     var bookSlug = container.dataset.bookSlug;
-    var chapterSelect = container.querySelector('.nav-chapter');
-    var verseSelect = container.querySelector('.nav-verse');
+    var chaptersRow = container.querySelector('.nav-chapters');
+    var versesRow = container.querySelector('.nav-verses');
 
     var chapters = Object.keys(navData).map(Number).sort(function (a, b) { return a - b; });
-    chapters.forEach(function (ch) {
-        var opt = document.createElement('option');
-        opt.value = ch;
-        opt.textContent = 'Глава ' + ch;
-        chapterSelect.appendChild(opt);
-    });
+    var activeChapter = Number(container.dataset.currentChapter) || chapters[0];
 
-    function fillVerses(chapter) {
-        verseSelect.innerHTML = '<option value="">Стих…</option>';
-        (navData[chapter] || []).forEach(function (pair) {
-            var verse = pair[0], hasMaterials = pair[1];
-            var opt = document.createElement('option');
-            opt.value = verse;
-            opt.textContent = chapter + ':' + verse + (hasMaterials ? ' ★' : '');
-            verseSelect.appendChild(opt);
+    function renderChapters() {
+        chaptersRow.innerHTML = '';
+        chapters.forEach(function (ch) {
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'nav-btn' + (ch === activeChapter ? ' active' : '');
+            btn.textContent = ch;
+            btn.addEventListener('click', function () {
+                activeChapter = ch;
+                renderChapters();
+                renderVerses();
+            });
+            chaptersRow.appendChild(btn);
         });
     }
 
-    var initialChapter = container.dataset.currentChapter || chapters[0];
-    chapterSelect.value = initialChapter;
-    fillVerses(initialChapter);
-
-    chapterSelect.addEventListener('change', function () {
-        fillVerses(this.value);
-    });
-
-    verseSelect.addEventListener('change', function () {
-        if (!this.value) return;
-        var chapter = chapterSelect.value;
-        var verse = this.value;
+    function goToVerse(chapter, verse) {
         var anchorId = 'v-' + chapter + '-' + verse;
         var el = document.getElementById(anchorId);
         if (el) {
@@ -56,6 +41,25 @@
         } else {
             window.location.href = '/' + bookSlug + '/' + chapter + '/#' + anchorId;
         }
-    });
+    }
+
+    function renderVerses() {
+        versesRow.innerHTML = '';
+        (navData[activeChapter] || []).forEach(function (pair) {
+            var verse = pair[0], hasMaterials = pair[1];
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'nav-btn' + (hasMaterials ? ' has-materials' : '');
+            btn.textContent = verse;
+            if (hasMaterials) { btn.title = 'Есть комментарий'; }
+            btn.addEventListener('click', function () {
+                goToVerse(activeChapter, verse);
+            });
+            versesRow.appendChild(btn);
+        });
+    }
+
+    renderChapters();
+    renderVerses();
 })();
 </script>

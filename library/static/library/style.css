@@ -64,32 +64,47 @@ main {
 .chapter-marker:first-child { margin-top: 0; }
 
 .quick-nav {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 1.2rem;
     margin-bottom: 1rem;
-    padding: .6rem .8rem;
+    padding: .7rem .8rem;
     background: #fff;
     border: 1px solid var(--border);
     border-radius: 4px;
 }
-.quick-nav label {
-    display: flex;
-    align-items: center;
-    gap: .4rem;
-    font-size: .85rem;
-    color: #666;
+.nav-row-label {
+    font-size: .75rem;
+    color: #999;
+    margin: .4rem 0 .2rem 0;
 }
-.quick-nav select {
-    font-family: inherit;
-    font-size: .9rem;
-    padding: .25rem .4rem;
+.nav-row-label:first-child { margin-top: 0; }
+.nav-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .3rem;
+}
+.nav-btn {
+    min-width: 1.9rem;
+    text-align: center;
+    padding: .2rem .3rem;
     border: 1px solid var(--border);
     border-radius: 3px;
     background: #fff;
     color: var(--text);
+    font-family: inherit;
+    font-size: .85rem;
+    cursor: pointer;
 }
+.nav-btn:hover { background: #f2ede0; }
+.nav-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+.nav-btn.has-materials {
+    background: var(--highlight);
+    border-color: var(--highlight-border);
+    font-weight: bold;
+}
+.nav-btn.has-materials:hover { filter: brightness(0.95); }
 
 .chapter-nav {
     display: flex;
