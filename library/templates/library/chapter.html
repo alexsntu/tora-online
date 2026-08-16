@@ -27,6 +27,7 @@
         {% for m in verse.materials.all %}
         <div class="material material-{{ m.type }}">
             <h3>{{ m.title }}</h3>
+            {% if m.body %}<p class="material-body">{{ m.body|linebreaksbr }}</p>{% endif %}
             {% if m.type == "video" %}
                 <div class="material-links">
                     {% if m.url %}
@@ -45,7 +46,6 @@
             {% else %}
                 {% if m.url %}<a href="{{ m.url }}" target="_blank" rel="noopener">Читать статью →</a>{% endif %}
             {% endif %}
-            {% if m.body %}<p class="material-body">{{ m.body|linebreaksbr }}</p>{% endif %}
         </div>
         {% endfor %}
     </div>
