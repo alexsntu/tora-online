@@ -1,15 +1,6 @@
 {% extends "library/base.html" %}
 {% block content %}
-<p class="today-widget">
-    Сегодня {{ today.hebrew_str }} — {{ today.gregorian_str }}.
-    Недельная глава:
-    {% if today.parasha_obj %}
-        <a href="{% url 'library:parasha' today.parasha_obj.slug %}">{{ today.parasha_ru }}</a>
-    {% else %}
-        {{ today.parasha_ru }}
-    {% endif %}
-    <a class="today-widget-calendar" href="{% url 'library:calendar' %}">Календарь и конвертер дат →</a>
-</p>
+{% include "library/_today_widget.html" %}
 
 <section class="nav-section">
     <h2>Библиотека</h2>

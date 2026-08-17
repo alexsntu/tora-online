@@ -1,0 +1,22 @@
+<div class="today-card">
+    <svg class="today-card-emblem" viewBox="0 0 100 100" aria-hidden="true">
+        <polygon points="50,6 90,74 10,74" fill="none" stroke="currentColor" stroke-width="5"/>
+        <polygon points="50,94 10,26 90,26" fill="none" stroke="currentColor" stroke-width="5"/>
+    </svg>
+    <div class="today-card-date">
+        <span class="today-card-hebrew">{{ today.hebrew_str }}</span>
+        <span class="today-card-gregorian">{{ today.gregorian_str }}</span>
+    </div>
+    <div class="today-card-divider">✦</div>
+    <div class="today-card-parasha">
+        <span class="nav-row-label">Недельная глава</span>
+        {% if today.parasha_obj %}
+        <a class="today-card-parasha-link" href="{% url 'library:parasha' today.parasha_obj.slug %}">{{ today.parasha_ru }}</a>
+        {% else %}
+        <span class="today-card-parasha-name">{{ today.parasha_ru }}</span>
+        {% endif %}
+    </div>
+    {% if not hide_calendar_link %}
+    <a class="today-card-calendar-link" href="{% url 'library:calendar' %}">Календарь и конвертер дат →</a>
+    {% endif %}
+</div>

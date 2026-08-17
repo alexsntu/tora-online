@@ -7,15 +7,7 @@
 
 <h1>Еврейский календарь</h1>
 
-<p class="today-widget">
-    Сегодня {{ today.hebrew_str }} — {{ today.gregorian_str }}.
-    Недельная глава:
-    {% if today.parasha_obj %}
-        <a href="{% url 'library:parasha' today.parasha_obj.slug %}">{{ today.parasha_ru }}</a>
-    {% else %}
-        {{ today.parasha_ru }}
-    {% endif %}
-</p>
+{% include "library/_today_widget.html" with hide_calendar_link=True %}
 
 <section class="promo-section">
     <div class="promo-card">
