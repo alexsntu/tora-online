@@ -1,5 +1,6 @@
 asgiref==3.12.1
 Django==6.1
 pillow==12.3.0
+pysqlite3-binary==0.5.4.post2; sys_platform == "linux"
 sqlparse==0.6.0
 whitenoise==6.12.0
