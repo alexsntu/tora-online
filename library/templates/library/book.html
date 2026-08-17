@@ -18,6 +18,12 @@
     <a class="nav-btn" href="{% url 'library:chapter' book.slug chapter %}">{{ chapter }}</a>
     {% endfor %}
 </div>
+<select class="nav-select" aria-label="Глава" onchange="if (this.value) window.location.href = this.value;">
+    <option value="">Выберите главу...</option>
+    {% for chapter in chapters %}
+    <option value="{% url 'library:chapter' book.slug chapter %}">Глава {{ chapter }}</option>
+    {% endfor %}
+</select>
 {% else %}
 <p class="empty-note">Текст этой книги ещё не загружен.</p>
 {% endif %}

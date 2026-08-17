@@ -426,13 +426,6 @@ summary::marker { color: var(--gold); }
     color: var(--text);
 }
 
-/* На мобильном сетка медальонов из 30-50 кнопок занимает слишком много места -
-   переключаемся на нативный select, он же удобнее тапать. */
-@media (max-width: 640px) {
-    .nav-row-label, .nav-row { display: none; }
-    .nav-select { display: block; }
-}
-
 .filter-toggle {
     display: flex;
     align-items: center;
@@ -459,6 +452,15 @@ summary::marker { color: var(--gold); }
     flex-wrap: wrap;
     gap: .3rem;
 }
+
+/* На мобильном сетка медальонов из 30-50 кнопок занимает слишком много места -
+   переключаемся на нативный select, он же удобнее тапать. Идёт после базового
+   .nav-row специально - иначе тот перебивает display:none той же специфичностью. */
+@media (max-width: 640px) {
+    .nav-row-label, .nav-row { display: none; }
+    .nav-select { display: block; }
+}
+
 .nav-btn {
     display: inline-flex;
     align-items: center;
