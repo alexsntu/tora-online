@@ -63,6 +63,13 @@ ALLOWED_HOSTS = [
     h.strip() for h in os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',') if h.strip()
 ]
 
+# HTTPS/cookie hardening - only in production, since local dev runs over plain http.
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 15768000  # 6 months
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
 
 # Application definition
 
@@ -73,6 +80,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'axes',
     'library',
 ]
 
@@ -83,9 +91,20 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'axes.middleware.AxesMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+AUTHENTICATION_BACKENDS = [
+    'axes.backends.AxesStandaloneBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+# Lock out an IP after this many failed admin-login attempts within COOLOFF_TIME.
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = 1  # hours
+AXES_LOCKOUT_PARAMETERS = ['ip_address']
 
 ROOT_URLCONF = 'config.urls'
 
