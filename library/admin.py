@@ -1,10 +1,23 @@
 from django.contrib import admin
+from django.urls import path
 
-from .models import Book, Category, Verse, Parasha, Material, Topic
+from .models import AnalyticsEvent, Book, Category, Verse, Parasha, Material, Topic
+from .views import analytics_dashboard
 
 admin.site.site_header = "Tora Online — панель управления"
 admin.site.site_title = "Tora Online"
 admin.site.index_title = "Управление сайтом"
+
+_default_get_urls = admin.site.get_urls
+
+
+def _get_urls_with_analytics():
+    return [
+        path("analytics/", admin.site.admin_view(analytics_dashboard), name="analytics_dashboard"),
+    ] + _default_get_urls()
+
+
+admin.site.get_urls = _get_urls_with_analytics
 
 
 @admin.register(Category)
@@ -46,3 +59,16 @@ class TopicAdmin(admin.ModelAdmin):
     list_display = ("title", "slug")
     prepopulated_fields = {"slug": ("title",)}
     filter_horizontal = ("materials",)
+
+
+@admin.register(AnalyticsEvent)
+class AnalyticsEventAdmin(admin.ModelAdmin):
+    list_display = ("event_type", "book", "chapter", "verse", "material", "target", "created_at")
+    list_filter = ("event_type", "book")
+    date_hierarchy = "created_at"
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False

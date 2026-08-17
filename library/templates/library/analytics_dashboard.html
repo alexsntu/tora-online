@@ -1,0 +1,82 @@
+{% extends "admin/base_site.html" %}
+
+{% block title %}Аналитика — {{ block.super }}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">Главная</a>
+    &rsaquo; Контентная аналитика
+</div>
+{% endblock %}
+
+{% block content %}
+<h1>Контентная аналитика</h1>
+<p>
+    Просмотров глав: <strong>{{ totals.chapter_views }}</strong> ·
+    Открытий комментариев: <strong>{{ totals.material_opens }}</strong> ·
+    Переходов по ссылкам: <strong>{{ totals.outbound_clicks }}</strong>
+</p>
+
+<div style="display:flex; gap:2rem; flex-wrap:wrap; align-items:flex-start;">
+
+    <div style="flex:1; min-width:320px;">
+        <h2>Самые читаемые главы</h2>
+        {% if top_chapters %}
+        <table>
+            <thead><tr><th>Книга</th><th>Глава</th><th>Просмотров</th></tr></thead>
+            <tbody>
+                {% for row in top_chapters %}
+                <tr>
+                    <td>{{ row.book__name_ru|default:"—" }}</td>
+                    <td>{{ row.chapter }}</td>
+                    <td>{{ row.views }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>Пока нет данных.</p>
+        {% endif %}
+    </div>
+
+    <div style="flex:1; min-width:320px;">
+        <h2>Самые открываемые комментарии</h2>
+        {% if top_materials %}
+        <table>
+            <thead><tr><th>Материал</th><th>Тип</th><th>Открытий</th></tr></thead>
+            <tbody>
+                {% for row in top_materials %}
+                <tr>
+                    <td>{{ row.material__title }}</td>
+                    <td>{{ row.material__type }}</td>
+                    <td>{{ row.opens }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>Пока нет данных.</p>
+        {% endif %}
+    </div>
+
+    <div style="flex:1; min-width:280px;">
+        <h2>Клики по внешним ссылкам</h2>
+        {% if outbound_totals %}
+        <table>
+            <thead><tr><th>Куда</th><th>Кликов</th></tr></thead>
+            <tbody>
+                {% for row in outbound_totals %}
+                <tr>
+                    <td>{{ row.target|default:"—" }}</td>
+                    <td>{{ row.clicks }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>Пока нет данных.</p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

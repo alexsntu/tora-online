@@ -4,19 +4,24 @@
     {% if m.type == "video" %}
         <div class="material-links">
             {% if m.url %}
-            <a class="platform-link platform-youtube" href="{{ m.url }}" target="_blank" rel="noopener">
+            <a class="platform-link platform-youtube" href="{{ m.url }}" target="_blank" rel="noopener"
+               onclick="fetch('{% url 'library:track_event' %}', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({event_type: 'outbound_click', material_id: {{ m.id }}, target: 'youtube'}), keepalive: true})">
                 <svg class="platform-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="1" y="4" width="22" height="16" rx="4"/><polygon points="10,8.5 10,15.5 16,12" fill="#fff"/></svg>
                 Смотреть видеоурок на YouTube
             </a>
             {% endif %}
             {% if m.url_rutube %}
-            <a class="platform-link platform-rutube" href="{{ m.url_rutube }}" target="_blank" rel="noopener">
+            <a class="platform-link platform-rutube" href="{{ m.url_rutube }}" target="_blank" rel="noopener"
+               onclick="fetch('{% url 'library:track_event' %}', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({event_type: 'outbound_click', material_id: {{ m.id }}, target: 'rutube'}), keepalive: true})">
                 <svg class="platform-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="1" y="4" width="22" height="16" rx="4"/><polygon points="10,8.5 10,15.5 16,12" fill="#fff"/></svg>
                 Смотреть видеоурок на RuTube
             </a>
             {% endif %}
         </div>
     {% else %}
-        {% if m.url %}<a href="{{ m.url }}" target="_blank" rel="noopener">Читать статью →</a>{% endif %}
+        {% if m.url %}
+        <a href="{{ m.url }}" target="_blank" rel="noopener"
+           onclick="fetch('{% url 'library:track_event' %}', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({event_type: 'outbound_click', material_id: {{ m.id }}, target: 'article'}), keepalive: true})">Читать статью →</a>
+        {% endif %}
     {% endif %}
 </div>

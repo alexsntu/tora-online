@@ -1,12 +1,16 @@
+import json
 from itertools import groupby
 from pathlib import Path
 
 from django.conf import settings
-from django.db.models import Q
-from django.http import Http404, HttpResponse
+from django.contrib.admin.views.decorators import staff_member_required
+from django.db.models import Count, Q
+from django.http import Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
-from .models import Book, Category, Material, Parasha, Verse
+from .models import AnalyticsEvent, Book, Category, Material, Parasha, Verse
 
 
 def service_worker(request):
@@ -96,6 +100,8 @@ def chapter_view(request, book_slug, chapter):
     nav_verses = Verse.objects.filter(book=book).prefetch_related("materials").order_by("chapter", "verse")
     verses = attach_parasha_starts(verses, book)
 
+    AnalyticsEvent.objects.create(event_type=AnalyticsEvent.CHAPTER_VIEW, book=book, chapter=chapter)
+
     context = {
         "book": book,
         "chapter": chapter,
@@ -159,3 +165,71 @@ def topics_view(request):
     ]
 
     return render(request, "library/topics.html", {"grouped": grouped})
+
+
+@csrf_exempt
+@require_POST
+def track_event(request):
+    """Анонимный beacon-эндпоинт для клиентских событий (открытие комментария, клик на видео)."""
+    try:
+        data = json.loads(request.body)
+    except (ValueError, TypeError):
+        return HttpResponseBadRequest()
+
+    event_type = data.get("event_type")
+    if event_type not in (AnalyticsEvent.MATERIAL_OPEN, AnalyticsEvent.OUTBOUND_CLICK):
+        return HttpResponseBadRequest()
+
+    verse = Verse.objects.filter(pk=data.get("verse_id")).first() if data.get("verse_id") else None
+    material = Material.objects.filter(pk=data.get("material_id")).first() if data.get("material_id") else None
+    if verse and not material:
+        material = verse.materials.first()
+
+    AnalyticsEvent.objects.create(
+        event_type=event_type,
+        verse=verse,
+        material=material,
+        book=verse.book if verse else None,
+        chapter=verse.chapter if verse else None,
+        target=data.get("target", "")[:20],
+    )
+    return HttpResponse(status=204)
+
+
+@staff_member_required
+def analytics_dashboard(request):
+    """Контентная аналитика: что читают/смотрят чаще всего (для админки)."""
+    top_chapters = (
+        AnalyticsEvent.objects.filter(event_type=AnalyticsEvent.CHAPTER_VIEW)
+        .values("book__name_ru", "chapter")
+        .annotate(views=Count("id"))
+        .order_by("-views")[:20]
+    )
+    top_materials = (
+        AnalyticsEvent.objects.filter(event_type=AnalyticsEvent.MATERIAL_OPEN, material__isnull=False)
+        .values("material__id", "material__title", "material__type")
+        .annotate(opens=Count("id"))
+        .order_by("-opens")[:20]
+    )
+    outbound_totals = (
+        AnalyticsEvent.objects.filter(event_type=AnalyticsEvent.OUTBOUND_CLICK)
+        .values("target")
+        .annotate(clicks=Count("id"))
+        .order_by("-clicks")
+    )
+    totals = {
+        "chapter_views": AnalyticsEvent.objects.filter(event_type=AnalyticsEvent.CHAPTER_VIEW).count(),
+        "material_opens": AnalyticsEvent.objects.filter(event_type=AnalyticsEvent.MATERIAL_OPEN).count(),
+        "outbound_clicks": AnalyticsEvent.objects.filter(event_type=AnalyticsEvent.OUTBOUND_CLICK).count(),
+    }
+
+    return render(
+        request,
+        "library/analytics_dashboard.html",
+        {
+            "top_chapters": top_chapters,
+            "top_materials": top_materials,
+            "outbound_totals": outbound_totals,
+            "totals": totals,
+        },
+    )

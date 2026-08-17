@@ -134,6 +134,35 @@ class Commentary(models.Model):
         return f"{self.source} — {self.verse}"
 
 
+class AnalyticsEvent(models.Model):
+    """Лёгкий лог просмотров/кликов для контентной аналитики в админке."""
+
+    CHAPTER_VIEW = "chapter_view"
+    MATERIAL_OPEN = "material_open"
+    OUTBOUND_CLICK = "outbound_click"
+    EVENT_CHOICES = [
+        (CHAPTER_VIEW, "Просмотр главы"),
+        (MATERIAL_OPEN, "Открытие комментария"),
+        (OUTBOUND_CLICK, "Переход по внешней ссылке"),
+    ]
+
+    event_type = models.CharField("Тип события", max_length=20, choices=EVENT_CHOICES)
+    book = models.ForeignKey(Book, verbose_name="Книга", null=True, blank=True, on_delete=models.CASCADE)
+    chapter = models.PositiveSmallIntegerField("Глава", null=True, blank=True)
+    verse = models.ForeignKey(Verse, verbose_name="Стих", null=True, blank=True, on_delete=models.CASCADE)
+    material = models.ForeignKey(Material, verbose_name="Материал", null=True, blank=True, on_delete=models.CASCADE)
+    target = models.CharField("Куда", max_length=20, blank=True, help_text="youtube / rutube / article")
+    created_at = models.DateTimeField("Когда", auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "событие аналитики"
+        verbose_name_plural = "Аналитика: события"
+
+    def __str__(self):
+        return f"{self.get_event_type_display()} — {self.created_at:%Y-%m-%d %H:%M}"
+
+
 class Topic(models.Model):
     title = models.CharField("Заголовок", max_length=255)
     slug = models.SlugField("Слаг (для ссылки)", unique=True)

@@ -22,7 +22,7 @@
     {% endifchanged %}
     <div class="verse-row {% if verse.materials.all %}has-materials{% endif %}"
          id="v-{{ verse.chapter }}-{{ verse.verse }}"
-         {% if verse.materials.all %}@click="open = (open === {{ verse.id }} ? null : {{ verse.id }})"{% endif %}>
+         {% if verse.materials.all %}@click="if (open !== {{ verse.id }}) { fetch('{% url 'library:track_event' %}', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({event_type: 'material_open', verse_id: {{ verse.id }}}), keepalive: true}) }; open = (open === {{ verse.id }} ? null : {{ verse.id }})"{% endif %}>
         <span class="verse-num">
             {{ verse.chapter }}:{{ verse.verse }}
             {% for c in verse.commentaries.all %}
