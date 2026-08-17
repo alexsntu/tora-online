@@ -1,22 +1,22 @@
-<div class="today-card">
-    <svg class="today-card-emblem" viewBox="0 0 100 100" aria-hidden="true">
+<div class="today-bar">
+    <svg class="today-bar-icon" viewBox="0 0 100 100" aria-hidden="true">
         <polygon points="50,6 90,74 10,74" fill="none" stroke="currentColor" stroke-width="5"/>
         <polygon points="50,94 10,26 90,26" fill="none" stroke="currentColor" stroke-width="5"/>
     </svg>
-    <div class="today-card-date">
-        <span class="today-card-hebrew">{{ today.hebrew_str }}</span>
-        <span class="today-card-gregorian">{{ today.gregorian_str }}</span>
-    </div>
-    <div class="today-card-divider">✦</div>
-    <div class="today-card-parasha">
-        <span class="nav-row-label">Недельная глава</span>
+    <span class="today-bar-date">
+        <strong>{{ today.hebrew_str }}</strong>
+        <span class="today-bar-greg">— {{ today.gregorian_str }}</span>
+    </span>
+    <span class="today-bar-sep">✦</span>
+    <span class="today-bar-parasha">
+        Недельная глава:
         {% if today.parasha_obj %}
-        <a class="today-card-parasha-link" href="{% url 'library:parasha' today.parasha_obj.slug %}">{{ today.parasha_ru }}</a>
+        <a href="{% url 'library:parasha' today.parasha_obj.slug %}">{{ today.parasha_ru }}</a>
         {% else %}
-        <span class="today-card-parasha-name">{{ today.parasha_ru }}</span>
+        <strong>{{ today.parasha_ru }}</strong>
         {% endif %}
-    </div>
+    </span>
     {% if not hide_calendar_link %}
-    <a class="today-card-calendar-link" href="{% url 'library:calendar' %}">Календарь и конвертер дат →</a>
+    <a class="today-bar-calendar" href="{% url 'library:calendar' %}">Календарь и конвертер дат →</a>
     {% endif %}
 </div>
