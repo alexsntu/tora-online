@@ -11,12 +11,21 @@
 {% include "library/_nav.html" %}
 
 <div class="verses"
-     x-data="{ open: null, openRashi: null, translation: localStorage.getItem('tora-translation') || 'classic' }"
+     x-data="{ open: null, openRashi: null, openAltTranslation: null, translation: localStorage.getItem('tora-translation') || 'classic' }"
      x-effect="localStorage.setItem('tora-translation', translation)">
     <div class="translation-toggle">
-        <span class="translation-toggle-label">Перевод:</span>
-        <label><input type="radio" name="translation" value="classic" x-model="translation"> Классический</label>
-        <label><input type="radio" name="translation" value="slivniak" x-model="translation"> Д. Сливняк</label>
+        <div class="translation-toggle-desktop">
+            <span class="translation-toggle-label">Перевод:</span>
+            <label><input type="radio" name="translation" value="classic" x-model="translation"> Классический</label>
+            <label><input type="radio" name="translation" value="slivniak" x-model="translation"> Д. Сливняк</label>
+        </div>
+        <label class="translation-toggle-mobile">
+            <span class="translation-toggle-label">Выберите тип русского перевода</span>
+            <select x-model="translation">
+                <option value="classic">Классический</option>
+                <option value="slivniak">Д. Сливняк</option>
+            </select>
+        </label>
         <p class="translation-attribution" x-show="translation === 'slivniak'" x-cloak>
             Перевод: Дмитрий Сливняк, ред. Ицхак Стрешинский, Da Project, 2011.
             Источник — <a href="https://www.sefaria.org/" target="_blank" rel="noopener">Sefaria.org</a>, лицензия CC BY-NC.
@@ -42,8 +51,17 @@
         </span>
         <span class="verse-he" dir="rtl" lang="he">{{ verse.text_he }}</span>
         {% if verse.text_ru_slivniak %}
-        <span class="verse-ru" lang="ru" x-show="translation === 'classic'">{{ verse.text_ru }}</span>
-        <span class="verse-ru" lang="ru" x-show="translation === 'slivniak'" x-cloak>{{ verse.text_ru_slivniak }}</span>
+        <span class="verse-ru-wrap">
+            <span class="verse-ru" lang="ru" x-show="translation === 'classic'">{{ verse.text_ru }}</span>
+            <span class="verse-ru" lang="ru" x-show="translation === 'slivniak'" x-cloak>{{ verse.text_ru_slivniak }}</span>
+            <button type="button" class="translation-alt-toggle"
+                    @click.stop="openAltTranslation = (openAltTranslation === {{ verse.id }} ? null : {{ verse.id }})"
+                    x-text="(openAltTranslation === {{ verse.id }} ? 'Скрыть ' : 'Показать ') + (translation === 'classic' ? 'перевод Сливняка' : 'классический перевод')"></button>
+            <span class="verse-ru verse-ru-alt" lang="ru" x-show="openAltTranslation === {{ verse.id }}" x-cloak>
+                <span x-show="translation === 'classic'">{{ verse.text_ru_slivniak }}</span>
+                <span x-show="translation === 'slivniak'">{{ verse.text_ru }}</span>
+            </span>
+        </span>
         {% else %}
         <span class="verse-ru" lang="ru">{{ verse.text_ru }}</span>
         {% endif %}
