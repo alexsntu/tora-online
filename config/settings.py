@@ -26,9 +26,13 @@ try:
     # reporting the standard SQLite compile-time defaults for the two
     # categories Django actually queries.
     _SQLITE_LIMIT_DEFAULTS = {9: 32766, 2: 2000}  # VARIABLE_NUMBER, COLUMN
-    for _name, _value in [('SQLITE_LIMIT_VARIABLE_NUMBER', 9), ('SQLITE_LIMIT_COLUMN', 2)]:
-        if not hasattr(_pysqlite3_dbapi2, _name):
-            setattr(_pysqlite3_dbapi2, _name, _value)
+    # Django does `import sqlite3` and reads constants off that module
+    # object directly, which after the swap below is the top-level
+    # `pysqlite3` package, not this `dbapi2` submodule - patch both.
+    for _mod in (_pysqlite3_dbapi2, sys.modules['pysqlite3']):
+        for _name, _value in [('SQLITE_LIMIT_VARIABLE_NUMBER', 9), ('SQLITE_LIMIT_COLUMN', 2)]:
+            if not hasattr(_mod, _name):
+                setattr(_mod, _name, _value)
 
     class _PatchedConnection(_pysqlite3_dbapi2.Connection):
         def getlimit(self, category):
