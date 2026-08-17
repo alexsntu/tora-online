@@ -209,19 +209,14 @@ def topics_view(request):
 
 
 def _search_materials(query):
-    """Регистронезависимый поиск материалов по заголовку/тексту/имени мудреца.
+    """Регистронезависимый поиск материалов по заголовку темы и тексту комментария
+    (имя мудреца НЕ участвует в поиске - по просьбе пользователя).
 
     SQLite LIKE (а значит и icontains) не умеет игнорировать регистр для кириллицы -
     поэтому сравнение делаем в Python через .lower()."""
     query = query.lower()
     materials = Material.objects.all().distinct().prefetch_related("verses__book", "sages")
-    return [
-        m
-        for m in materials
-        if query in m.title.lower()
-        or query in m.body.lower()
-        or any(query in s.name_ru.lower() for s in m.sages.all())
-    ]
+    return [m for m in materials if query in m.title.lower() or query in m.body.lower()]
 
 
 def _search_entries(query):
@@ -234,7 +229,7 @@ def _search_entries(query):
 
 
 def topics_search_view(request):
-    """Поиск по темам: ищет в заголовке, тексте комментария и имени мудреца."""
+    """Поиск по темам: ищет в заголовке темы и тексте комментария."""
     query = request.GET.get("q", "").strip()
     entries = _search_entries(query) if query else []
 
