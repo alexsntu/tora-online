@@ -666,6 +666,7 @@ summary::marker { color: var(--gold); }
     background: var(--highlight);
     border-left: 3px solid var(--highlight-border);
     border-radius: 3px;
+    margin-bottom: .5rem;
 }
 
 .has-materials:hover {
