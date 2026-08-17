@@ -753,3 +753,37 @@ summary::marker { color: var(--gold); }
 .platform-icon { width: 1.3rem; height: 1.3rem; flex-shrink: 0; }
 .platform-youtube .platform-icon rect { fill: #d3312b; }
 .platform-rutube .platform-icon rect { fill: #1c1c1e; }
+
+.topics-search-form {
+    display: flex;
+    gap: .5rem;
+    margin: 0 0 1.5rem 0;
+    max-width: 32rem;
+}
+.topics-search-form input[type="search"] {
+    flex: 1 1 auto;
+    padding: .6rem .8rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--paper);
+    font-family: inherit;
+    font-size: 1rem;
+    color: var(--text);
+}
+.topics-search-form input[type="search"]:focus {
+    outline: none;
+    border-color: var(--gold);
+}
+.topics-search-form button {
+    padding: .6rem 1.1rem;
+    border: none;
+    border-radius: 4px;
+    background: var(--accent-dark);
+    color: #fff;
+    font-family: inherit;
+    font-size: .95rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color .12s ease;
+}
+.topics-search-form button:hover { background: var(--maroon); }

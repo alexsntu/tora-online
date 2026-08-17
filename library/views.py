@@ -207,6 +207,31 @@ def topics_view(request):
     return render(request, "library/topics.html", {"books": books})
 
 
+def topics_search_view(request):
+    """Поиск по темам: ищет в заголовке, тексте комментария и имени мудреца."""
+    query = request.GET.get("q", "").strip()
+    entries = []
+    if query:
+        materials = (
+            Material.objects.filter(
+                Q(title__icontains=query) | Q(body__icontains=query) | Q(sages__name_ru__icontains=query)
+            )
+            .distinct()
+            .prefetch_related("verses__book", "sages")
+        )
+        for m in materials:
+            for v in m.verses.all():
+                entries.append({"verse": v, "material": m})
+        entries.sort(key=lambda e: (e["verse"].book.order, e["verse"].chapter, e["verse"].verse))
+
+    entries_word = ru_plural(len(entries), "результат", "результата", "результатов")
+    return render(
+        request,
+        "library/topics_search.html",
+        {"query": query, "entries": entries, "entries_word": entries_word},
+    )
+
+
 def topics_book_view(request, book_slug):
     """Указатель тем внутри одной книги: комментарии по недельным главам."""
     book = get_object_or_404(Book, slug=book_slug)
