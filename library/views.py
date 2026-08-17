@@ -5,8 +5,9 @@ from pathlib import Path
 from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Count, Q
-from django.http import Http404, HttpResponse, HttpResponseBadRequest
+from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render
+from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
@@ -207,22 +208,35 @@ def topics_view(request):
     return render(request, "library/topics.html", {"books": books})
 
 
+def _search_materials(query):
+    """Регистронезависимый поиск материалов по заголовку/тексту/имени мудреца.
+
+    SQLite LIKE (а значит и icontains) не умеет игнорировать регистр для кириллицы -
+    поэтому сравнение делаем в Python через .lower()."""
+    query = query.lower()
+    materials = Material.objects.all().distinct().prefetch_related("verses__book", "sages")
+    return [
+        m
+        for m in materials
+        if query in m.title.lower()
+        or query in m.body.lower()
+        or any(query in s.name_ru.lower() for s in m.sages.all())
+    ]
+
+
+def _search_entries(query):
+    entries = []
+    for m in _search_materials(query):
+        for v in m.verses.all():
+            entries.append({"verse": v, "material": m})
+    entries.sort(key=lambda e: (e["verse"].book.order, e["verse"].chapter, e["verse"].verse))
+    return entries
+
+
 def topics_search_view(request):
     """Поиск по темам: ищет в заголовке, тексте комментария и имени мудреца."""
     query = request.GET.get("q", "").strip()
-    entries = []
-    if query:
-        materials = (
-            Material.objects.filter(
-                Q(title__icontains=query) | Q(body__icontains=query) | Q(sages__name_ru__icontains=query)
-            )
-            .distinct()
-            .prefetch_related("verses__book", "sages")
-        )
-        for m in materials:
-            for v in m.verses.all():
-                entries.append({"verse": v, "material": m})
-        entries.sort(key=lambda e: (e["verse"].book.order, e["verse"].chapter, e["verse"].verse))
+    entries = _search_entries(query) if query else []
 
     entries_word = ru_plural(len(entries), "результат", "результата", "результатов")
     return render(
@@ -230,6 +244,18 @@ def topics_search_view(request):
         "library/topics_search.html",
         {"query": query, "entries": entries, "entries_word": entries_word},
     )
+
+
+def topics_search_json_view(request):
+    """Живой поиск (для выпадающей подсказки): те же данные в JSON, максимум 8 совпадений."""
+    query = request.GET.get("q", "").strip()
+    results = []
+    if len(query) >= 2:
+        for entry in _search_entries(query)[:8]:
+            v, m = entry["verse"], entry["material"]
+            url = reverse("library:chapter", args=[v.book.slug, v.chapter]) + f"#v-{v.chapter}-{v.verse}"
+            results.append({"key": f"{m.id}-{v.id}", "title": m.title, "verse": str(v), "url": url})
+    return JsonResponse({"results": results})
 
 
 def topics_book_view(request, book_slug):

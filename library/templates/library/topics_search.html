@@ -7,10 +7,7 @@
 
 <h1>Поиск по темам</h1>
 
-<form method="get" action="{% url 'library:topics_search' %}" class="topics-search-form">
-    <input type="search" name="q" value="{{ query }}" placeholder="Искать по темам и комментариям…" aria-label="Поиск по темам">
-    <button type="submit">Найти</button>
-</form>
+{% include "library/_topics_search.html" with initial_q=query %}
 
 {% if query %}
 <p class="topics-intro">

@@ -8,10 +8,7 @@
 <h1>Указатель тем</h1>
 <p class="topics-intro">Все наши комментарии по книгам. Выберите книгу, чтобы увидеть темы по недельным главам.</p>
 
-<form method="get" action="{% url 'library:topics_search' %}" class="topics-search-form">
-    <input type="search" name="q" placeholder="Искать по темам и комментариям…" aria-label="Поиск по темам">
-    <button type="submit">Найти</button>
-</form>
+{% include "library/_topics_search.html" %}
 
 <div class="book-grid">
     {% for book in books %}

@@ -1,0 +1,28 @@
+<div class="topics-search-live{% if extra_class %} {{ extra_class }}{% endif %}"
+     x-data="{
+        q: '{{ initial_q|default:''|escapejs }}',
+        results: [],
+        open: false,
+        fetchResults() {
+            if (this.q.trim().length < 2) { this.results = []; this.open = false; return; }
+            fetch('{% url 'library:topics_search_json' %}?q=' + encodeURIComponent(this.q))
+                .then(r => r.json())
+                .then(data => { this.results = data.results; this.open = true; });
+        }
+     }"
+     @click.outside="open = false">
+    <form method="get" action="{% url 'library:topics_search' %}" class="topics-search-form" @submit="open = false">
+        <input type="search" name="q" x-model="q" @input.debounce.300ms="fetchResults()"
+               @focus="if (results.length) open = true"
+               placeholder="Искать по темам и комментариям…" aria-label="Поиск по темам" autocomplete="off">
+        <button type="submit">Найти</button>
+    </form>
+    <div class="topics-search-dropdown" x-show="open && results.length" x-cloak>
+        <template x-for="r in results" :key="r.key">
+            <a :href="r.url" class="topics-search-result">
+                <span class="topics-search-result-title" x-text="r.title"></span>
+                <span class="topics-search-result-verse" x-text="r.verse"></span>
+            </a>
+        </template>
+    </div>
+</div>
