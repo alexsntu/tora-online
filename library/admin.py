@@ -1,6 +1,9 @@
 from django.contrib import admin
 from django.urls import path
 
+from axes.admin import AccessAttemptAdmin, IsLockedOutFilter
+from axes.models import AccessAttempt
+
 from .models import AnalyticsEvent, Book, Category, Verse, Parasha, Material, Topic
 from .views import analytics_dashboard
 
@@ -18,6 +21,24 @@ def _get_urls_with_analytics():
 
 
 admin.site.get_urls = _get_urls_with_analytics
+
+
+class _RuIsLockedOutFilter(IsLockedOutFilter):
+    """axes не перевёл строку "Locked Out" в своём ru-каталоге - переопределяем."""
+
+    title = "Заблокирован"
+
+
+if admin.site.is_registered(AccessAttempt):
+    admin.site.unregister(AccessAttempt)
+
+
+@admin.register(AccessAttempt)
+class RuAccessAttemptAdmin(AccessAttemptAdmin):
+    list_filter = [
+        _RuIsLockedOutFilter if f is IsLockedOutFilter else f
+        for f in AccessAttemptAdmin.list_filter
+    ]
 
 
 @admin.register(Category)
