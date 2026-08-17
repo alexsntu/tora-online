@@ -105,6 +105,10 @@ class Material(models.Model):
     url_rutube = models.URLField("Ссылка (RuTube)", blank=True, help_text="Ссылка на RuTube (если есть, для видеоурока)")
     body = models.TextField("Текст статьи / комментарий", blank=True, help_text="Текст статьи или комментарий")
     verses = models.ManyToManyField(Verse, verbose_name="Стихи", related_name="materials", blank=True)
+    sages = models.ManyToManyField(
+        "Sage", verbose_name="Мудрецы Торы (на чьё учение опирается)",
+        related_name="materials", blank=True,
+    )
     created_at = models.DateTimeField("Дата создания", auto_now_add=True)
 
     class Meta:
@@ -183,3 +187,21 @@ class Topic(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Sage(models.Model):
+    """Мудрец Торы (комментатор), на чьё учение опирается материал -
+    Зера Шимшон, Ор аХаим аКадош и т.п. Отдельный указатель, как у тем.
+    Связь с Material - через Material.sages (related_name="materials")."""
+
+    name_ru = models.CharField("Имя", max_length=255)
+    slug = models.SlugField("Слаг (для ссылки)", unique=True)
+    bio = models.TextField("Биография", blank=True, help_text="Короткая справка: кто это и когда жил")
+
+    class Meta:
+        ordering = ["name_ru"]
+        verbose_name = "мудрец Торы"
+        verbose_name_plural = "Мудрецы Торы (комментаторы)"
+
+    def __str__(self):
+        return self.name_ru

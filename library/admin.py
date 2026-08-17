@@ -4,7 +4,7 @@ from django.urls import path
 from axes.admin import AccessAttemptAdmin, IsLockedOutFilter
 from axes.models import AccessAttempt
 
-from .models import AnalyticsEvent, Book, Category, Verse, Parasha, Material, Topic
+from .models import AnalyticsEvent, Book, Category, Verse, Parasha, Material, Sage, Topic
 from .views import analytics_dashboard
 
 admin.site.site_header = "Tora Online — панель управления"
@@ -70,9 +70,16 @@ class ParashaAdmin(admin.ModelAdmin):
 @admin.register(Material)
 class MaterialAdmin(admin.ModelAdmin):
     list_display = ("title", "type", "created_at")
-    list_filter = ("type",)
+    list_filter = ("type", "sages")
     search_fields = ("title", "body")
     filter_horizontal = ("verses",)
+    # sages - обычный select (не filter_horizontal), по просьбе пользователя
+
+
+@admin.register(Sage)
+class SageAdmin(admin.ModelAdmin):
+    list_display = ("name_ru", "slug")
+    prepopulated_fields = {"slug": ("name_ru",)}
 
 
 @admin.register(Topic)

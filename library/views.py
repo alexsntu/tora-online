@@ -17,7 +17,7 @@ from .hebrew_calendar import (
     convert_hebrew_to_gregorian,
     today_info,
 )
-from .models import AnalyticsEvent, Book, Category, Material, Parasha, Verse
+from .models import AnalyticsEvent, Book, Category, Material, Parasha, Sage, Verse
 
 
 def service_worker(request):
@@ -173,6 +173,23 @@ def topics_view(request):
     ]
 
     return render(request, "library/topics.html", {"grouped": grouped})
+
+
+def sages_view(request):
+    """Указатель мудрецов Торы: наши комментарии, сгруппированные по мудрецу-первоисточнику."""
+    sages = Sage.objects.prefetch_related("materials__verses__book").order_by("name_ru")
+
+    grouped = []
+    for sage in sages:
+        entries = []
+        for m in sage.materials.all():
+            for v in m.verses.all():
+                entries.append({"verse": v, "material": m})
+        entries.sort(key=lambda e: (e["verse"].book.order, e["verse"].chapter, e["verse"].verse))
+        if entries:
+            grouped.append({"sage": sage, "entries": entries})
+
+    return render(request, "library/sages.html", {"grouped": grouped})
 
 
 @csrf_exempt

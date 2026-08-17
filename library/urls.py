@@ -7,6 +7,7 @@ app_name = "library"
 urlpatterns = [
     path("", views.home, name="home"),
     path("topics/", views.topics_view, name="topics"),
+    path("sages/", views.sages_view, name="sages"),
     path("track/", views.track_event, name="track_event"),
     path("calendar/", views.calendar_view, name="calendar"),
     path("<slug:book_slug>/<int:chapter>/", views.chapter_view, name="chapter"),
