@@ -155,63 +155,86 @@ def parasha_view(request, parasha_slug):
     return render(request, "library/chapter.html", context)
 
 
+def _parashot_by_book():
+    """book_id -> [Parasha, ...] по порядку - для определения, в какую недельную
+    главу попадает произвольный стих (используется указателями тем/мудрецов)."""
+    result = {}
+    for p in Parasha.objects.select_related("start_verse__book", "end_verse").order_by("order"):
+        result.setdefault(p.start_verse.book_id, []).append(p)
+    return result
+
+
+def _parasha_for_verse(verse, parashot_by_book):
+    for p in parashot_by_book.get(verse.book_id, []):
+        if (p.start_verse.chapter, p.start_verse.verse) <= (verse.chapter, verse.verse) <= (p.end_verse.chapter, p.end_verse.verse):
+            return p
+    return None
+
+
+def _group_entries_by_parasha(entries, parashot_by_book):
+    """entries (отсортированные по chapter/verse) -> [{"parasha": Parasha|None, "entries": [...]}, ...]."""
+    for e in entries:
+        e["parasha"] = _parasha_for_verse(e["verse"], parashot_by_book)
+    return [
+        {"parasha": parasha, "entries": list(group)}
+        for parasha, group in groupby(entries, key=lambda e: e["parasha"])
+    ]
+
+
 def topics_view(request):
-    """Указатель тем: все наши комментарии (Material) по порядку следования в тексте."""
-    materials = Material.objects.prefetch_related("verses__book").all()
+    """Указатель тем: карточки книг, в которых есть наши комментарии (как в библиотеке) -
+    раскрытие по недельным главам живёт на отдельной странице книги."""
+    books = (
+        Book.objects.filter(verses__materials__isnull=False)
+        .distinct()
+        .order_by("order")
+    )
+    return render(request, "library/topics.html", {"books": books})
+
+
+def topics_book_view(request, book_slug):
+    """Указатель тем внутри одной книги: комментарии по недельным главам."""
+    book = get_object_or_404(Book, slug=book_slug)
+    materials = Material.objects.filter(verses__book=book).distinct().prefetch_related("verses")
 
     entries = []
     for m in materials:
+        for v in m.verses.filter(book=book):
+            entries.append({"verse": v, "material": m})
+    entries.sort(key=lambda e: (e["verse"].chapter, e["verse"].verse))
+
+    parashot = _group_entries_by_parasha(entries, _parashot_by_book())
+    return render(request, "library/topics_book.html", {"book": book, "parashot": parashot})
+
+
+def sages_view(request):
+    """Указатель мудрецов Торы: карточки мудрецов, у кого есть комментарии -
+    раскрытие по книгам/недельным главам живёт на отдельной странице мудреца."""
+    sages = (
+        Sage.objects.filter(materials__isnull=False)
+        .distinct()
+        .order_by("name_ru")
+    )
+    return render(request, "library/sages.html", {"sages": sages})
+
+
+def sage_detail_view(request, sage_slug):
+    """Комментарии одного мудреца, сгруппированные по книге и недельной главе."""
+    sage = get_object_or_404(Sage, slug=sage_slug)
+
+    entries = []
+    for m in sage.materials.all().prefetch_related("verses__book"):
         for v in m.verses.all():
             entries.append({"verse": v, "material": m})
     entries.sort(key=lambda e: (e["verse"].book.order, e["verse"].chapter, e["verse"].verse))
 
-    grouped = [
-        {"book": book, "chapter": chapter, "entries": list(group)}
-        for (book, chapter), group in groupby(
-            entries, key=lambda e: (e["verse"].book, e["verse"].chapter)
-        )
-    ]
+    parashot_by_book = _parashot_by_book()
+    books = []
+    for book, book_entries in groupby(entries, key=lambda e: e["verse"].book):
+        parashot = _group_entries_by_parasha(list(book_entries), parashot_by_book)
+        books.append({"book": book, "parashot": parashot})
 
-    return render(request, "library/topics.html", {"grouped": grouped})
-
-
-def sages_view(request):
-    """Указатель мудрецов Торы: комментарии по мудрецу, с раскрывающейся навигацией
-    книга -> недельная глава (иначе список комментариев быстро превращается
-    в нечитаемую простыню заголовков)."""
-    sages = Sage.objects.prefetch_related("materials__verses__book").order_by("name_ru")
-
-    parashot_by_book = {}
-    for p in Parasha.objects.select_related("start_verse__book", "end_verse").order_by("order"):
-        parashot_by_book.setdefault(p.start_verse.book_id, []).append(p)
-
-    def parasha_for_verse(verse):
-        for p in parashot_by_book.get(verse.book_id, []):
-            if (p.start_verse.chapter, p.start_verse.verse) <= (verse.chapter, verse.verse) <= (p.end_verse.chapter, p.end_verse.verse):
-                return p
-        return None
-
-    grouped = []
-    for sage in sages:
-        entries = []
-        for m in sage.materials.all():
-            for v in m.verses.all():
-                entries.append({"verse": v, "material": m, "parasha": parasha_for_verse(v)})
-        if not entries:
-            continue
-        entries.sort(key=lambda e: (e["verse"].book.order, e["verse"].chapter, e["verse"].verse))
-
-        books = []
-        for book, book_entries in groupby(entries, key=lambda e: e["verse"].book):
-            parashot = [
-                {"parasha": parasha, "entries": list(p_entries)}
-                for parasha, p_entries in groupby(book_entries, key=lambda e: e["parasha"])
-            ]
-            books.append({"book": book, "parashot": parashot})
-
-        grouped.append({"sage": sage, "books": books})
-
-    return render(request, "library/sages.html", {"grouped": grouped})
+    return render(request, "library/sage_detail.html", {"sage": sage, "books": books})
 
 
 @csrf_exempt
