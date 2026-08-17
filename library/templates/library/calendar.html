@@ -1,0 +1,81 @@
+{% extends "library/base.html" %}
+{% block title %}Еврейский календарь и конвертер дат — Tora Online{% endblock %}
+{% block content %}
+<nav class="breadcrumbs">
+    <a href="{% url 'library:home' %}">← Оглавление</a>
+</nav>
+
+<h1>Еврейский календарь</h1>
+
+<p class="today-widget">
+    Сегодня {{ today.hebrew_str }} — {{ today.gregorian_str }}.
+    Недельная глава:
+    {% if today.parasha_obj %}
+        <a href="{% url 'library:parasha' today.parasha_obj.slug %}">{{ today.parasha_ru }}</a>
+    {% else %}
+        {{ today.parasha_ru }}
+    {% endif %}
+</p>
+
+<section class="promo-section">
+    <div class="promo-card">
+        <h2>Григорианский → Еврейский</h2>
+        <form method="get" class="date-convert-form">
+            <div class="date-convert-row">
+                <select name="gd">
+                    <option value="">День</option>
+                    {% for d in gregorian_days %}
+                    <option value="{{ d }}" {% if gd == d|stringformat:"s" %}selected{% endif %}>{{ d }}</option>
+                    {% endfor %}
+                </select>
+                <select name="gm">
+                    <option value="">Месяц</option>
+                    {% for num, name in gregorian_months %}
+                    <option value="{{ num }}" {% if gm == num|stringformat:"s" %}selected{% endif %}>{{ name }}</option>
+                    {% endfor %}
+                </select>
+                <input type="number" name="gy" placeholder="Год" value="{{ gy }}" min="1" max="9999">
+            </div>
+            <button type="submit" class="channel-link">Конвертировать</button>
+        </form>
+        {% if gregorian_error %}
+        <p class="date-convert-error">{{ gregorian_error }}</p>
+        {% elif gregorian_result %}
+        <p class="date-convert-result">
+            Еврейская дата: <strong>{{ gregorian_result.hebrew_str }}</strong><br>
+            Недельная глава: <strong>{{ gregorian_result.parasha_ru }}</strong>
+        </p>
+        {% endif %}
+    </div>
+
+    <div class="promo-card">
+        <h2>Еврейский → Григорианский</h2>
+        <form method="get" class="date-convert-form">
+            <div class="date-convert-row">
+                <select name="hd">
+                    <option value="">День</option>
+                    {% for d in hebrew_days %}
+                    <option value="{{ d }}" {% if hd == d|stringformat:"s" %}selected{% endif %}>{{ d }}</option>
+                    {% endfor %}
+                </select>
+                <select name="hm">
+                    <option value="">Месяц</option>
+                    {% for num, name in hebrew_months %}
+                    <option value="{{ num }}" {% if hm == num|stringformat:"s" %}selected{% endif %}>{{ name }}</option>
+                    {% endfor %}
+                </select>
+                <input type="number" name="hy" placeholder="Год (напр. 5786)" value="{{ hy }}" min="1" max="9999">
+            </div>
+            <button type="submit" class="channel-link">Конвертировать</button>
+        </form>
+        {% if hebrew_error %}
+        <p class="date-convert-error">{{ hebrew_error }}</p>
+        {% elif hebrew_result %}
+        <p class="date-convert-result">
+            Григорианская дата: <strong>{{ hebrew_result.gregorian_str }}</strong><br>
+            Недельная глава: <strong>{{ hebrew_result.parasha_ru }}</strong>
+        </p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

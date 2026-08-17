@@ -1,5 +1,6 @@
 asgiref==3.12.1
 Django==6.1
+pyluach==2.3.0
 django-axes==8.3.1
 gunicorn==26.0.0
 pillow==12.3.0

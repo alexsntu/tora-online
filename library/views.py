@@ -10,6 +10,13 @@ from django.shortcuts import get_object_or_404, render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
+from .hebrew_calendar import (
+    GREGORIAN_MONTH_CHOICES,
+    HEBREW_MONTH_CHOICES,
+    convert_gregorian_to_hebrew,
+    convert_hebrew_to_gregorian,
+    today_info,
+)
 from .models import AnalyticsEvent, Book, Category, Material, Parasha, Verse
 
 
@@ -80,7 +87,11 @@ def home(request):
     return render(
         request,
         "library/home.html",
-        {"top_categories": top_categories, "parasha_groups": parasha_groups},
+        {
+            "top_categories": top_categories,
+            "parasha_groups": parasha_groups,
+            "today": today_info(),
+        },
     )
 
 
@@ -231,5 +242,50 @@ def analytics_dashboard(request):
             "top_materials": top_materials,
             "outbound_totals": outbound_totals,
             "totals": totals,
+        },
+    )
+
+
+def calendar_view(request):
+    """Календарь: сегодняшняя дата + двусторонний конвертер Григорианский/Еврейский."""
+    gregorian_result = None
+    gregorian_error = None
+    if "gd" in request.GET:
+        try:
+            gregorian_result = convert_gregorian_to_hebrew(
+                int(request.GET["gd"]), int(request.GET["gm"]), int(request.GET["gy"])
+            )
+        except (ValueError, KeyError):
+            gregorian_error = "Такой даты не существует - проверьте день/месяц/год."
+
+    hebrew_result = None
+    hebrew_error = None
+    if "hd" in request.GET:
+        try:
+            hebrew_result = convert_hebrew_to_gregorian(
+                int(request.GET["hd"]), int(request.GET["hm"]), int(request.GET["hy"])
+            )
+        except (ValueError, KeyError):
+            hebrew_error = "Такой даты не существует в еврейском календаре (например, Адар II бывает только в високосный год) - проверьте день/месяц/год."
+
+    return render(
+        request,
+        "library/calendar.html",
+        {
+            "today": today_info(),
+            "gregorian_days": range(1, 32),
+            "hebrew_days": range(1, 31),
+            "gregorian_months": GREGORIAN_MONTH_CHOICES,
+            "hebrew_months": HEBREW_MONTH_CHOICES,
+            "gregorian_result": gregorian_result,
+            "gregorian_error": gregorian_error,
+            "hebrew_result": hebrew_result,
+            "hebrew_error": hebrew_error,
+            "gd": request.GET.get("gd", ""),
+            "gm": request.GET.get("gm", ""),
+            "gy": request.GET.get("gy", ""),
+            "hd": request.GET.get("hd", ""),
+            "hm": request.GET.get("hm", ""),
+            "hy": request.GET.get("hy", ""),
         },
     )

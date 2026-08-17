@@ -75,6 +75,67 @@ main {
 
 h1 { font-family: var(--font-display); color: var(--maroon); }
 
+.today-widget {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: .3rem .6rem;
+    margin: 0 0 1.8rem 0;
+    padding: .7rem 1.1rem;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 1rem;
+    color: #4a3d24;
+}
+.today-widget a { color: var(--accent-dark); font-weight: bold; text-decoration: none; }
+.today-widget a:hover { text-decoration: underline; }
+.today-widget-calendar { margin-left: auto; font-weight: normal !important; white-space: nowrap; }
+
+@media (max-width: 640px) {
+    .today-widget-calendar { margin-left: 0; }
+}
+
+.date-convert-form { margin-top: .8rem; }
+.date-convert-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-bottom: .8rem;
+}
+.date-convert-row select,
+.date-convert-row input {
+    padding: .45rem .5rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: #fff;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    color: var(--text);
+}
+.date-convert-row input[type="number"] { width: 8rem; }
+.date-convert-form button {
+    border: none;
+    cursor: pointer;
+    font-family: var(--font-body);
+}
+.date-convert-result {
+    margin-top: 1rem;
+    padding: .8rem 1rem;
+    background: var(--highlight);
+    border: 1px solid var(--highlight-border);
+    border-radius: 4px;
+    line-height: 1.6;
+}
+.date-convert-error {
+    margin-top: 1rem;
+    padding: .8rem 1rem;
+    background: #fbe9e5;
+    border: 1px solid #d99b8a;
+    border-radius: 4px;
+    color: #7c3223;
+}
+
 .promo-section {
     display: grid;
     grid-template-columns: 1fr 1fr;
