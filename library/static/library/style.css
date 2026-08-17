@@ -241,7 +241,7 @@ h1 { font-family: var(--font-display); color: var(--maroon); }
 }
 .parasha-list { list-style: none; padding: 0; }
 .parasha-list li { padding: .4rem 0; }
-.parasha-list .range { color: #7a6a4a; font-size: .95rem; margin-left: .5rem; }
+.range { color: #7a6a4a; font-size: .9rem; margin-left: .5rem; font-weight: normal; }
 
 .category-block { margin-bottom: 1rem; }
 .category-summary {

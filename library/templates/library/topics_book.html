@@ -9,11 +9,14 @@
 
 <div class="verses topics-list" x-data="{ open: null }">
     {% for parasha_group in parashot %}
-    <details class="book-entry" open>
+    <details class="book-entry">
         <summary>
-            <strong>
-                {% if parasha_group.parasha %}{{ parasha_group.parasha.name_ru }}{% else %}Без привязки к недельной главе{% endif %}
-            </strong>
+            {% if parasha_group.parasha %}
+            <strong>{{ parasha_group.parasha.name_ru }}</strong>
+            <span class="range">{{ parasha_group.parasha.start_verse }} — {{ parasha_group.parasha.end_verse }}</span>
+            {% else %}
+            <strong>Без привязки к недельной главе</strong>
+            {% endif %}
         </summary>
         <div class="topics-flow">
             {% for entry in parasha_group.entries %}
