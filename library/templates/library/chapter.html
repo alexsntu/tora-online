@@ -52,6 +52,7 @@
         <span class="verse-he" dir="rtl" lang="he">{{ verse.text_he }}</span>
         {% if verse.text_ru_slivniak %}
         <span class="verse-ru-wrap">
+            <span class="verse-ru-current-label" x-text="translation === 'classic' ? 'Классический перевод' : 'Перевод Д. Сливняка'"></span>
             <span class="verse-ru" lang="ru" x-show="translation === 'classic'">{{ verse.text_ru }}</span>
             <span class="verse-ru" lang="ru" x-show="translation === 'slivniak'" x-cloak>{{ verse.text_ru_slivniak }}</span>
             <button type="button" class="translation-alt-toggle"
