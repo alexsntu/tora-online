@@ -249,7 +249,8 @@ def topics_search_json_view(request):
         for entry in _search_entries(query)[:8]:
             v, m = entry["verse"], entry["material"]
             url = reverse("library:chapter", args=[v.book.slug, v.chapter]) + f"#v-{v.chapter}-{v.verse}"
-            results.append({"key": f"{m.id}-{v.id}", "title": m.title, "verse": str(v), "url": url})
+            sage = ", ".join(s.name_ru for s in m.sages.all())
+            results.append({"key": f"{m.id}-{v.id}", "title": m.title, "verse": str(v), "sage": sage, "url": url})
     return JsonResponse({"results": results})
 
 

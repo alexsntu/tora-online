@@ -891,6 +891,12 @@ summary::marker { color: var(--gold); }
 }
 .topics-search-result:last-child { border-bottom: none; }
 .topics-search-result:hover { background: var(--highlight); }
+.topics-search-result-meta {
+    flex-shrink: 0;
+    display: flex;
+    align-items: baseline;
+    gap: .4rem;
+}
 .topics-search-result-verse {
     flex-shrink: 0;
     color: var(--accent-dark);
@@ -898,7 +904,15 @@ summary::marker { color: var(--gold); }
     font-weight: bold;
     white-space: nowrap;
 }
+.topics-search-result-sage {
+    flex-shrink: 0;
+    color: #8a7a55;
+    font-size: .78rem;
+    font-style: italic;
+    white-space: nowrap;
+}
 
 @media (max-width: 640px) {
     .topics-search-result { flex-direction: column; align-items: flex-start; gap: .2rem; }
+    .topics-search-result-meta { flex-wrap: wrap; }
 }

@@ -21,7 +21,10 @@
         <template x-for="r in results" :key="r.key">
             <a :href="r.url" class="topics-search-result">
                 <span class="topics-search-result-title" x-text="r.title"></span>
-                <span class="topics-search-result-verse" x-text="r.verse"></span>
+                <span class="topics-search-result-meta">
+                    <span class="topics-search-result-verse" x-text="r.verse"></span>
+                    <span class="topics-search-result-sage" x-show="r.sage" x-text="r.sage"></span>
+                </span>
             </a>
         </template>
     </div>
