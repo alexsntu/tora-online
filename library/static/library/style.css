@@ -526,7 +526,7 @@ summary::marker { color: var(--gold); }
 }
 .translation-toggle-label { color: #8a7a55; font-size: .85rem; text-transform: uppercase; letter-spacing: .05em; }
 .translation-toggle-desktop { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem 1rem; }
-.translation-toggle label { display: inline-flex; align-items: center; gap: .3rem; cursor: pointer; }
+.translation-toggle-desktop label { display: inline-flex; align-items: center; gap: .3rem; cursor: pointer; }
 .translation-toggle input[type="radio"] { accent-color: var(--maroon); cursor: pointer; }
 .translation-toggle-mobile {
     display: none;
