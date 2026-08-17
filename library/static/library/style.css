@@ -411,6 +411,28 @@ summary::marker { color: var(--gold); }
     box-shadow: 0 2px 8px rgba(56, 41, 15, 0.08);
 }
 
+.quick-nav-hint { margin: 0 0 .8rem 0; font-size: .95rem; color: #6a5a3a; font-style: italic; }
+
+.nav-select {
+    display: none;
+    width: 100%;
+    margin: 0 0 .8rem 0;
+    padding: .6rem .7rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: #fff;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    color: var(--text);
+}
+
+/* На мобильном сетка медальонов из 30-50 кнопок занимает слишком много места -
+   переключаемся на нативный select, он же удобнее тапать. */
+@media (max-width: 640px) {
+    .nav-row-label, .nav-row { display: none; }
+    .nav-select { display: block; }
+}
+
 .filter-toggle {
     display: flex;
     align-items: center;

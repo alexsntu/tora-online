@@ -1,9 +1,15 @@
 {{ nav_data|json_script:"nav-data" }}
 <div class="quick-nav" data-book-slug="{{ book.slug }}" data-current-chapter="{{ current_chapter|default:'' }}">
+    <p class="quick-nav-hint">Чтобы перейти к нужному фрагменту текста, выберите главу и стих.</p>
+
     <div class="nav-row-label">Глава</div>
     <div class="nav-row nav-chapters"></div>
+    <select class="nav-select nav-select-chapters" aria-label="Глава"></select>
+
     <div class="nav-row-label">Стих</div>
     <div class="nav-row nav-verses"></div>
+    <select class="nav-select nav-select-verses" aria-label="Стих"></select>
+
     <label class="filter-toggle">
         <input type="checkbox" class="filter-materials-checkbox">
         Показывать только стихи с комментариями <span class="filter-star">✦</span>
@@ -16,6 +22,8 @@
     var bookSlug = container.dataset.bookSlug;
     var chaptersRow = container.querySelector('.nav-chapters');
     var versesRow = container.querySelector('.nav-verses');
+    var chaptersSelect = container.querySelector('.nav-select-chapters');
+    var versesSelect = container.querySelector('.nav-select-verses');
 
     var chapters = Object.keys(navData).map(Number).sort(function (a, b) { return a - b; });
     var activeChapter = Number(container.dataset.currentChapter) || chapters[0];
@@ -47,6 +55,16 @@
             });
             chaptersRow.appendChild(btn);
         });
+
+        chaptersSelect.innerHTML = '';
+        visibleChapters.forEach(function (ch) {
+            var hasMaterials = chapterHasMaterials(ch);
+            var opt = document.createElement('option');
+            opt.value = ch;
+            opt.textContent = (hasMaterials ? '✦ ' : '') + 'Глава ' + ch;
+            if (ch === activeChapter) { opt.selected = true; }
+            chaptersSelect.appendChild(opt);
+        });
     }
 
     function goToVerse(chapter, verse) {
@@ -76,10 +94,33 @@
             });
             versesRow.appendChild(btn);
         });
+
+        versesSelect.innerHTML = '';
+        var placeholder = document.createElement('option');
+        placeholder.textContent = 'Выберите стих...';
+        placeholder.disabled = true;
+        placeholder.selected = true;
+        versesSelect.appendChild(placeholder);
+        verses.forEach(function (pair) {
+            var verse = pair[0], hasMaterials = pair[1];
+            var opt = document.createElement('option');
+            opt.value = verse;
+            opt.textContent = (hasMaterials ? '✦ ' : '') + 'Стих ' + verse;
+            versesSelect.appendChild(opt);
+        });
     }
 
     renderChapters();
     renderVerses();
+
+    chaptersSelect.addEventListener('change', function () {
+        activeChapter = Number(this.value);
+        renderChapters();
+        renderVerses();
+    });
+    versesSelect.addEventListener('change', function () {
+        goToVerse(activeChapter, Number(this.value));
+    });
 
     var filterCheckbox = container.querySelector('.filter-materials-checkbox');
     filterCheckbox.addEventListener('change', function () {
