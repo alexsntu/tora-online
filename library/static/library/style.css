@@ -443,7 +443,13 @@ summary::marker { color: var(--gold); }
     background: none;
     border: 1px solid var(--border);
     border-radius: 3px;
-    padding: .1rem .4rem;
+    /* Визуально скромная кнопка, но с увеличенной кликабельной областью -
+       исходные .1rem .4rem давали всего ~20px высоты, заметно меньше
+       рекомендованного минимума тач-таргета (44px iOS / 48px Material). */
+    padding: .45rem .5rem;
+    min-height: 2rem;
+    display: inline-flex;
+    align-items: center;
     cursor: pointer;
     white-space: nowrap;
 }
@@ -464,7 +470,7 @@ summary::marker { color: var(--gold); }
 @media (max-width: 640px) {
     .materials-panel { padding: 1rem; }
     .material a.platform-link { width: 100%; justify-content: center; }
-    .nav-btn { width: 2.3rem; height: 2.3rem; font-size: .9rem; }
+    .nav-btn { width: 2.5rem; height: 2.5rem; font-size: .9rem; }
 }
 
 [x-cloak] { display: none !important; }
