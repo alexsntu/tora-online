@@ -787,3 +787,11 @@ summary::marker { color: var(--gold); }
     transition: background-color .12s ease;
 }
 .topics-search-form button:hover { background: var(--maroon); }
+.topics-search-form-home {
+    max-width: none;
+    margin-bottom: 2rem;
+}
+.topics-search-form-home input[type="search"] {
+    padding: .8rem 1rem;
+    font-size: 1.1rem;
+}

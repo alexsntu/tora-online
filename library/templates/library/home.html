@@ -2,6 +2,11 @@
 {% block content %}
 {% include "library/_today_widget.html" %}
 
+<form method="get" action="{% url 'library:topics_search' %}" class="topics-search-form topics-search-form-home">
+    <input type="search" name="q" placeholder="Искать по темам и комментариям…" aria-label="Поиск по темам">
+    <button type="submit">Найти</button>
+</form>
+
 <section class="nav-section">
     <h2>Библиотека</h2>
     {% for cat in top_categories %}
