@@ -6,27 +6,45 @@
 </nav>
 
 <h1>Указатель мудрецов Торы</h1>
-<p class="topics-intro">Наши комментарии, сгруппированные по мудрецу-первоисточнику. Нажмите на комментарий, чтобы открыть его.</p>
+<p class="topics-intro">Наши комментарии, сгруппированные по мудрецу-первоисточнику. Раскройте книгу и недельную главу, чтобы увидеть комментарии.</p>
 
 <div class="verses topics-list" x-data="{ open: null }">
     {% for group in grouped %}
-    <h2 class="chapter-marker book-marker">{{ group.sage.name_ru }}</h2>
-    {% if group.sage.bio %}<p class="sage-bio">{{ group.sage.bio }}</p>{% endif %}
-    <div class="topics-flow">
-        {% for entry in group.entries %}
-        <button type="button" class="topic-entry" @click="open = (open === {{ entry.material.id }} ? null : {{ entry.material.id }})">
-            {{ entry.material.title }} <span class="topic-entry-verse">{{ entry.verse }}</span>
-        </button>
+    <details class="category-block" open>
+        <summary class="category-summary">{{ group.sage.name_ru }}</summary>
+        {% if group.sage.bio %}<p class="sage-bio">{{ group.sage.bio }}</p>{% endif %}
+
+        {% for book_group in group.books %}
+        <details class="subcategory-block" open>
+            <summary class="subcategory-summary">{{ book_group.book.name_ru }}</summary>
+
+            {% for parasha_group in book_group.parashot %}
+            <details class="book-entry" open>
+                <summary>
+                    <strong>
+                        {% if parasha_group.parasha %}{{ parasha_group.parasha.name_ru }}{% else %}Без привязки к недельной главе{% endif %}
+                    </strong>
+                </summary>
+                <div class="topics-flow">
+                    {% for entry in parasha_group.entries %}
+                    <button type="button" class="topic-entry" @click="open = (open === {{ entry.material.id }} ? null : {{ entry.material.id }})">
+                        {{ entry.material.title }} <span class="topic-entry-verse">{{ entry.verse }}</span>
+                    </button>
+                    {% endfor %}
+                </div>
+                {% for entry in parasha_group.entries %}
+                <div class="materials-panel topics-panel" x-show="open === {{ entry.material.id }}" x-cloak>
+                    <div class="topics-panel-ref">
+                        <a href="{% url 'library:chapter' book_group.book.slug entry.verse.chapter %}#v-{{ entry.verse.chapter }}-{{ entry.verse.verse }}">{{ entry.verse }} — открыть в тексте →</a>
+                    </div>
+                    {% include "library/_material.html" with m=entry.material %}
+                </div>
+                {% endfor %}
+            </details>
+            {% endfor %}
+        </details>
         {% endfor %}
-    </div>
-    {% for entry in group.entries %}
-    <div class="materials-panel topics-panel" x-show="open === {{ entry.material.id }}" x-cloak>
-        <div class="topics-panel-ref">
-            <a href="{% url 'library:chapter' entry.verse.book.slug entry.verse.chapter %}#v-{{ entry.verse.chapter }}-{{ entry.verse.verse }}">{{ entry.verse }} — открыть в тексте →</a>
-        </div>
-        {% include "library/_material.html" with m=entry.material %}
-    </div>
-    {% endfor %}
+    </details>
     {% empty %}
     <p>Пока нет комментариев с указанным мудрецом — добавь мудреца в админке к нужному материалу, и он появится здесь автоматически.</p>
     {% endfor %}

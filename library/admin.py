@@ -75,6 +75,15 @@ class MaterialAdmin(admin.ModelAdmin):
     filter_horizontal = ("verses",)
     # sages - обычный select (не filter_horizontal), по просьбе пользователя
 
+    class Media:
+        css = {"all": ("library/admin-extra.css",)}
+
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        field = super().formfield_for_dbfield(db_field, request, **kwargs)
+        if db_field.name == "title":
+            field.widget.attrs["style"] = "width: 95%; max-width: 900px; font-size: 1.1em;"
+        return field
+
 
 @admin.register(Sage)
 class SageAdmin(admin.ModelAdmin):

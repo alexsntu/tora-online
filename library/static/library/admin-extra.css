@@ -1,0 +1,9 @@
+/* Материал: выбранные мудрецы в select[multiple] должны быть однозначно заметны */
+#id_sages option:checked {
+    background-color: #7c3223 !important;
+    color: #fff !important;
+    font-weight: bold;
+}
+#id_sages {
+    min-height: 8rem;
+}

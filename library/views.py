@@ -176,18 +176,40 @@ def topics_view(request):
 
 
 def sages_view(request):
-    """Указатель мудрецов Торы: наши комментарии, сгруппированные по мудрецу-первоисточнику."""
+    """Указатель мудрецов Торы: комментарии по мудрецу, с раскрывающейся навигацией
+    книга -> недельная глава (иначе список комментариев быстро превращается
+    в нечитаемую простыню заголовков)."""
     sages = Sage.objects.prefetch_related("materials__verses__book").order_by("name_ru")
+
+    parashot_by_book = {}
+    for p in Parasha.objects.select_related("start_verse__book", "end_verse").order_by("order"):
+        parashot_by_book.setdefault(p.start_verse.book_id, []).append(p)
+
+    def parasha_for_verse(verse):
+        for p in parashot_by_book.get(verse.book_id, []):
+            if (p.start_verse.chapter, p.start_verse.verse) <= (verse.chapter, verse.verse) <= (p.end_verse.chapter, p.end_verse.verse):
+                return p
+        return None
 
     grouped = []
     for sage in sages:
         entries = []
         for m in sage.materials.all():
             for v in m.verses.all():
-                entries.append({"verse": v, "material": m})
+                entries.append({"verse": v, "material": m, "parasha": parasha_for_verse(v)})
+        if not entries:
+            continue
         entries.sort(key=lambda e: (e["verse"].book.order, e["verse"].chapter, e["verse"].verse))
-        if entries:
-            grouped.append({"sage": sage, "entries": entries})
+
+        books = []
+        for book, book_entries in groupby(entries, key=lambda e: e["verse"].book):
+            parashot = [
+                {"parasha": parasha, "entries": list(p_entries)}
+                for parasha, p_entries in groupby(book_entries, key=lambda e: e["parasha"])
+            ]
+            books.append({"book": book, "parashot": parashot})
+
+        grouped.append({"sage": sage, "books": books})
 
     return render(request, "library/sages.html", {"grouped": grouped})
 
