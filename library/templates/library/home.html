@@ -1,37 +1,5 @@
 {% extends "library/base.html" %}
 {% block content %}
-<section class="promo-section">
-    <div class="promo-card">
-        <h2>Наши каналы</h2>
-        <p>Самые свежие уроки по недельным главам Торы для Бней Ноах — на наших каналах:</p>
-        <div class="channel-links">
-            <a class="channel-link" href="https://www.youtube.com/@tora-online" target="_blank" rel="noopener">YouTube ↗</a>
-            <a class="channel-link" href="https://rutube.ru/channel/28457833/" target="_blank" rel="noopener">RuTube ↗</a>
-        </div>
-    </div>
-    <div class="promo-card">
-        <h2>Прямой эфир по ZOOM</h2>
-        <p>Онлайн-уроки проходят каждую субботу в 19:00 по времени Иерусалима.</p>
-        <a class="zoom-link" href="https://us04web.zoom.us/j/4050464361" target="_blank" rel="noopener">Присоединиться к трансляции ↗</a>
-    </div>
-</section>
-
-<section class="about-section">
-    <h2>Об авторе</h2>
-    <p>
-        <strong>Дмитрий Калашник</strong> — автор всех уроков, комментариев и статей на портале Tora Online.
-        Уже более 10 лет ведёт уроки Торы для Бней Ноах. Сам является соблюдающим Бней Ноах, учеником рава
-        Ури Амоса Шерки, имеет смиху (раввинское благословение на преподавание Торы) от нескольких раввинов.
-        Ранее жил в Харькове, сейчас живёт в Миннеаполисе (США).
-    </p>
-</section>
-
-<section class="about-section">
-    <h2>Указатель тем</h2>
-    <p>Все темы наших комментариев по порядку следования в тексте — быстро найти нужный вопрос.</p>
-    <p style="margin-top: .8rem;"><a class="channel-link" href="{% url 'library:topics' %}">Открыть указатель →</a></p>
-</section>
-
 <section class="nav-section">
     <h2>Библиотека</h2>
     {% for cat in top_categories %}
@@ -89,5 +57,37 @@
     {% empty %}
     <p>Недельные главы ещё не загружены.</p>
     {% endfor %}
+</section>
+
+<section class="about-section">
+    <h2>Указатель тем</h2>
+    <p>Все темы наших комментариев по порядку следования в тексте — быстро найти нужный вопрос.</p>
+    <p style="margin-top: .8rem;"><a class="channel-link" href="{% url 'library:topics' %}">Открыть указатель →</a></p>
+</section>
+
+<section class="promo-section">
+    <div class="promo-card">
+        <h2>Наши каналы</h2>
+        <p>Самые свежие уроки по недельным главам Торы для Бней Ноах — на наших каналах:</p>
+        <div class="channel-links">
+            <a class="channel-link" href="https://www.youtube.com/@tora-online" target="_blank" rel="noopener">YouTube ↗</a>
+            <a class="channel-link" href="https://rutube.ru/channel/28457833/" target="_blank" rel="noopener">RuTube ↗</a>
+        </div>
+    </div>
+    <div class="promo-card">
+        <h2>Прямой эфир по ZOOM</h2>
+        <p>Онлайн-уроки проходят каждую субботу в 19:00 по времени Иерусалима.</p>
+        <a class="zoom-link" href="https://us04web.zoom.us/j/4050464361" target="_blank" rel="noopener">Присоединиться к трансляции ↗</a>
+    </div>
+</section>
+
+<section class="about-section">
+    <h2>Об авторе</h2>
+    <p>
+        <strong>Дмитрий Калашник</strong> — автор всех уроков, комментариев и статей на портале Tora Online.
+        Уже более 10 лет ведёт уроки Торы для Бней Ноах. Сам является соблюдающим Бней Ноах, учеником рава
+        Ури Амоса Шерки, имеет смиху (раввинское благословение на преподавание Торы) от нескольких раввинов.
+        Ранее жил в Харькове, сейчас живёт в Миннеаполисе (США).
+    </p>
 </section>
 {% endblock %}
