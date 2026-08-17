@@ -54,7 +54,11 @@ class Verse(models.Model):
     chapter = models.PositiveSmallIntegerField("Глава")
     verse = models.PositiveSmallIntegerField("Стих")
     text_he = models.TextField("Текст (иврит)", blank=True)
-    text_ru = models.TextField("Текст (рус.)", blank=True)
+    text_ru = models.TextField("Текст (рус., классический перевод)", blank=True)
+    text_ru_slivniak = models.TextField(
+        "Текст (рус., перевод Д. Сливняка)", blank=True,
+        help_text="Da Project, 2011, CC BY-NC, с Sefaria",
+    )
 
     class Meta:
         ordering = ["book", "chapter", "verse"]

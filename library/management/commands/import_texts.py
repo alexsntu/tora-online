@@ -2,6 +2,7 @@ import html
 import json
 import re
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
@@ -17,6 +18,15 @@ SECTION_MARKER_RE = re.compile(r"\{[פס]\}")
 
 TEXTS_RU_DIR = Path(settings.BASE_DIR) / "texts" / "ru"
 TEXTS_HE_CACHE_DIR = Path(settings.BASE_DIR) / "texts" / "he"
+TEXTS_RU_SLIVNIAK_CACHE_DIR = Path(settings.BASE_DIR) / "texts" / "ru_slivniak"
+
+# Единственный русский перевод Торы на Sefaria с чёткой открытой лицензией
+# (CC BY-NC) - см. project memory. Второй русский перевод там же имеет
+# неясные права и не используется.
+SLIVNIAK_VERSION_TITLE = (
+    "Russian Torah translation, by Dmitri Slivniak, Ph.D., "
+    "edited by Dr. Itzhak Streshinsky. Da Project, 2011 [ru]"
+)
 
 
 def clean_hebrew(raw: str) -> str:
@@ -45,6 +55,29 @@ def fetch_hebrew_chapter(sefaria_name: str, chapter: int, cache_dir: Path):
     with open(cache_file, "w", encoding="utf-8") as f:
         json.dump(he_verses, f, ensure_ascii=False, indent=2)
     return he_verses
+
+
+def fetch_slivniak_chapter(sefaria_name: str, chapter: int, cache_dir: Path):
+    """Возвращает список стихов перевода Д. Сливняка (Da Project, 2011, CC BY-NC),
+    с локальным кэшем json - та же схема, что для иврита."""
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    cache_file = cache_dir / f"{chapter}.json"
+    if cache_file.exists():
+        with open(cache_file, encoding="utf-8") as f:
+            return json.load(f)
+
+    version_param = urllib.parse.quote(SLIVNIAK_VERSION_TITLE)
+    url = f"https://www.sefaria.org/api/texts/{sefaria_name}.{chapter}?context=0&ven={version_param}"
+    try:
+        with urllib.request.urlopen(url, timeout=15) as resp:
+            data = json.load(resp)
+    except (urllib.error.URLError, TimeoutError, OSError):
+        return None
+
+    verses = [clean_hebrew(v) for v in data.get("text", [])]
+    with open(cache_file, "w", encoding="utf-8") as f:
+        json.dump(verses, f, ensure_ascii=False, indent=2)
+    return verses
 
 
 def fetch_rashi_verse(sefaria_name: str, chapter: int, verse: int, cache_dir: Path):
@@ -151,8 +184,14 @@ class Command(BaseCommand):
                 ))
             he_by_chapter[chapter] = he_verses
 
+        slivniak_cache_dir = TEXTS_RU_SLIVNIAK_CACHE_DIR / book.slug
+        slivniak_by_chapter = {}
+        for chapter in chapters_needed:
+            slivniak_by_chapter[chapter] = fetch_slivniak_chapter(sefaria_name, chapter, slivniak_cache_dir)
+
         rashi_cache_dir = TEXTS_HE_CACHE_DIR / book.slug / "rashi"
         rashi_found = 0
+        slivniak_found = 0
 
         verse_objs = []
         for chapter, verse, text_ru in parsed:
@@ -161,11 +200,18 @@ class Command(BaseCommand):
             if he_verses and 1 <= verse <= len(he_verses):
                 text_he = he_verses[verse - 1]
 
+            slivniak_verses = slivniak_by_chapter.get(chapter)
+            text_ru_slivniak = ""
+            if slivniak_verses and 1 <= verse <= len(slivniak_verses):
+                text_ru_slivniak = slivniak_verses[verse - 1]
+                if text_ru_slivniak:
+                    slivniak_found += 1
+
             obj, _ = Verse.objects.update_or_create(
                 book=book,
                 chapter=chapter,
                 verse=verse,
-                defaults={"text_ru": text_ru, "text_he": text_he},
+                defaults={"text_ru": text_ru, "text_he": text_he, "text_ru_slivniak": text_ru_slivniak},
             )
             verse_objs.append(obj)
 
@@ -200,5 +246,5 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(
             f"{txt_file.name}: импортировано {len(verse_objs)} стихов "
             f"({start_verse} — {end_verse}), недельная глава '{name_ru}', "
-            f"Раши найден к {rashi_found} стихам"
+            f"Раши найден к {rashi_found} стихам, перевод Сливняка найден к {slivniak_found} стихам"
         ))

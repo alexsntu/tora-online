@@ -10,7 +10,18 @@
 {% include "library/_quick_nav.html" %}
 {% include "library/_nav.html" %}
 
-<div class="verses" x-data="{ open: null, openRashi: null }">
+<div class="verses"
+     x-data="{ open: null, openRashi: null, translation: localStorage.getItem('tora-translation') || 'classic' }"
+     x-effect="localStorage.setItem('tora-translation', translation)">
+    <div class="translation-toggle">
+        <span class="translation-toggle-label">Перевод:</span>
+        <label><input type="radio" name="translation" value="classic" x-model="translation"> Классический</label>
+        <label><input type="radio" name="translation" value="slivniak" x-model="translation"> Д. Сливняк</label>
+        <p class="translation-attribution" x-show="translation === 'slivniak'" x-cloak>
+            Перевод: Дмитрий Сливняк, ред. Ицхак Стрешинский, Da Project, 2011.
+            Источник — <a href="https://www.sefaria.org/" target="_blank" rel="noopener">Sefaria.org</a>, лицензия CC BY-NC.
+        </p>
+    </div>
     {% for verse in verses %}
     {% if verse.starts_parasha %}
     <a class="parasha-marker" href="{% url 'library:parasha' verse.starts_parasha.slug %}">
@@ -30,7 +41,12 @@
             {% endfor %}
         </span>
         <span class="verse-he" dir="rtl" lang="he">{{ verse.text_he }}</span>
+        {% if verse.text_ru_slivniak %}
+        <span class="verse-ru" lang="ru" x-show="translation === 'classic'">{{ verse.text_ru }}</span>
+        <span class="verse-ru" lang="ru" x-show="translation === 'slivniak'" x-cloak>{{ verse.text_ru_slivniak }}</span>
+        {% else %}
         <span class="verse-ru" lang="ru">{{ verse.text_ru }}</span>
+        {% endif %}
     </div>
     {% for c in verse.commentaries.all %}
     <div class="rashi-panel" x-show="openRashi === {{ c.id }}" x-cloak dir="rtl" lang="he">
