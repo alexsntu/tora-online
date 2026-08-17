@@ -363,11 +363,13 @@ summary::marker { color: var(--gold); }
 .topics-chapter-marker a { color: inherit; text-decoration: none; }
 .topics-chapter-marker a:hover { text-decoration: underline; }
 .topics-flow {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    align-items: start;
     gap: .6rem;
     margin: 0 0 1.2rem 0;
 }
+.topics-flow .topics-panel { grid-column: 1 / -1; margin: 0; }
 .topic-entry {
     display: inline-flex;
     align-items: baseline;

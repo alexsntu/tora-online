@@ -12,6 +12,7 @@
     {% for book in books %}
     <a class="book-card" href="{% url 'library:topics_book' book.slug %}">
         <h3>{{ book.name_ru }}</h3>
+        <p>{{ book.materials_count }} {{ book.materials_word }} — нажмите, чтобы открыть</p>
     </a>
     {% empty %}
     <p>Пока нет комментариев — добавь их в админке к нужным стихам, и они появятся здесь автоматически.</p>

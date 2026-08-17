@@ -24,16 +24,14 @@
                 {{ entry.material.title }} <span class="topic-entry-verse">{{ entry.verse }}</span>
                 {% if entry.material.sages.all %}<span class="topic-entry-sage">{{ entry.material.sages.all|join:", " }}</span>{% endif %}
             </button>
+            <div class="materials-panel topics-panel" x-show="open === {{ entry.material.id }}" x-cloak>
+                <div class="topics-panel-ref">
+                    <a href="{% url 'library:chapter' book.slug entry.verse.chapter %}#v-{{ entry.verse.chapter }}-{{ entry.verse.verse }}">{{ entry.verse }} — открыть в тексте →</a>
+                </div>
+                {% include "library/_material.html" with m=entry.material %}
+            </div>
             {% endfor %}
         </div>
-        {% for entry in parasha_group.entries %}
-        <div class="materials-panel topics-panel" x-show="open === {{ entry.material.id }}" x-cloak>
-            <div class="topics-panel-ref">
-                <a href="{% url 'library:chapter' book.slug entry.verse.chapter %}#v-{{ entry.verse.chapter }}-{{ entry.verse.verse }}">{{ entry.verse }} — открыть в тексте →</a>
-            </div>
-            {% include "library/_material.html" with m=entry.material %}
-        </div>
-        {% endfor %}
     </details>
     {% endfor %}
 </div>

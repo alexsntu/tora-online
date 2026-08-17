@@ -20,6 +20,19 @@ from .hebrew_calendar import (
 from .models import AnalyticsEvent, Book, Category, Material, Parasha, Sage, Verse
 
 
+def ru_plural(n, one, few, many):
+    """Русское склонение по числу: 1 комментарий / 2 комментария / 5 комментариев."""
+    n = abs(n) % 100
+    n1 = n % 10
+    if 10 < n < 20:
+        return many
+    if 1 < n1 < 5:
+        return few
+    if n1 == 1:
+        return one
+    return many
+
+
 def service_worker(request):
     """Отдаём service worker с корня сайта, чтобы его scope покрывал весь домен."""
     path = Path(settings.BASE_DIR) / "library" / "static" / "library" / "service-worker.js"
@@ -185,10 +198,12 @@ def topics_view(request):
     """Указатель тем: карточки книг, в которых есть наши комментарии (как в библиотеке) -
     раскрытие по недельным главам живёт на отдельной странице книги."""
     books = (
-        Book.objects.filter(verses__materials__isnull=False)
-        .distinct()
+        Book.objects.annotate(materials_count=Count("verses__materials", distinct=True))
+        .filter(materials_count__gt=0)
         .order_by("order")
     )
+    for book in books:
+        book.materials_word = ru_plural(book.materials_count, "комментарий", "комментария", "комментариев")
     return render(request, "library/topics.html", {"books": books})
 
 
