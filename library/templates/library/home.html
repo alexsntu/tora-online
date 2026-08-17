@@ -1,4 +1,5 @@
 {% extends "library/base.html" %}
+{% load static %}
 {% block content %}
 {% include "library/_today_widget.html" %}
 
@@ -69,6 +70,23 @@
         <h2>Прямой эфир по ZOOM</h2>
         <p>Онлайн-уроки проходят каждую субботу в 19:00 по времени Иерусалима.</p>
         <a class="zoom-link" href="https://us04web.zoom.us/j/4050464361" target="_blank" rel="noopener">Присоединиться к трансляции ↗</a>
+    </div>
+</section>
+
+<section class="about-section install-section">
+    <img class="install-section-icon" src="{% static 'library/icons/icon-192.png' %}" alt="" width="64" height="64">
+    <div class="install-section-body">
+        <h2>Установите приложение</h2>
+        <p>Tora Online можно установить на смартфон как обычное приложение — быстрый доступ с главного экрана, без адресной строки браузера.</p>
+        <button type="button" id="install-app-btn" class="install-app-btn" aria-label="Установить приложение">
+            <svg class="install-app-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M12 3v12m0 0l-4-4m4 4l4-4M5 19h14" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Установить</span>
+        </button>
+        <div id="install-app-hint" class="install-app-hint">
+            Чтобы установить: нажмите <strong>⎋ Поделиться</strong> внизу экрана Safari и выберите <strong>«На экран «Домой»»</strong>.
+        </div>
     </div>
 </section>
 

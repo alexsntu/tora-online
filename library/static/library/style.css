@@ -67,20 +67,32 @@ body {
     color: var(--gold);
 }
 
+.install-section {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.1rem;
+}
+.install-section-icon {
+    flex-shrink: 0;
+    width: 4rem;
+    height: 4rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(56, 41, 15, 0.15);
+}
+.install-section-body { flex: 1 1 auto; }
+
 .install-app-btn {
     display: none;
-    position: absolute;
-    top: 1rem;
-    right: 1.2rem;
     align-items: center;
     gap: .4rem;
-    padding: .45rem .9rem;
+    margin-top: .6rem;
+    padding: .55rem 1.1rem;
     background: var(--accent-dark);
     color: #fff;
     border: none;
     border-radius: 20px;
     font-family: var(--font-body);
-    font-size: .85rem;
+    font-size: .95rem;
     font-weight: bold;
     cursor: pointer;
     box-shadow: 0 2px 8px rgba(56, 41, 15, 0.15);
@@ -88,30 +100,25 @@ body {
 }
 .install-app-btn.is-visible { display: inline-flex; }
 .install-app-btn:hover { background: var(--maroon); transform: translateY(-1px); }
-.install-app-icon { width: 1rem; height: 1rem; flex-shrink: 0; }
+.install-app-icon { width: 1.1rem; height: 1.1rem; flex-shrink: 0; }
 .install-app-hint {
     display: none;
-    position: absolute;
-    top: 3.3rem;
-    right: 1.2rem;
-    max-width: 16rem;
+    margin-top: .6rem;
+    max-width: 26rem;
     padding: .7rem .9rem;
     background: var(--paper);
     border: 1px solid var(--border);
     border-radius: 6px;
-    box-shadow: 0 4px 14px rgba(56, 41, 15, 0.15);
-    font-size: .85rem;
+    font-size: .9rem;
     line-height: 1.5;
-    text-align: left;
     color: var(--text);
-    z-index: 30;
 }
 .install-app-hint.is-visible { display: block; }
 .install-app-hint strong { color: var(--accent-dark); }
 
 @media (max-width: 640px) {
-    .install-app-btn { top: .7rem; right: .7rem; padding: .4rem .7rem; font-size: .78rem; }
-    .install-app-hint { top: 2.8rem; right: .7rem; max-width: calc(100vw - 2.4rem); }
+    .install-section { gap: .8rem; }
+    .install-section-icon { width: 3rem; height: 3rem; }
 }
 
 main {
