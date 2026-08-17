@@ -898,3 +898,7 @@ summary::marker { color: var(--gold); }
     font-weight: bold;
     white-space: nowrap;
 }
+
+@media (max-width: 640px) {
+    .topics-search-result { flex-direction: column; align-items: flex-start; gap: .2rem; }
+}
