@@ -16,21 +16,25 @@ from pathlib import Path
 
 # AlmaLinux 8 on the shared host ships SQLite 3.26, older than the 3.37
 # Django requires; swap in the bundled modern build where available.
+_SQLITE_CONNECTION_FACTORY = None
 try:
     import pysqlite3.dbapi2 as _pysqlite3_dbapi2
 
     # pysqlite3 doesn't expose sqlite3_limit(), which Django 6.1 calls for
-    # bulk_create batching and query logging. Report the standard SQLite
-    # compile-time defaults (unchanged in this build) instead.
+    # bulk_create batching and query logging. Connection is an immutable C
+    # type, so patch via a subclass (passed as the connect() factory below)
+    # reporting the standard SQLite compile-time defaults for the two
+    # categories Django actually queries.
     _SQLITE_LIMIT_DEFAULTS = {9: 32766, 2: 2000}  # VARIABLE_NUMBER, COLUMN
     for _name, _value in [('SQLITE_LIMIT_VARIABLE_NUMBER', 9), ('SQLITE_LIMIT_COLUMN', 2)]:
         if not hasattr(_pysqlite3_dbapi2, _name):
             setattr(_pysqlite3_dbapi2, _name, _value)
-    if not hasattr(_pysqlite3_dbapi2.Connection, 'getlimit'):
-        _pysqlite3_dbapi2.Connection.getlimit = (
-            lambda self, category: _SQLITE_LIMIT_DEFAULTS.get(category, -1)
-        )
 
+    class _PatchedConnection(_pysqlite3_dbapi2.Connection):
+        def getlimit(self, category):
+            return _SQLITE_LIMIT_DEFAULTS.get(category, -1)
+
+    _SQLITE_CONNECTION_FACTORY = _PatchedConnection
     sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 except ImportError:
     pass
@@ -106,6 +110,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        'OPTIONS': (
+            {'factory': _SQLITE_CONNECTION_FACTORY} if _SQLITE_CONNECTION_FACTORY else {}
+        ),
     }
 }
 
