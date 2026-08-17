@@ -1,0 +1,36 @@
+{% extends "library/base.html" %}
+{% block title %}{{ book.name_ru }} — Tora Online{% endblock %}
+{% block content %}
+<nav class="breadcrumbs">
+    <a href="{% url 'library:home' %}">← Оглавление</a>
+</nav>
+
+<p class="book-category-label">{{ book.category.name_ru }}</p>
+<h1>{{ book.name_ru }}{% if book.name_he %} <span class="he-label" dir="rtl">({{ book.name_he }})</span>{% endif %}</h1>
+{% if book.description_ru %}<p class="book-description">{{ book.description_ru }}</p>{% endif %}
+
+{% if chapters %}
+<a class="channel-link book-start-reading" href="{% url 'library:chapter' book.slug chapters.0 %}">Начать чтение →</a>
+
+<h2 class="book-section-heading">Главы</h2>
+<div class="nav-row">
+    {% for chapter in chapters %}
+    <a class="nav-btn" href="{% url 'library:chapter' book.slug chapter %}">{{ chapter }}</a>
+    {% endfor %}
+</div>
+{% else %}
+<p class="empty-note">Текст этой книги ещё не загружен.</p>
+{% endif %}
+
+{% if parashot %}
+<h2 class="book-section-heading">Недельные главы</h2>
+<ul class="parasha-list book-parasha-grid">
+    {% for parasha in parashot %}
+    <li>
+        <a href="{% url 'library:parasha' parasha.slug %}">{{ parasha.name_ru }}</a>
+        <span class="range">{{ parasha.start_verse }} — {{ parasha.end_verse }}</span>
+    </li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}

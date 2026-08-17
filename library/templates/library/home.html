@@ -8,56 +8,37 @@
     <details class="category-block" open>
         <summary class="category-summary">{{ cat.name_ru }}{% if cat.name_he %} <span class="he-label" dir="rtl">({{ cat.name_he }})</span>{% endif %}</summary>
 
-        {% for book in cat.own_books %}
-        <details class="book-entry">
-            <summary><strong>{{ book.name_ru }}</strong>{% if book.name_he %} <span class="he-label" dir="rtl">({{ book.name_he }})</span>{% endif %}</summary>
-            <div class="nav-row">
-                {% for chapter in book.chapters %}
-                <a class="nav-btn" href="{% url 'library:chapter' book.slug chapter %}">{{ chapter }}</a>
-                {% endfor %}
-            </div>
-        </details>
-        {% endfor %}
+        {% if cat.own_books %}
+        <div class="book-grid">
+            {% for book in cat.own_books %}
+            <a class="book-card" href="{% url 'library:book' book.slug %}">
+                <h3>{{ book.name_ru }}{% if book.name_he %} <span class="he-label" dir="rtl">({{ book.name_he }})</span>{% endif %}</h3>
+                {% if book.description_ru %}<p>{{ book.description_ru }}</p>{% endif %}
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
 
         {% for child in cat.child_categories %}
         <details class="subcategory-block" open>
             <summary class="subcategory-summary">{{ child.name_ru }}{% if child.name_he %} <span class="he-label" dir="rtl">({{ child.name_he }})</span>{% endif %}</summary>
-            {% for book in child.own_books %}
-            <details class="book-entry">
-                <summary><strong>{{ book.name_ru }}</strong>{% if book.name_he %} <span class="he-label" dir="rtl">({{ book.name_he }})</span>{% endif %}</summary>
-                <div class="nav-row">
-                    {% for chapter in book.chapters %}
-                    <a class="nav-btn" href="{% url 'library:chapter' book.slug chapter %}">{{ chapter }}</a>
-                    {% endfor %}
-                </div>
-            </details>
-            {% empty %}
+            {% if child.own_books %}
+            <div class="book-grid">
+                {% for book in child.own_books %}
+                <a class="book-card" href="{% url 'library:book' book.slug %}">
+                    <h3>{{ book.name_ru }}{% if book.name_he %} <span class="he-label" dir="rtl">({{ book.name_he }})</span>{% endif %}</h3>
+                    {% if book.description_ru %}<p>{{ book.description_ru }}</p>{% endif %}
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
             <p class="empty-note">Пока нет текстов.</p>
-            {% endfor %}
+            {% endif %}
         </details>
         {% endfor %}
     </details>
     {% empty %}
     <p>Разделы библиотеки ещё не загружены.</p>
-    {% endfor %}
-</section>
-
-<section class="nav-section">
-    <h2>По недельным главам (парашот)</h2>
-    {% for book, book_parashot in parasha_groups %}
-    <details class="book-entry" open>
-        <summary><strong>{{ book.name_ru }}</strong>{% if book.name_he %} <span class="he-label" dir="rtl">({{ book.name_he }})</span>{% endif %}</summary>
-        <ul class="parasha-list">
-            {% for parasha in book_parashot %}
-            <li>
-                <a href="{% url 'library:parasha' parasha.slug %}">{{ parasha.order }}. {{ parasha.name_ru }}</a>
-                <span class="range">{{ parasha.start_verse }} — {{ parasha.end_verse }}</span>
-            </li>
-            {% endfor %}
-        </ul>
-    </details>
-    {% empty %}
-    <p>Недельные главы ещё не загружены.</p>
     {% endfor %}
 </section>
 

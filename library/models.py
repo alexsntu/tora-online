@@ -35,6 +35,10 @@ class Book(models.Model):
     name_he = models.CharField("Название (иврит)", max_length=100, blank=True)
     slug = models.SlugField("Слаг (для ссылки)", unique=True)
     order = models.PositiveSmallIntegerField("Порядок", default=0)
+    description_ru = models.CharField(
+        "Краткое описание", max_length=255, blank=True,
+        help_text="Одна строка о содержании книги - показывается на главной, как на Sefaria",
+    )
 
     class Meta:
         ordering = ["order"]

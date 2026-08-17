@@ -101,7 +101,7 @@ class Command(BaseCommand):
                 ))
                 continue
 
-            name_ru, name_he, sefaria_name, order, category_slug = BOOKS[book_slug]
+            name_ru, name_he, sefaria_name, order, category_slug, description_ru = BOOKS[book_slug]
             category = Category.objects.get(slug=category_slug)
             book, _ = Book.objects.update_or_create(
                 slug=book_slug,
@@ -110,6 +110,7 @@ class Command(BaseCommand):
                     "name_he": name_he,
                     "order": order,
                     "category": category,
+                    "description_ru": description_ru,
                 },
             )
 

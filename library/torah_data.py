@@ -13,9 +13,12 @@ CATEGORIES = {
     "talmud": ("Талмуд", "תַּלְמוּד", None, 2),
 }
 
-# slug -> (name_ru, name_he, sefaria_name, order, category_slug)
+# slug -> (name_ru, name_he, sefaria_name, order, category_slug, description_ru)
 BOOKS = {
-    "bereshit": ("Берешит", "בְּרֵאשִׁית", "Genesis", 1, "torah"),
+    "bereshit": (
+        "Берешит", "בְּרֵאשִׁית", "Genesis", 1, "torah",
+        "Сотворение мира, начало человечества и истории праотцов и праматерей.",
+    ),
 }
 
 # slug -> (name_ru, name_he, order) — порядок сквозной по всей Торе (1..54)

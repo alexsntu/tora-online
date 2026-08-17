@@ -49,13 +49,6 @@ def attach_parasha_starts(verses, book):
 def home(request):
     categories = list(Category.objects.order_by("order"))
     books = list(Book.objects.select_related("category").order_by("order"))
-    for book in books:
-        book.chapters = list(
-            Verse.objects.filter(book=book)
-            .order_by("chapter")
-            .values_list("chapter", flat=True)
-            .distinct()
-        )
 
     books_by_category = {}
     for book in books:
@@ -71,27 +64,31 @@ def home(request):
 
     top_categories = children_by_parent.get(None, [])
 
-    parashot = list(
-        Parasha.objects.select_related("start_verse__book", "end_verse").order_by("order")
-    )
-    parashot_by_book_id = {}
-    for p in parashot:
-        parashot_by_book_id.setdefault(p.start_verse.book_id, []).append(p)
-
-    parasha_groups = [
-        (book, parashot_by_book_id[book.id])
-        for book in books
-        if book.id in parashot_by_book_id
-    ]
-
     return render(
         request,
         "library/home.html",
         {
             "top_categories": top_categories,
-            "parasha_groups": parasha_groups,
             "today": today_info(),
         },
+    )
+
+
+def book_view(request, book_slug):
+    """Страница книги (как на Sefaria): сетка глав + недельные главы этой книги."""
+    book = get_object_or_404(Book, slug=book_slug)
+    chapters = list(
+        Verse.objects.filter(book=book).order_by("chapter").values_list("chapter", flat=True).distinct()
+    )
+    parashot = list(
+        Parasha.objects.filter(start_verse__book=book)
+        .select_related("start_verse", "end_verse")
+        .order_by("order")
+    )
+    return render(
+        request,
+        "library/book.html",
+        {"book": book, "chapters": chapters, "parashot": parashot},
     )
 
 

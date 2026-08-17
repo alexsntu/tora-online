@@ -10,5 +10,6 @@ urlpatterns = [
     path("track/", views.track_event, name="track_event"),
     path("calendar/", views.calendar_view, name="calendar"),
     path("<slug:book_slug>/<int:chapter>/", views.chapter_view, name="chapter"),
+    path("<slug:book_slug>/", views.book_view, name="book"),
     path("parasha/<slug:parasha_slug>/", views.parasha_view, name="parasha"),
 ]
