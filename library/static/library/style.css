@@ -364,7 +364,7 @@ summary::marker { color: var(--gold); }
 .topics-chapter-marker a:hover { text-decoration: underline; }
 .topics-flow {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     align-items: start;
     gap: .6rem;
     margin: 0 0 1.2rem 0;
