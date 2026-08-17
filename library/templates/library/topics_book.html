@@ -21,8 +21,11 @@
         <div class="topics-flow">
             {% for entry in parasha_group.entries %}
             <button type="button" class="topic-entry" @click="open = (open === {{ entry.material.id }} ? null : {{ entry.material.id }})">
-                {{ entry.material.title }} <span class="topic-entry-verse">{{ entry.verse }}</span>
-                {% if entry.material.sages.all %}<span class="topic-entry-sage">{{ entry.material.sages.all|join:", " }}</span>{% endif %}
+                <span class="topic-entry-title">{{ entry.material.title }}</span>
+                <span class="topic-entry-meta">
+                    <span class="topic-entry-verse">{{ entry.verse }}</span>
+                    {% if entry.material.sages.all %}<span class="topic-entry-sage">{{ entry.material.sages.all|join:", " }}</span>{% endif %}
+                </span>
             </button>
             <div class="materials-panel topics-panel" x-show="open === {{ entry.material.id }}" x-cloak>
                 <div class="topics-panel-ref">

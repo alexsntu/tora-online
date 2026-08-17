@@ -439,6 +439,13 @@ summary::marker { color: var(--gold); }
     transition: background-color .12s ease, transform .12s ease;
 }
 .topic-entry:hover { background: var(--highlight); transform: translateY(-1px); }
+.topic-entry-title { flex: 1 1 auto; }
+.topic-entry-meta {
+    flex-shrink: 0;
+    display: flex;
+    align-items: baseline;
+    gap: .4rem;
+}
 .topic-entry-verse {
     flex-shrink: 0;
     color: var(--accent-dark);
@@ -452,6 +459,11 @@ summary::marker { color: var(--gold); }
     font-size: .78rem;
     font-style: italic;
     white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+    .topic-entry { flex-direction: column; align-items: flex-start; gap: .3rem; }
+    .topic-entry-meta { flex-wrap: wrap; }
 }
 .topics-panel { margin: -.3rem 0 1rem 0; }
 .topics-panel-ref { margin-bottom: .8rem; font-size: .85rem; }
