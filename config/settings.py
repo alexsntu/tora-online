@@ -17,7 +17,20 @@ from pathlib import Path
 # AlmaLinux 8 on the shared host ships SQLite 3.26, older than the 3.37
 # Django requires; swap in the bundled modern build where available.
 try:
-    __import__('pysqlite3')
+    import pysqlite3.dbapi2 as _pysqlite3_dbapi2
+
+    # pysqlite3 doesn't expose sqlite3_limit(), which Django 6.1 calls for
+    # bulk_create batching and query logging. Report the standard SQLite
+    # compile-time defaults (unchanged in this build) instead.
+    _SQLITE_LIMIT_DEFAULTS = {9: 32766, 2: 2000}  # VARIABLE_NUMBER, COLUMN
+    for _name, _value in [('SQLITE_LIMIT_VARIABLE_NUMBER', 9), ('SQLITE_LIMIT_COLUMN', 2)]:
+        if not hasattr(_pysqlite3_dbapi2, _name):
+            setattr(_pysqlite3_dbapi2, _name, _value)
+    if not hasattr(_pysqlite3_dbapi2.Connection, 'getlimit'):
+        _pysqlite3_dbapi2.Connection.getlimit = (
+            lambda self, category: _SQLITE_LIMIT_DEFAULTS.get(category, -1)
+        )
+
     sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 except ImportError:
     pass
