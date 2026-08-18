@@ -4,7 +4,7 @@ from django.urls import path
 from axes.admin import AccessAttemptAdmin, IsLockedOutFilter
 from axes.models import AccessAttempt
 
-from .models import AnalyticsEvent, Book, Category, Verse, Parasha, Material, Question, Sage, Topic
+from .models import AnalyticsEvent, Book, Category, Verse, Parasha, Material, ErrorReport, Question, Sage, Topic
 from .views import analytics_dashboard
 
 admin.site.site_header = "Tora Online — панель управления"
@@ -145,6 +145,19 @@ class QuestionAdmin(admin.ModelAdmin):
     @admin.display(description="Отвечен", boolean=True)
     def is_answered(self, obj):
         return obj.is_answered
+
+
+@admin.register(ErrorReport)
+class ErrorReportAdmin(admin.ModelAdmin):
+    list_display = ("description_preview", "page_url", "is_resolved", "created_at")
+    list_filter = ("is_resolved",)
+    search_fields = ("description", "page_url")
+    fields = ("description", "page_url", "created_at", "is_resolved")
+    readonly_fields = ("description", "page_url", "created_at")
+
+    @admin.display(description="Описание")
+    def description_preview(self, obj):
+        return obj.description[:80]
 
 
 @admin.register(AnalyticsEvent)

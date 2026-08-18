@@ -1,0 +1,13 @@
+<details class="report-error-widget">
+    <summary>Нашли ошибку? Сообщите нам</summary>
+    <form method="post" action="{% url 'library:report_error' %}" class="report-error-form">
+        {% csrf_token %}
+        <textarea name="description" rows="3" placeholder="Опишите, что не так…" required></textarea>
+        <input type="hidden" name="page_url" value="{{ request.path }}">
+        <div class="question-ask-honeypot" aria-hidden="true">
+            <label for="id_report_website">Сайт</label>
+            <input type="text" name="website" id="id_report_website" tabindex="-1" autocomplete="off">
+        </div>
+        <button type="submit" class="channel-link report-error-submit">Отправить</button>
+    </form>
+</details>

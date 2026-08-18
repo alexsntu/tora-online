@@ -46,6 +46,13 @@
         </a>
     </header>
     <main>
+        {% if messages %}
+        <ul class="site-messages">
+            {% for message in messages %}
+            <li class="site-message{% if message.tags %} site-message-{{ message.tags }}{% endif %}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
         {% block content %}{% endblock %}
     </main>
     <script>

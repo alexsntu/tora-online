@@ -246,3 +246,21 @@ class Question(models.Model):
         elif not self.answer:
             self.answered_at = None
         super().save(*args, **kwargs)
+
+
+class ErrorReport(models.Model):
+    """Сообщение об ошибке от посетителя (опечатка, неточность и т.п.),
+    отправляется прямо со страницы, где её заметили."""
+
+    description = models.TextField("Описание ошибки")
+    page_url = models.CharField("Страница", max_length=500, blank=True)
+    is_resolved = models.BooleanField("Обработано", default=False)
+    created_at = models.DateTimeField("Дата", auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "сообщение об ошибке"
+        verbose_name_plural = "Сообщения об ошибках"
+
+    def __str__(self):
+        return self.description[:60]

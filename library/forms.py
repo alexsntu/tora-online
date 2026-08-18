@@ -1,6 +1,6 @@
 from django import forms
 
-from .models import Question
+from .models import ErrorReport, Question
 
 
 class QuestionForm(forms.ModelForm):
@@ -21,3 +21,15 @@ class QuestionForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["asker_name"].required = True
+
+
+class ErrorReportForm(forms.ModelForm):
+    class Meta:
+        model = ErrorReport
+        fields = ["description"]
+        widgets = {
+            "description": forms.Textarea(attrs={"rows": 3, "placeholder": "Опишите, что не так…"}),
+        }
+        labels = {
+            "description": "Описание ошибки",
+        }

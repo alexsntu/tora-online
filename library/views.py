@@ -4,6 +4,7 @@ from itertools import groupby
 from pathlib import Path
 
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Count, Q
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
@@ -12,7 +13,7 @@ from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
-from .forms import QuestionForm
+from .forms import ErrorReportForm, QuestionForm
 from .hebrew_calendar import (
     GREGORIAN_MONTH_CHOICES,
     HEBREW_MONTH_CHOICES,
@@ -20,7 +21,7 @@ from .hebrew_calendar import (
     convert_hebrew_to_gregorian,
     today_info,
 )
-from .models import AnalyticsEvent, Book, Category, Material, Parasha, Question, Sage, Verse
+from .models import AnalyticsEvent, Book, Category, ErrorReport, Material, Parasha, Question, Sage, Verse
 
 
 def ru_plural(n, one, few, many):
@@ -467,3 +468,24 @@ def question_ask_view(request):
 
 def question_ask_done_view(request):
     return render(request, "library/question_ask_done.html")
+
+
+@require_POST
+def report_error_view(request):
+    page_url = request.POST.get("page_url", "")
+    fallback = page_url if page_url.startswith("/") and not page_url.startswith("//") else reverse("library:home")
+
+    if request.POST.get("website", "").strip():
+        # honeypot - для бота делаем вид, что всё прошло успешно, но ничего не сохраняем
+        return redirect(fallback)
+
+    form = ErrorReportForm(request.POST)
+    if form.is_valid():
+        report = form.save(commit=False)
+        report.page_url = page_url
+        report.save()
+        messages.success(request, "Спасибо! Сообщение об ошибке отправлено.")
+    else:
+        messages.error(request, "Не удалось отправить - опишите ошибку текстом.")
+
+    return redirect(fallback)

@@ -935,6 +935,15 @@ summary::marker { color: var(--gold); }
 .question-full { padding: .5rem 0; }
 .question-full-text { margin-bottom: .3rem; }
 .question-full-date { color: var(--accent-dark); font-size: .85rem; font-weight: bold; margin: 0 0 1rem 0; }
+.question-full-body {
+    padding: .9rem 1.1rem;
+    margin-bottom: 1rem;
+    background: var(--highlight);
+    border: 1px solid var(--highlight-border);
+    border-radius: 4px;
+    font-size: 1.05rem;
+    line-height: 1.6;
+}
 .question-full-answer {
     padding: 1rem 1.2rem;
     background: var(--paper);
@@ -1010,3 +1019,45 @@ summary::marker { color: var(--gold); }
 .qa-widget-item-meta { margin: 0 0 .3rem 0; font-size: .82rem; color: #8a7a55; }
 .qa-widget-item-excerpt { margin: 0; font-size: .95rem; color: #4a3d24; line-height: 1.5; }
 .qa-widget-empty { color: #4a3d24; }
+
+.site-messages { list-style: none; padding: 0; margin: 0 0 1.2rem 0; }
+.site-message {
+    padding: .7rem 1rem;
+    border-radius: 4px;
+    margin-bottom: .5rem;
+    font-size: .95rem;
+}
+.site-message-success { background: var(--highlight); border: 1px solid var(--highlight-border); color: var(--text); }
+.site-message-error { background: #fbe9e5; border: 1px solid #d99b8a; color: #7c3223; }
+
+.report-error-widget {
+    margin: 2rem 0 0 0;
+    padding: .8rem 1rem;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+}
+.report-error-widget summary {
+    cursor: pointer;
+    color: var(--accent-dark);
+    font-size: .9rem;
+}
+.report-error-form { display: flex; flex-direction: column; gap: .5rem; margin-top: .8rem; max-width: 32rem; }
+.report-error-form textarea {
+    padding: .6rem .8rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: #fff;
+    font-family: inherit;
+    font-size: .95rem;
+    color: var(--text);
+    resize: vertical;
+}
+.report-error-submit {
+    align-self: flex-start;
+    border: none;
+    font-family: inherit;
+    font-size: .9rem;
+    cursor: pointer;
+    padding: .5rem 1rem;
+}

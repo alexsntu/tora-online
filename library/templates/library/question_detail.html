@@ -8,8 +8,10 @@
 <div class="question-full">
     <h1 class="question-full-text">{{ question.display_title }}</h1>
     <p class="question-full-date">{{ question.answered_at|date:"d.m.Y" }}</p>
+    <div class="question-full-body">{{ question.text|linebreaksbr }}</div>
     <div class="question-full-answer">{{ question.answer|linebreaksbr }}</div>
 </div>
 
 <p style="margin-top: 1.5rem;"><a class="channel-link" href="{% url 'library:question_ask' %}">Задать свой вопрос →</a></p>
+{% include "library/_report_error.html" %}
 {% endblock %}

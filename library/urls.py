@@ -16,6 +16,7 @@ urlpatterns = [
     path("questions/ask/", views.question_ask_view, name="question_ask"),
     path("questions/ask/done/", views.question_ask_done_view, name="question_ask_done"),
     path("questions/<int:pk>/", views.question_detail_view, name="question_detail"),
+    path("report-error/", views.report_error_view, name="report_error"),
     path("track/", views.track_event, name="track_event"),
     path("calendar/", views.calendar_view, name="calendar"),
     path("<slug:book_slug>/<int:chapter>/", views.chapter_view, name="chapter"),
