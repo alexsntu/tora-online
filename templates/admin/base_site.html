@@ -1,0 +1,25 @@
+{% extends "admin/base_site.html" %}
+
+{% block branding %}
+{{ block.super }}
+{% if unresolved_errors_count %}
+<a href="{% url 'admin:library_errorreport_changelist' %}?is_resolved__exact=0" id="unresolved-errors-badge">
+    ⚠ Необработанных ошибок: {{ unresolved_errors_count }}
+</a>
+<style>
+#unresolved-errors-badge {
+    display: inline-block;
+    margin-left: 16px;
+    padding: 4px 12px;
+    background: #dc3545;
+    color: #fff;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: bold;
+    text-decoration: none;
+    vertical-align: middle;
+}
+#unresolved-errors-badge:hover { background: #b02a37; color: #fff; }
+</style>
+{% endif %}
+{% endblock %}

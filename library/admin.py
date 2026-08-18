@@ -33,6 +33,17 @@ def _index_with_question_badge(request, extra_context=None):
 
 admin.site.index = _index_with_question_badge
 
+_default_each_context = admin.site.each_context
+
+
+def _each_context_with_error_badge(request):
+    context = _default_each_context(request)
+    context["unresolved_errors_count"] = ErrorReport.objects.filter(is_resolved=False).count()
+    return context
+
+
+admin.site.each_context = _each_context_with_error_badge
+
 
 class _RuIsLockedOutFilter(IsLockedOutFilter):
     """axes не перевёл строку "Locked Out" в своём ru-каталоге - переопределяем."""
