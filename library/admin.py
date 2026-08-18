@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.http import JsonResponse
 from django.urls import path
 
 from axes.admin import AccessAttemptAdmin, IsLockedOutFilter
@@ -89,16 +90,40 @@ class ParashaAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("name_ru",)}
 
 
+def _verse_picker_data(request):
+    """Данные для виджета выбора стиха (Книга/Глава/Стих) на странице материала - см. admin-verse-picker.js."""
+    books = list(Book.objects.order_by("order").values("id", "name_ru"))
+    verses_by_book = {}
+    for book_id, chapter, verse_id, verse_num in Verse.objects.order_by(
+        "book", "chapter", "verse"
+    ).values_list("book_id", "chapter", "id", "verse"):
+        verses_by_book.setdefault(str(book_id), {}).setdefault(str(chapter), []).append(
+            [verse_id, verse_num]
+        )
+    return JsonResponse({"books": books, "verses": verses_by_book})
+
+
 @admin.register(Material)
 class MaterialAdmin(admin.ModelAdmin):
     list_display = ("title", "type", "created_at")
     list_filter = ("type", "sages")
     search_fields = ("title", "body")
-    filter_horizontal = ("verses",)
+    # verses - выбор через виджет Книга/Глава/Стих (см. admin-verse-picker.js), не filter_horizontal
     # sages - обычный select (не filter_horizontal), по просьбе пользователя
 
     class Media:
         css = {"all": ("library/admin-extra.css",)}
+        js = ("library/admin-verse-picker.js",)
+
+    def get_urls(self):
+        custom_urls = [
+            path(
+                "verse-picker-data.json/",
+                self.admin_site.admin_view(_verse_picker_data),
+                name="library_material_verse_picker_data",
+            ),
+        ]
+        return custom_urls + super().get_urls()
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         field = super().formfield_for_dbfield(db_field, request, **kwargs)

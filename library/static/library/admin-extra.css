@@ -7,3 +7,52 @@
 #id_sages {
     min-height: 8rem;
 }
+
+/* Материал: выбор стихов через Книга/Глава/Стих вместо длинного списка */
+.verse-picker-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+.verse-picker-controls select {
+    min-width: 10rem;
+}
+.verse-picker-chosen {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    max-width: 700px;
+}
+.verse-picker-chosen li {
+    background: #f3e8ce;
+    border: 1px solid #b4890f;
+    border-radius: 999px;
+    padding: 0.2rem 0.4rem 0.2rem 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.9em;
+}
+.verse-picker-chosen li.verse-picker-empty {
+    background: none;
+    border: none;
+    color: #777;
+    padding: 0.2rem 0;
+}
+.verse-picker-remove {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: #7c3223;
+    font-weight: bold;
+    line-height: 1;
+    padding: 0 0.2rem;
+}
+.verse-picker-remove:hover {
+    color: #b4231a;
+}
