@@ -9,7 +9,7 @@ class QuestionForm(forms.ModelForm):
         fields = ["text", "asker_name", "asker_email"]
         widgets = {
             "text": forms.Textarea(attrs={"rows": 5, "placeholder": "Введите ваш вопрос…"}),
-            "asker_name": forms.TextInput(attrs={"placeholder": "Необязательно"}),
+            "asker_name": forms.TextInput(attrs={"placeholder": "Как к вам обращаться"}),
             "asker_email": forms.EmailInput(attrs={"placeholder": "Необязательно, не публикуется"}),
         }
         labels = {
@@ -17,3 +17,7 @@ class QuestionForm(forms.ModelForm):
             "asker_name": "Ваше имя",
             "asker_email": "Email",
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["asker_name"].required = True
