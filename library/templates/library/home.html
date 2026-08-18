@@ -57,6 +57,21 @@
     <p style="margin-top: .8rem;"><a class="channel-link" href="{% url 'library:sages' %}">Открыть указатель →</a></p>
 </section>
 
+<section class="qa-widget">
+    <h2><a href="{% url 'library:questions' %}">Вопросы и ответы <span class="qa-widget-arrow">›</span></a></h2>
+    <div class="qa-widget-list">
+        {% for q in questions_preview %}
+        <a class="qa-widget-item" href="{% url 'library:question_detail' q.pk %}">
+            <p class="qa-widget-item-title">{{ q.display_title|truncatewords:16 }}</p>
+            <p class="qa-widget-item-meta">{{ q.answered_at|date:"d.m.Y" }}</p>
+            <p class="qa-widget-item-excerpt">{{ q.answer|truncatewords:20 }}</p>
+        </a>
+        {% empty %}
+        <p class="qa-widget-empty">Пока нет опубликованных вопросов — <a href="{% url 'library:question_ask' %}">задайте первый</a>.</p>
+        {% endfor %}
+    </div>
+</section>
+
 <section class="promo-section">
     <div class="promo-card">
         <h2>Наши каналы</h2>

@@ -1,0 +1,23 @@
+{% extends "library/base.html" %}
+{% block title %}Вопросы и ответы — Tora Online{% endblock %}
+{% block content %}
+<nav class="breadcrumbs">
+    <a href="{% url 'library:home' %}">← Оглавление</a>
+</nav>
+
+<h1>Вопросы и ответы</h1>
+<p class="topics-intro">Вопросы читателей и ответы автора. Есть свой вопрос?
+    <a href="{% url 'library:question_ask' %}">Задать вопрос →</a>
+</p>
+
+<div class="topics-flow">
+    {% for q in questions %}
+    <a class="question-card" href="{% url 'library:question_detail' q.pk %}">
+        <p class="question-card-text">{{ q.display_title|truncatewords:30 }}</p>
+        <span class="question-card-date">{{ q.answered_at|date:"d.m.Y" }}</span>
+    </a>
+    {% empty %}
+    <p>Пока нет опубликованных вопросов.</p>
+    {% endfor %}
+</div>
+{% endblock %}

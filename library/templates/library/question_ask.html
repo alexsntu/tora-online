@@ -1,0 +1,44 @@
+{% extends "library/base.html" %}
+{% block title %}Задать вопрос — Tora Online{% endblock %}
+{% block content %}
+<nav class="breadcrumbs">
+    <a href="{% url 'library:questions' %}">← Вопросы и ответы</a>
+</nav>
+
+<h1>Задать вопрос</h1>
+
+{% if form.non_field_errors %}
+<div class="date-convert-error">{{ form.non_field_errors|striptags }}</div>
+{% endif %}
+
+<form method="post" class="question-ask-form">
+    {% csrf_token %}
+    <label for="id_text">{{ form.text.label }}</label>
+    {{ form.text }}
+    {% if form.text.errors %}<p class="question-ask-error">{{ form.text.errors|striptags }}</p>{% endif %}
+
+    <label for="id_asker_name">{{ form.asker_name.label }}</label>
+    {{ form.asker_name }}
+
+    <label for="id_asker_email">{{ form.asker_email.label }}</label>
+    {{ form.asker_email }}
+    {% if form.asker_email.errors %}<p class="question-ask-error">{{ form.asker_email.errors|striptags }}</p>{% endif %}
+
+    <div class="question-ask-honeypot" aria-hidden="true">
+        <label for="id_website">Сайт</label>
+        <input type="text" name="website" id="id_website" tabindex="-1" autocomplete="off">
+    </div>
+
+    <label>Какая цифра здесь показана: <strong>{{ captcha_target }}</strong>?</label>
+    <div class="question-ask-captcha">
+        {% for opt in captcha_options %}
+        <label class="question-ask-captcha-option">
+            <input type="radio" name="captcha" value="{{ opt }}" required>
+            {{ opt }}
+        </label>
+        {% endfor %}
+    </div>
+
+    <button type="submit" class="channel-link question-ask-submit">Отправить вопрос</button>
+</form>
+{% endblock %}

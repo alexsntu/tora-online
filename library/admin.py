@@ -4,7 +4,7 @@ from django.urls import path
 from axes.admin import AccessAttemptAdmin, IsLockedOutFilter
 from axes.models import AccessAttempt
 
-from .models import AnalyticsEvent, Book, Category, Verse, Parasha, Material, Sage, Topic
+from .models import AnalyticsEvent, Book, Category, Verse, Parasha, Material, Question, Sage, Topic
 from .views import analytics_dashboard
 
 admin.site.site_header = "Tora Online — панель управления"
@@ -21,6 +21,17 @@ def _get_urls_with_analytics():
 
 
 admin.site.get_urls = _get_urls_with_analytics
+
+_default_index = admin.site.index
+
+
+def _index_with_question_badge(request, extra_context=None):
+    extra_context = extra_context or {}
+    extra_context["unanswered_questions_count"] = Question.objects.filter(answer="").count()
+    return _default_index(request, extra_context)
+
+
+admin.site.index = _index_with_question_badge
 
 
 class _RuIsLockedOutFilter(IsLockedOutFilter):
@@ -96,6 +107,44 @@ class TopicAdmin(admin.ModelAdmin):
     list_display = ("title", "slug")
     prepopulated_fields = {"slug": ("title",)}
     filter_horizontal = ("materials",)
+
+
+class QuestionStatusFilter(admin.SimpleListFilter):
+    title = "статус"
+    parameter_name = "status"
+
+    def lookups(self, request, model_admin):
+        return (
+            ("new", "Новые (без ответа)"),
+            ("answered", "Отвечены"),
+            ("published", "Опубликованы"),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == "new":
+            return queryset.filter(answer="")
+        if self.value() == "answered":
+            return queryset.exclude(answer="")
+        if self.value() == "published":
+            return queryset.filter(is_published=True)
+        return queryset
+
+
+@admin.register(Question)
+class QuestionAdmin(admin.ModelAdmin):
+    list_display = ("text_preview", "is_answered", "is_published", "created_at", "answered_at")
+    list_filter = (QuestionStatusFilter,)
+    search_fields = ("text", "answer", "asker_name", "asker_email")
+    fields = ("text", "asker_name", "asker_email", "created_at", "answer", "title", "is_published", "answered_at")
+    readonly_fields = ("asker_name", "asker_email", "created_at", "answered_at")
+
+    @admin.display(description="Вопрос")
+    def text_preview(self, obj):
+        return obj.display_title[:80]
+
+    @admin.display(description="Отвечен", boolean=True)
+    def is_answered(self, obj):
+        return obj.is_answered
 
 
 @admin.register(AnalyticsEvent)

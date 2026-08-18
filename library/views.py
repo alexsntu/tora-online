@@ -1,4 +1,5 @@
 import json
+import random
 from itertools import groupby
 from pathlib import Path
 
@@ -6,11 +7,12 @@ from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Count, Q
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
+from .forms import QuestionForm
 from .hebrew_calendar import (
     GREGORIAN_MONTH_CHOICES,
     HEBREW_MONTH_CHOICES,
@@ -18,7 +20,7 @@ from .hebrew_calendar import (
     convert_hebrew_to_gregorian,
     today_info,
 )
-from .models import AnalyticsEvent, Book, Category, Material, Parasha, Sage, Verse
+from .models import AnalyticsEvent, Book, Category, Material, Parasha, Question, Sage, Verse
 
 
 def ru_plural(n, one, few, many):
@@ -78,12 +80,15 @@ def home(request):
 
     top_categories = children_by_parent.get(None, [])
 
+    questions_preview = Question.objects.filter(is_published=True).exclude(answer="")[:3]
+
     return render(
         request,
         "library/home.html",
         {
             "top_categories": top_categories,
             "today": today_info(),
+            "questions_preview": questions_preview,
         },
     )
 
@@ -410,3 +415,55 @@ def calendar_view(request):
             "hy": request.GET.get("hy", ""),
         },
     )
+
+
+def questions_view(request):
+    """Вопросы и ответы: опубликованные вопросы по дате, новые сверху."""
+    questions = Question.objects.filter(is_published=True).exclude(answer="")
+    return render(request, "library/questions.html", {"questions": questions})
+
+
+def question_detail_view(request, pk):
+    question = get_object_or_404(Question, pk=pk, is_published=True)
+    return render(request, "library/question_detail.html", {"question": question})
+
+
+def _new_captcha(request):
+    target = random.randint(1, 9)
+    decoys = random.sample([n for n in range(1, 10) if n != target], 2)
+    options = [target] + decoys
+    random.shuffle(options)
+    request.session["question_captcha"] = target
+    return target, options
+
+
+def question_ask_view(request):
+    if request.method == "POST":
+        if request.POST.get("website", "").strip():
+            # honeypot - для бота делаем вид, что всё прошло успешно, но ничего не сохраняем
+            return redirect("library:question_ask_done")
+
+        form = QuestionForm(request.POST)
+        expected = request.session.get("question_captcha")
+        captcha_ok = expected is not None and request.POST.get("captcha") == str(expected)
+
+        if form.is_valid() and captcha_ok:
+            form.save()
+            request.session.pop("question_captcha", None)
+            return redirect("library:question_ask_done")
+
+        if not captcha_ok:
+            form.add_error(None, "Неверно выбрана цифра - попробуйте ещё раз.")
+    else:
+        form = QuestionForm()
+
+    target, options = _new_captcha(request)
+    return render(
+        request,
+        "library/question_ask.html",
+        {"form": form, "captcha_target": target, "captcha_options": options},
+    )
+
+
+def question_ask_done_view(request):
+    return render(request, "library/question_ask_done.html")

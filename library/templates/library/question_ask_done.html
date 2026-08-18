@@ -1,0 +1,10 @@
+{% extends "library/base.html" %}
+{% block title %}Вопрос отправлен — Tora Online{% endblock %}
+{% block content %}
+<nav class="breadcrumbs">
+    <a href="{% url 'library:questions' %}">← Вопросы и ответы</a>
+</nav>
+
+<h1>Спасибо!</h1>
+<p class="topics-intro">Ваш вопрос отправлен и будет рассмотрен. Как только на него ответят и опубликуют, он появится в разделе «Вопросы и ответы».</p>
+{% endblock %}

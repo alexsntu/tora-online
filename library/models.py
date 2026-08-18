@@ -205,3 +205,44 @@ class Sage(models.Model):
 
     def __str__(self):
         return self.name_ru
+
+
+class Question(models.Model):
+    """Вопрос от посетителя сайта автору. Отвечен = заполнено поле answer.
+    Опубликован = отдельная галочка is_published (показывается на /questions/)."""
+
+    text = models.TextField("Текст вопроса")
+    title = models.CharField(
+        "Заголовок (для публикации)", max_length=255, blank=True,
+        help_text="Показывается на сайте вместо текста вопроса - заполняется при публикации",
+    )
+    asker_name = models.CharField("Имя (не публикуется)", max_length=255, blank=True)
+    asker_email = models.EmailField("Email (не публикуется, для связи)", blank=True)
+    answer = models.TextField("Ответ", blank=True)
+    is_published = models.BooleanField("Опубликовать на сайте", default=False)
+    created_at = models.DateTimeField("Дата вопроса", auto_now_add=True)
+    answered_at = models.DateTimeField("Дата ответа", null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "вопрос"
+        verbose_name_plural = "Вопросы и ответы"
+
+    def __str__(self):
+        return self.title or self.text[:60]
+
+    @property
+    def is_answered(self):
+        return bool(self.answer)
+
+    @property
+    def display_title(self):
+        return self.title or self.text
+
+    def save(self, *args, **kwargs):
+        if self.answer and not self.answered_at:
+            from django.utils import timezone
+            self.answered_at = timezone.now()
+        elif not self.answer:
+            self.answered_at = None
+        super().save(*args, **kwargs)

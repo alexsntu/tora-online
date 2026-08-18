@@ -1,0 +1,12 @@
+{% extends "admin/index.html" %}
+
+{% block content %}
+{% if unanswered_questions_count %}
+<div class="module" style="margin-bottom: 20px; padding: 12px 18px; background: #fff3cd; border: 1px solid #ffe69c; border-radius: 4px;">
+    <a href="{% url 'admin:library_question_changelist' %}?status=new" style="font-weight: bold; text-decoration: none; color: #664d03;">
+        ⚠ Новых вопросов без ответа: {{ unanswered_questions_count }}
+    </a>
+</div>
+{% endif %}
+{{ block.super }}
+{% endblock %}
