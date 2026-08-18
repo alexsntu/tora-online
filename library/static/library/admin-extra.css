@@ -47,3 +47,8 @@
 .admin-picker-remove:hover {
     color: #b4231a;
 }
+.admin-picker-error {
+    color: #b4231a;
+    font-weight: bold;
+    margin: 0.5rem 0 0;
+}

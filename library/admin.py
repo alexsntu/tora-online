@@ -1,3 +1,4 @@
+from django import forms
 from django.contrib import admin
 from django.http import JsonResponse
 from django.urls import path
@@ -103,12 +104,27 @@ def _verse_picker_data(request):
     return JsonResponse({"books": books, "verses": verses_by_book})
 
 
+class MaterialForm(forms.ModelForm):
+    class Meta:
+        model = Material
+        fields = "__all__"
+
+    def clean_verses(self):
+        verses = self.cleaned_data.get("verses")
+        if not verses:
+            raise forms.ValidationError("Нужно выбрать хотя бы один стих, прежде чем сохранить материал.")
+        return verses
+
+
 @admin.register(Material)
 class MaterialAdmin(admin.ModelAdmin):
+    form = MaterialForm
     list_display = ("title", "type", "created_at")
     list_filter = ("type", "sages")
     search_fields = ("title", "body")
-    # verses - выбор через виджет Книга/Глава/Стих (см. admin-verse-picker.js), не filter_horizontal
+    # verses - выбор через виджет Книга/Глава/Стих (см. admin-verse-picker.js), не filter_horizontal;
+    # обязательность (хотя бы 1 стих) проверяется в MaterialForm.clean_verses, не через model.blank=False -
+    # required=True на самом (скрытом display:none) select дал бы невидимую браузерную HTML5-валидацию.
     # sages - выбор через виджет "выбрать + Добавить" (см. admin-sage-picker.js), не filter_horizontal/ctrl+click
 
     class Media:

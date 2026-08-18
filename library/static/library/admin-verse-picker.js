@@ -20,7 +20,8 @@
             '  <select class="verse-picker-verse" disabled><option value="">Стих…</option></select>' +
             '  <button type="button" class="verse-picker-add admin-picker-add button">Добавить</button>' +
             "</div>" +
-            '<ul class="admin-picker-chosen"></ul>';
+            '<ul class="admin-picker-chosen"></ul>' +
+            '<p class="admin-picker-error" style="display:none">Нужно выбрать хотя бы один стих.</p>';
         versesSelect.parentNode.insertBefore(wrapper, versesSelect);
 
         var bookSelect = wrapper.querySelector(".verse-picker-book");
@@ -28,6 +29,7 @@
         var verseSelect = wrapper.querySelector(".verse-picker-verse");
         var addBtn = wrapper.querySelector(".verse-picker-add");
         var chosenList = wrapper.querySelector(".admin-picker-chosen");
+        var errorMsg = wrapper.querySelector(".admin-picker-error");
 
         var DATA = null;
 
@@ -115,9 +117,24 @@
             var opt = versesSelect.querySelector('option[value="' + verseSelect.value + '"]');
             if (opt) {
                 opt.selected = true;
+                errorMsg.style.display = "none";
                 renderChosen();
             }
         });
+
+        var form = versesSelect.closest("form");
+        if (form) {
+            form.addEventListener("submit", function (e) {
+                var hasVerse = Array.prototype.some.call(versesSelect.options, function (opt) {
+                    return opt.selected;
+                });
+                if (!hasVerse) {
+                    e.preventDefault();
+                    errorMsg.style.display = "";
+                    wrapper.scrollIntoView({ block: "center" });
+                }
+            });
+        }
 
         renderChosen();
 
