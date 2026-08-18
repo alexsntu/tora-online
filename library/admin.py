@@ -109,11 +109,11 @@ class MaterialAdmin(admin.ModelAdmin):
     list_filter = ("type", "sages")
     search_fields = ("title", "body")
     # verses - выбор через виджет Книга/Глава/Стих (см. admin-verse-picker.js), не filter_horizontal
-    # sages - обычный select (не filter_horizontal), по просьбе пользователя
+    # sages - выбор через виджет "выбрать + Добавить" (см. admin-sage-picker.js), не filter_horizontal/ctrl+click
 
     class Media:
         css = {"all": ("library/admin-extra.css",)}
-        js = ("library/admin-verse-picker.js",)
+        js = ("library/admin-verse-picker.js", "library/admin-sage-picker.js")
 
     def get_urls(self):
         custom_urls = [
@@ -129,6 +129,9 @@ class MaterialAdmin(admin.ModelAdmin):
         field = super().formfield_for_dbfield(db_field, request, **kwargs)
         if db_field.name == "title":
             field.widget.attrs["style"] = "width: 95%; max-width: 900px; font-size: 1.1em;"
+        if db_field.name in ("verses", "sages"):
+            # выбор идёт через виджет "выбрать + Добавить" - подсказка про Ctrl/Command неактуальна
+            field.help_text = ""
         return field
 
 

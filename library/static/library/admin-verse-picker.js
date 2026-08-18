@@ -14,20 +14,20 @@
         var wrapper = document.createElement("div");
         wrapper.className = "verse-picker";
         wrapper.innerHTML =
-            '<div class="verse-picker-controls">' +
+            '<div class="admin-picker-controls">' +
             '  <select class="verse-picker-book"><option value="">Книга…</option></select>' +
             '  <select class="verse-picker-chapter" disabled><option value="">Глава…</option></select>' +
             '  <select class="verse-picker-verse" disabled><option value="">Стих…</option></select>' +
-            '  <button type="button" class="verse-picker-add button">Добавить</button>' +
+            '  <button type="button" class="verse-picker-add admin-picker-add button">Добавить</button>' +
             "</div>" +
-            '<ul class="verse-picker-chosen"></ul>';
+            '<ul class="admin-picker-chosen"></ul>';
         versesSelect.parentNode.insertBefore(wrapper, versesSelect);
 
         var bookSelect = wrapper.querySelector(".verse-picker-book");
         var chapterSelect = wrapper.querySelector(".verse-picker-chapter");
         var verseSelect = wrapper.querySelector(".verse-picker-verse");
         var addBtn = wrapper.querySelector(".verse-picker-add");
-        var chosenList = wrapper.querySelector(".verse-picker-chosen");
+        var chosenList = wrapper.querySelector(".admin-picker-chosen");
 
         var DATA = null;
 
@@ -54,7 +54,7 @@
                 li.appendChild(document.createTextNode(opt.text));
                 var rm = document.createElement("button");
                 rm.type = "button";
-                rm.className = "verse-picker-remove";
+                rm.className = "admin-picker-remove";
                 rm.textContent = "✕";
                 rm.title = "Убрать";
                 rm.addEventListener("click", function () {
@@ -66,7 +66,7 @@
             });
             if (!chosenList.children.length) {
                 var empty = document.createElement("li");
-                empty.className = "verse-picker-empty";
+                empty.className = "admin-picker-empty";
                 empty.textContent = "Стихи не выбраны";
                 chosenList.appendChild(empty);
             }
