@@ -14,6 +14,11 @@
         <input type="checkbox" class="filter-materials-checkbox">
         Показывать только стихи с комментариями <span class="filter-star">✦</span>
     </label>
+
+    <label class="filter-toggle">
+        <input type="checkbox" class="highlight-materials-checkbox">
+        Включить подсветку глав и стихов с комментариями <span class="filter-star">✦</span>
+    </label>
 </div>
 <script>
 (function () {
@@ -28,6 +33,7 @@
     var chapters = Object.keys(navData).map(Number).sort(function (a, b) { return a - b; });
     var activeChapter = Number(container.dataset.currentChapter) || chapters[0];
     var filterOn = false;
+    var highlightOn = false;
 
     function chapterHasMaterials(ch) {
         return (navData[ch] || []).some(function (pair) { return pair[1]; });
@@ -45,7 +51,7 @@
             btn.type = 'button';
             btn.className = 'nav-btn'
                 + (ch === activeChapter ? ' active' : '')
-                + (hasMaterials ? ' has-materials' : '');
+                + (hasMaterials && highlightOn ? ' has-materials' : '');
             btn.textContent = ch;
             if (hasMaterials) { btn.title = 'В этой главе есть комментарии'; }
             btn.addEventListener('click', function () {
@@ -61,7 +67,7 @@
             var hasMaterials = chapterHasMaterials(ch);
             var opt = document.createElement('option');
             opt.value = ch;
-            opt.textContent = (hasMaterials ? '✦ ' : '') + 'Глава ' + ch;
+            opt.textContent = (hasMaterials && highlightOn ? '✦ ' : '') + 'Глава ' + ch;
             if (ch === activeChapter) { opt.selected = true; }
             chaptersSelect.appendChild(opt);
         });
@@ -86,7 +92,7 @@
             var verse = pair[0], hasMaterials = pair[1];
             var btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'nav-btn' + (hasMaterials ? ' has-materials' : '');
+            btn.className = 'nav-btn' + (hasMaterials && highlightOn ? ' has-materials' : '');
             btn.textContent = verse;
             if (hasMaterials) { btn.title = 'Есть комментарий'; }
             btn.addEventListener('click', function () {
@@ -105,7 +111,7 @@
             var verse = pair[0], hasMaterials = pair[1];
             var opt = document.createElement('option');
             opt.value = verse;
-            opt.textContent = (hasMaterials ? '✦ ' : '') + 'Стих ' + verse;
+            opt.textContent = (hasMaterials && highlightOn ? '✦ ' : '') + 'Стих ' + verse;
             versesSelect.appendChild(opt);
         });
     }
@@ -145,6 +151,13 @@
             }
             marker.style.display = (filterOn && !hasVisible) ? 'none' : '';
         });
+    });
+
+    var highlightCheckbox = container.querySelector('.highlight-materials-checkbox');
+    highlightCheckbox.addEventListener('change', function () {
+        highlightOn = this.checked;
+        renderChapters();
+        renderVerses();
     });
 })();
 </script>
