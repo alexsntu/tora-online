@@ -116,11 +116,128 @@ class MaterialForm(forms.ModelForm):
         return verses
 
 
+def _format_verse_refs(verses):
+    """Группирует стихи материала в компактную ссылку вида "Берешит 1:26-27; Шмот 2:3" для колонки в списке."""
+    groups = {}
+    order_by_group = {}
+    for v in verses:
+        key = (v.book_id, v.chapter)
+        groups.setdefault(key, []).append(v.verse)
+        order_by_group[key] = (v.book.order, v.book.name_ru, v.chapter)
+
+    parts = []
+    for key in sorted(groups, key=lambda k: order_by_group[k]):
+        _, book_name, chapter = order_by_group[key]
+        nums = sorted(set(groups[key]))
+        ranges = []
+        start = prev = nums[0]
+        for n in nums[1:]:
+            if n == prev + 1:
+                prev = n
+                continue
+            ranges.append((start, prev))
+            start = prev = n
+        ranges.append((start, prev))
+        range_str = ", ".join(str(a) if a == b else f"{a}-{b}" for a, b in ranges)
+        parts.append(f"{book_name} {chapter}:{range_str}")
+    return "; ".join(parts)
+
+
+class MaterialBookFilter(admin.SimpleListFilter):
+    title = "Книга"
+    parameter_name = "book"
+
+    def lookups(self, request, model_admin):
+        book_ids = Material.objects.filter(verses__isnull=False).values_list("verses__book_id", flat=True).distinct()
+        books = Book.objects.filter(id__in=book_ids).order_by("order")
+        return [(b.id, b.name_ru) for b in books]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(verses__book_id=self.value()).distinct()
+        return queryset
+
+    def choices(self, changelist):
+        yield {
+            "selected": self.value() is None,
+            "query_string": changelist.get_query_string(remove=[self.parameter_name, "chapter", "verse"]),
+            "display": "Все",
+        }
+        for lookup, title in self.lookup_choices:
+            yield {
+                "selected": str(self.value()) == str(lookup),
+                "query_string": changelist.get_query_string({self.parameter_name: lookup}, remove=["chapter", "verse"]),
+                "display": title,
+            }
+
+
+class MaterialChapterFilter(admin.SimpleListFilter):
+    title = "Глава"
+    parameter_name = "chapter"
+
+    def lookups(self, request, model_admin):
+        book_id = request.GET.get("book")
+        if not book_id:
+            return []
+        chapters = (
+            Material.objects.filter(verses__book_id=book_id)
+            .values_list("verses__chapter", flat=True)
+            .distinct()
+            .order_by("verses__chapter")
+        )
+        return [(c, str(c)) for c in chapters]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(verses__chapter=self.value()).distinct()
+        return queryset
+
+    def choices(self, changelist):
+        yield {
+            "selected": self.value() is None,
+            "query_string": changelist.get_query_string(remove=[self.parameter_name, "verse"]),
+            "display": "Все",
+        }
+        for lookup, title in self.lookup_choices:
+            yield {
+                "selected": str(self.value()) == str(lookup),
+                "query_string": changelist.get_query_string({self.parameter_name: lookup}, remove=["verse"]),
+                "display": title,
+            }
+
+
+class MaterialVerseFilter(admin.SimpleListFilter):
+    title = "Стих"
+    parameter_name = "verse"
+
+    def lookups(self, request, model_admin):
+        book_id = request.GET.get("book")
+        chapter = request.GET.get("chapter")
+        if not book_id or not chapter:
+            return []
+        verse_nums = (
+            Material.objects.filter(verses__book_id=book_id, verses__chapter=chapter)
+            .values_list("verses__verse", flat=True)
+            .distinct()
+            .order_by("verses__verse")
+        )
+        return [(v, str(v)) for v in verse_nums]
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(
+                verses__book_id=request.GET.get("book"),
+                verses__chapter=request.GET.get("chapter"),
+                verses__verse=self.value(),
+            ).distinct()
+        return queryset
+
+
 @admin.register(Material)
 class MaterialAdmin(admin.ModelAdmin):
     form = MaterialForm
-    list_display = ("title", "type", "created_at")
-    list_filter = ("type", "sages")
+    list_display = ("title", "type", "verses_display", "created_at")
+    list_filter = ("type", MaterialBookFilter, MaterialChapterFilter, MaterialVerseFilter, "sages")
     search_fields = ("title", "body")
     # verses - выбор через виджет Книга/Глава/Стих (см. admin-verse-picker.js), не filter_horizontal;
     # обязательность (хотя бы 1 стих) проверяется в MaterialForm.clean_verses, не через model.blank=False -
@@ -140,6 +257,13 @@ class MaterialAdmin(admin.ModelAdmin):
             ),
         ]
         return custom_urls + super().get_urls()
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related("verses__book")
+
+    @admin.display(description="Стихи")
+    def verses_display(self, obj):
+        return _format_verse_refs(obj.verses.all()) or "—"
 
     def formfield_for_dbfield(self, db_field, request, **kwargs):
         field = super().formfield_for_dbfield(db_field, request, **kwargs)
