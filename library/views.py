@@ -219,10 +219,14 @@ def _search_materials(query):
     (имя мудреца НЕ участвует в поиске - по просьбе пользователя).
 
     SQLite LIKE (а значит и icontains) не умеет игнорировать регистр для кириллицы -
-    поэтому сравнение делаем в Python через .lower()."""
+    поэтому фильтруем по title_lower/body_lower (кешируются в Material.save()), уже
+    приведённым к нижнему регистру, вместо загрузки всех материалов и сравнения в Python."""
     query = query.lower()
-    materials = Material.objects.all().distinct().prefetch_related("verses__book", "sages")
-    return [m for m in materials if query in m.title.lower() or query in m.body.lower()]
+    return list(
+        Material.objects.filter(Q(title_lower__icontains=query) | Q(body_lower__icontains=query))
+        .distinct()
+        .prefetch_related("verses__book", "sages")
+    )
 
 
 def _search_entries(query):

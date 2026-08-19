@@ -111,6 +111,12 @@ class Material(models.Model):
     )
     created_at = models.DateTimeField("Дата создания", auto_now_add=True)
 
+    # Закешированные lower()-версии title/body - чтобы поиск (_search_materials в views.py)
+    # фильтровал на уровне БД (icontains), а не грузил все материалы и сравнивал в Python
+    # (SQLite icontains не регистронезависим для кириллицы, отсюда и .lower() на записи).
+    title_lower = models.CharField(max_length=255, editable=False, blank=True)
+    body_lower = models.TextField(editable=False, blank=True)
+
     class Meta:
         ordering = ["-created_at"]
         verbose_name = "материал"
@@ -118,6 +124,11 @@ class Material(models.Model):
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        self.title_lower = self.title.lower()
+        self.body_lower = self.body.lower()
+        super().save(*args, **kwargs)
 
     @property
     def youtube_embed_url(self):
