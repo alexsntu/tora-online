@@ -9,6 +9,8 @@
     --highlight: #f5dd9a;
     --highlight-border: #c1860f;
     --border: #ddc998;
+    --verse-highlight: #eceae5;
+    --verse-highlight-border: #b3b0a8;
 
     --font-hebrew: "Frank Ruhl Libre", Georgia, serif;
     --font-display: "Frank Ruhl Libre", Georgia, serif;
@@ -729,8 +731,8 @@ summary::marker { color: var(--gold); }
 
 .has-materials {
     cursor: pointer;
-    background: var(--highlight);
-    border-left: 3px solid var(--highlight-border);
+    background: var(--verse-highlight);
+    border-left: 3px solid var(--verse-highlight-border);
     border-radius: 3px;
     margin-bottom: .5rem;
 }
