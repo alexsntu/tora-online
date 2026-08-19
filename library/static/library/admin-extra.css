@@ -53,6 +53,43 @@
     margin: 0.5rem 0 0;
 }
 
+.sage-picker-list {
+    min-width: 16rem;
+    max-width: 22rem;
+    max-height: 11rem;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.sage-picker-item {
+    padding: 0.3rem 0.6rem;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    user-select: none;
+}
+.sage-picker-item:last-child {
+    border-bottom: none;
+}
+.sage-picker-item:hover {
+    background: #f2ede0;
+}
+.sage-picker-item.selected {
+    background: #e8dcc0;
+}
+.sage-picker-item.sage-picker-empty {
+    color: #777;
+    cursor: default;
+}
+.sage-picker-item.sage-picker-empty:hover {
+    background: none;
+}
+.sage-picker-hint {
+    font-size: 0.82em;
+    color: #777;
+    margin: 0 0 0.6rem;
+}
+
 .material-page-size {
     display: flex;
     align-items: center;

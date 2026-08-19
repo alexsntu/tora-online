@@ -11,24 +11,52 @@
         wrapper.className = "sage-picker";
         wrapper.innerHTML =
             '<div class="admin-picker-controls">' +
-            '  <select class="sage-picker-select"><option value="">Мудрец…</option></select>' +
+            '  <div class="sage-picker-list" role="listbox" tabindex="0"></div>' +
             '  <button type="button" class="sage-picker-add admin-picker-add button">Добавить</button>' +
             "</div>" +
+            '<p class="sage-picker-hint">Дважды щёлкните по имени, чтобы сразу добавить мудреца</p>' +
             '<ul class="admin-picker-chosen"></ul>';
         sagesSelect.parentNode.insertBefore(wrapper, sagesSelect);
 
-        var sagePickerSelect = wrapper.querySelector(".sage-picker-select");
+        var availableList = wrapper.querySelector(".sage-picker-list");
         var addBtn = wrapper.querySelector(".sage-picker-add");
         var chosenList = wrapper.querySelector(".admin-picker-chosen");
+        var highlightedOpt = null;
 
-        Array.prototype.forEach.call(sagesSelect.options, function (opt) {
-            var picked = document.createElement("option");
-            picked.value = opt.value;
-            picked.textContent = opt.text;
-            sagePickerSelect.appendChild(picked);
-        });
+        function addSage(opt) {
+            if (!opt) return;
+            opt.selected = true;
+            highlightedOpt = null;
+            render();
+        }
 
-        function renderChosen() {
+        function render() {
+            // Доступные для выбора - список
+            availableList.innerHTML = "";
+            Array.prototype.forEach.call(sagesSelect.options, function (opt) {
+                if (opt.selected) return;
+                var item = document.createElement("div");
+                item.className = "sage-picker-item";
+                item.textContent = opt.text;
+                item.setAttribute("role", "option");
+                if (opt === highlightedOpt) item.classList.add("selected");
+                item.addEventListener("click", function () {
+                    highlightedOpt = opt;
+                    render();
+                });
+                item.addEventListener("dblclick", function () {
+                    addSage(opt);
+                });
+                availableList.appendChild(item);
+            });
+            if (!availableList.children.length) {
+                var empty = document.createElement("div");
+                empty.className = "sage-picker-item sage-picker-empty";
+                empty.textContent = "Все мудрецы выбраны";
+                availableList.appendChild(empty);
+            }
+
+            // Уже выбранные - список с удалением
             chosenList.innerHTML = "";
             Array.prototype.forEach.call(sagesSelect.options, function (opt) {
                 if (!opt.selected) return;
@@ -41,29 +69,23 @@
                 rm.title = "Убрать";
                 rm.addEventListener("click", function () {
                     opt.selected = false;
-                    renderChosen();
+                    render();
                 });
                 li.appendChild(rm);
                 chosenList.appendChild(li);
             });
             if (!chosenList.children.length) {
-                var empty = document.createElement("li");
-                empty.className = "admin-picker-empty";
-                empty.textContent = "Мудрецы не выбраны";
-                chosenList.appendChild(empty);
+                var emptyChosen = document.createElement("li");
+                emptyChosen.className = "admin-picker-empty";
+                emptyChosen.textContent = "Мудрецы не выбраны";
+                chosenList.appendChild(emptyChosen);
             }
         }
 
         addBtn.addEventListener("click", function () {
-            if (!sagePickerSelect.value) return;
-            var opt = sagesSelect.querySelector('option[value="' + sagePickerSelect.value + '"]');
-            if (opt) {
-                opt.selected = true;
-                renderChosen();
-            }
-            sagePickerSelect.value = "";
+            addSage(highlightedOpt);
         });
 
-        renderChosen();
+        render();
     });
 })();
