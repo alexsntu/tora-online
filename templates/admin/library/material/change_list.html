@@ -1,0 +1,15 @@
+{% extends "admin/change_list.html" %}
+
+{% block pagination %}
+  <div class="material-page-size">
+    <span>Показывать по:</span>
+    {% for size in material_page_sizes %}
+      {% if size == material_current_page_size %}
+        <strong>{{ size }}</strong>
+      {% else %}
+        <a href="{% querystring list_per_page=size p=None %}">{{ size }}</a>
+      {% endif %}
+    {% endfor %}
+  </div>
+  {{ block.super }}
+{% endblock %}

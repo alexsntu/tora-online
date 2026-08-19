@@ -52,3 +52,25 @@
     font-weight: bold;
     margin: 0.5rem 0 0;
 }
+
+.material-page-size {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0;
+    font-size: 0.85rem;
+    color: #444;
+}
+.material-page-size a {
+    padding: 0.1rem 0.45rem;
+    border-radius: 3px;
+}
+.material-page-size a:hover {
+    background: #f2ede0;
+}
+.material-page-size strong {
+    padding: 0.1rem 0.45rem;
+    border-radius: 3px;
+    background: #7c3223;
+    color: #fff;
+}

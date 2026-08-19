@@ -233,12 +233,17 @@ class MaterialVerseFilter(admin.SimpleListFilter):
         return queryset
 
 
+MATERIAL_PAGE_SIZES = (10, 25, 50)
+
+
 @admin.register(Material)
 class MaterialAdmin(admin.ModelAdmin):
     form = MaterialForm
+    change_list_template = "admin/library/material/change_list.html"
     list_display = ("title", "type", "verses_display", "created_at")
     list_filter = ("type", MaterialBookFilter, MaterialChapterFilter, MaterialVerseFilter, "sages")
     search_fields = ("title", "body")
+    list_per_page = MATERIAL_PAGE_SIZES[1]  # 25 по умолчанию
     # verses - выбор через виджет Книга/Глава/Стих (см. admin-verse-picker.js), не filter_horizontal;
     # обязательность (хотя бы 1 стих) проверяется в MaterialForm.clean_verses, не через model.blank=False -
     # required=True на самом (скрытом display:none) select дал бы невидимую браузерную HTML5-валидацию.
@@ -247,6 +252,28 @@ class MaterialAdmin(admin.ModelAdmin):
     class Media:
         css = {"all": ("library/admin-extra.css",)}
         js = ("library/admin-verse-picker.js", "library/admin-sage-picker.js")
+
+    def changelist_view(self, request, extra_context=None):
+        # list_per_page переопределяется на инстансе (singleton ModelAdmin) из query-параметра -
+        # безопасно в рамках одного request/response цикла, значение пересчитывается заново на каждый запрос.
+        try:
+            per_page = int(request.GET.get("list_per_page", self.list_per_page))
+        except (TypeError, ValueError):
+            per_page = self.list_per_page
+        if per_page not in MATERIAL_PAGE_SIZES:
+            per_page = MATERIAL_PAGE_SIZES[1]
+        self.list_per_page = per_page
+
+        # ChangeList трактует любой незнакомый GET-параметр как lookup по полю модели
+        # (FieldError) - list_per_page не поле, поэтому убираем его из GET до вызова super().
+        if "list_per_page" in request.GET:
+            request.GET = request.GET.copy()
+            del request.GET["list_per_page"]
+
+        extra_context = extra_context or {}
+        extra_context["material_page_sizes"] = MATERIAL_PAGE_SIZES
+        extra_context["material_current_page_size"] = per_page
+        return super().changelist_view(request, extra_context=extra_context)
 
     def get_urls(self):
         custom_urls = [
