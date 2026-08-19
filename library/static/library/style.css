@@ -789,8 +789,9 @@ summary::marker { color: var(--gold); }
 
 [x-cloak] { display: none !important; }
 
-.material { margin-bottom: 1rem; }
-.material:last-child { margin-bottom: 0; }
+.material { margin-bottom: 1rem; padding-bottom: 1rem; }
+.material:last-child { margin-bottom: 0; padding-bottom: 0; }
+.material:not(:last-child) { border-bottom: 1px solid var(--highlight-border); }
 .material h3 { margin: 0 0 .4rem 0; font-family: var(--font-display); font-size: 1.05rem; color: var(--maroon); }
 .material-sages { margin: 0 0 .5rem 0; font-size: .82rem; color: #8a7a55; }
 .material-sages a { color: var(--accent-dark); }
