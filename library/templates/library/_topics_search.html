@@ -4,7 +4,7 @@
         results: [],
         open: false,
         fetchResults() {
-            if (this.q.trim().length < 2) { this.results = []; this.open = false; return; }
+            if (this.q.trim().length < 3) { this.results = []; this.open = false; return; }
             fetch('{% url 'library:topics_search_json' %}?q=' + encodeURIComponent(this.q))
                 .then(r => r.json())
                 .then(data => { this.results = data.results; this.open = true; });

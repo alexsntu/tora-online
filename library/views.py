@@ -251,7 +251,7 @@ def topics_search_json_view(request):
     """Живой поиск (для выпадающей подсказки): те же данные в JSON, максимум 8 совпадений."""
     query = request.GET.get("q", "").strip()
     results = []
-    if len(query) >= 2:
+    if len(query) >= 3:
         for entry in _search_entries(query)[:8]:
             v, m = entry["verse"], entry["material"]
             url = reverse("library:chapter", args=[v.book.slug, v.chapter]) + f"#v-{v.chapter}-{v.verse}"
