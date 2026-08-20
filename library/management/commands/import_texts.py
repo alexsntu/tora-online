@@ -184,10 +184,11 @@ class Command(BaseCommand):
                 ))
             he_by_chapter[chapter] = he_verses
 
-        slivniak_cache_dir = TEXTS_RU_SLIVNIAK_CACHE_DIR / book.slug
         slivniak_by_chapter = {}
-        for chapter in chapters_needed:
-            slivniak_by_chapter[chapter] = fetch_slivniak_chapter(sefaria_name, chapter, slivniak_cache_dir)
+        if book.category.slug == "torah":
+            slivniak_cache_dir = TEXTS_RU_SLIVNIAK_CACHE_DIR / book.slug
+            for chapter in chapters_needed:
+                slivniak_by_chapter[chapter] = fetch_slivniak_chapter(sefaria_name, chapter, slivniak_cache_dir)
 
         rashi_cache_dir = TEXTS_HE_CACHE_DIR / book.slug / "rashi"
         rashi_found = 0
@@ -229,22 +230,27 @@ class Command(BaseCommand):
         verse_objs.sort(key=lambda v: (v.chapter, v.verse))
         start_verse, end_verse = verse_objs[0], verse_objs[-1]
 
-        name_ru, name_he, order = PARASHOT.get(
-            parasha_slug, (parasha_slug.replace("-", " ").title(), "", 0)
-        )
-        Parasha.objects.update_or_create(
-            slug=parasha_slug,
-            defaults={
-                "name_ru": name_ru,
-                "name_he": name_he,
-                "order": order,
-                "start_verse": start_verse,
-                "end_verse": end_verse,
-            },
-        )
+        # Недельные главы (Parasha) - только у Торы; у остальных книг Танаха (Невиим, Ктувим)
+        # такого деления нет, поэтому для них Parasha не создаётся.
+        parasha_note = ""
+        if book.category.slug == "torah":
+            name_ru, name_he, order = PARASHOT.get(
+                parasha_slug, (parasha_slug.replace("-", " ").title(), "", 0)
+            )
+            Parasha.objects.update_or_create(
+                slug=parasha_slug,
+                defaults={
+                    "name_ru": name_ru,
+                    "name_he": name_he,
+                    "order": order,
+                    "start_verse": start_verse,
+                    "end_verse": end_verse,
+                },
+            )
+            parasha_note = f", недельная глава '{name_ru}'"
 
         self.stdout.write(self.style.SUCCESS(
             f"{txt_file.name}: импортировано {len(verse_objs)} стихов "
-            f"({start_verse} — {end_verse}), недельная глава '{name_ru}', "
+            f"({start_verse} — {end_verse}){parasha_note}, "
             f"Раши найден к {rashi_found} стихам, перевод Сливняка найден к {slivniak_found} стихам"
         ))
