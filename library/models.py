@@ -1,5 +1,10 @@
+import io
 import re
+from pathlib import Path
 
+from PIL import Image
+
+from django.core.files.base import ContentFile
 from django.db import models
 
 YOUTUBE_ID_RE = re.compile(r"(?:v=|youtu\.be/|embed/)([A-Za-z0-9_-]{11})")
@@ -360,3 +365,14 @@ class WeeklyPost(models.Model):
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        if self.image and not self.image.name.lower().endswith(".webp"):
+            img = Image.open(self.image)
+            img = img.convert("RGBA" if img.mode in ("RGBA", "LA", "P") else "RGB")
+            img.thumbnail((1200, 1200))
+            buffer = io.BytesIO()
+            img.save(buffer, format="WEBP", quality=85)
+            webp_name = Path(self.image.name).stem + ".webp"
+            self.image.save(webp_name, ContentFile(buffer.getvalue()), save=False)
+        super().save(*args, **kwargs)
