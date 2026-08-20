@@ -326,10 +326,17 @@ h1 { font-family: var(--font-display); color: var(--maroon); }
     transition: background-color .12s ease, transform .12s ease;
 }
 .weekly-post-link-btn:hover { background: #f2ede0; color: var(--maroon); transform: translateY(-1px); }
+.weekly-post-link-icon { width: 18px; height: 18px; flex-shrink: 0; }
 
 @media (min-width: 641px) {
     .weekly-post-inner { flex-direction: row; align-items: stretch; gap: 1.4rem; }
-    .weekly-post-image { width: 300px; height: auto; flex: 0 0 300px; }
+    .weekly-post-image {
+        width: 380px;
+        height: auto;
+        flex: 0 0 380px;
+        object-fit: contain;
+        background: var(--bg);
+    }
     .weekly-post-content { flex: 1 1 auto; justify-content: center; }
 }
 

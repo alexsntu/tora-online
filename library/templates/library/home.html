@@ -15,9 +15,24 @@
             <button type="button" class="weekly-post-toggle" @click="expanded = !expanded" x-text="expanded ? 'Свернуть ▲' : 'Читать полностью ▼'"></button>
             {% if weekly_post.url_youtube or weekly_post.url_rutube or weekly_post.url_vk %}
             <div class="weekly-post-links">
-                {% if weekly_post.url_youtube %}<a class="weekly-post-link-btn" href="{{ weekly_post.url_youtube }}" target="_blank" rel="noopener">▶ YouTube</a>{% endif %}
-                {% if weekly_post.url_rutube %}<a class="weekly-post-link-btn" href="{{ weekly_post.url_rutube }}" target="_blank" rel="noopener">▶ RuTube</a>{% endif %}
-                {% if weekly_post.url_vk %}<a class="weekly-post-link-btn" href="{{ weekly_post.url_vk }}" target="_blank" rel="noopener">▶ VK Видео</a>{% endif %}
+                {% if weekly_post.url_youtube %}
+                <a class="weekly-post-link-btn" href="{{ weekly_post.url_youtube }}" target="_blank" rel="noopener">
+                    <svg class="weekly-post-link-icon" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#FF0000"/><path d="M10 8.3v7.4l6.3-3.7z" fill="#fff"/></svg>
+                    YouTube
+                </a>
+                {% endif %}
+                {% if weekly_post.url_rutube %}
+                <a class="weekly-post-link-btn" href="{{ weekly_post.url_rutube }}" target="_blank" rel="noopener">
+                    <svg class="weekly-post-link-icon" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#EB4C22"/><path d="M10 8.3v7.4l6.3-3.7z" fill="#fff"/></svg>
+                    RuTube
+                </a>
+                {% endif %}
+                {% if weekly_post.url_vk %}
+                <a class="weekly-post-link-btn" href="{{ weekly_post.url_vk }}" target="_blank" rel="noopener">
+                    <svg class="weekly-post-link-icon" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#0077FF"/><text x="12" y="16.5" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#fff" text-anchor="middle">VK</text></svg>
+                    VK Видео
+                </a>
+                {% endif %}
             </div>
             {% endif %}
         </div>
