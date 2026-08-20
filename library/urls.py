@@ -19,6 +19,7 @@ urlpatterns = [
     path("report-error/", views.report_error_view, name="report_error"),
     path("track/", views.track_event, name="track_event"),
     path("calendar/", views.calendar_view, name="calendar"),
+    path("info/", views.info_view, name="info"),
     path("<slug:book_slug>/<int:chapter>/", views.chapter_view, name="chapter"),
     path("<slug:book_slug>/", views.book_view, name="book"),
     path("parasha/<slug:parasha_slug>/", views.parasha_view, name="parasha"),

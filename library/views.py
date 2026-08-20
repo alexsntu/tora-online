@@ -422,6 +422,53 @@ def calendar_view(request):
     )
 
 
+def info_view(request):
+    return render(request, "library/info.html", {"title": "О портале"})
+
+
+def robots_txt_view(request):
+    lines = [
+        "User-agent: *",
+        "Allow: /",
+        f"Sitemap: {request.build_absolute_uri(reverse('sitemap'))}",
+    ]
+    return HttpResponse("\n".join(lines), content_type="text/plain")
+
+
+def sitemap_xml_view(request):
+    """Простая карта сайта (без django.contrib.sitemaps - список URL невелик
+    и не меняется настолько часто, чтобы городить отдельное приложение)."""
+    url_names = ["home", "topics", "sages", "questions", "calendar", "info"]
+    paths = [reverse(f"library:{name}") for name in url_names]
+
+    for book in Book.objects.all():
+        paths.append(reverse("library:book", args=[book.slug]))
+        chapters = (
+            Verse.objects.filter(book=book).order_by("chapter").values_list("chapter", flat=True).distinct()
+        )
+        for chapter in chapters:
+            paths.append(reverse("library:chapter", args=[book.slug, chapter]))
+
+    for parasha in Parasha.objects.all():
+        paths.append(reverse("library:parasha", args=[parasha.slug]))
+
+    books_with_materials = Book.objects.annotate(materials_count=Count("verses__materials", distinct=True)).filter(
+        materials_count__gt=0
+    )
+    for book in books_with_materials:
+        paths.append(reverse("library:topics_book", args=[book.slug]))
+
+    for sage in Sage.objects.filter(materials__isnull=False).distinct():
+        paths.append(reverse("library:sage_detail", args=[sage.slug]))
+
+    for question in Question.objects.filter(is_published=True).exclude(answer=""):
+        paths.append(reverse("library:question_detail", args=[question.pk]))
+
+    urls = "".join(f"<url><loc>{request.build_absolute_uri(p)}</loc></url>" for p in paths)
+    xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>'
+    return HttpResponse(xml, content_type="application/xml")
+
+
 def questions_view(request):
     """Вопросы и ответы: опубликованные вопросы по дате, новые сверху."""
     questions = Question.objects.filter(is_published=True).exclude(answer="")

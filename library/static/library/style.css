@@ -69,6 +69,38 @@ body {
     color: var(--gold);
 }
 
+.site-header-tools {
+    margin-top: .7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.header-tool-link {
+    font-size: .85rem;
+    color: var(--accent-dark);
+    text-decoration: none;
+    border-bottom: 1px dotted var(--accent-dark);
+}
+.header-tool-link:hover { color: var(--maroon); }
+
+.font-size-control { display: flex; gap: .35rem; }
+.font-size-control button {
+    min-width: 2.2rem;
+    min-height: 2.2rem;
+    padding: .2rem .4rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--paper);
+    color: var(--accent-dark);
+    font-family: var(--font-body);
+    font-size: .85rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+.font-size-control button:hover { background: #f2ede0; color: var(--maroon); }
+
 .install-section {
     display: flex;
     align-items: flex-start;
@@ -286,6 +318,15 @@ h1 { font-family: var(--font-display); color: var(--maroon); }
     color: var(--maroon);
 }
 .about-section p { margin: 0; font-size: 1.05rem; line-height: 1.7; color: #4a3d24; }
+.about-section p + p { margin-top: .8rem; }
+.info-steps {
+    margin: 0;
+    padding-left: 1.4rem;
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: #4a3d24;
+}
+.info-steps li { margin-bottom: .3rem; }
 
 .nav-section { margin-bottom: 2rem; font-size: 1.15rem; }
 .nav-section h2 {
@@ -656,6 +697,11 @@ summary::marker { color: var(--gold); }
 }
 .verse-row:last-child { border-bottom: none; }
 .verse-row:not(.has-materials):hover { background: rgba(180, 137, 15, 0.06); }
+@keyframes verse-flash-anim {
+    0% { background: var(--highlight); }
+    100% { background: transparent; }
+}
+.verse-row.verse-flash { animation: verse-flash-anim 2.2s ease-out; }
 
 .verse-num {
     position: relative;
@@ -770,6 +816,22 @@ summary::marker { color: var(--gold); }
     white-space: nowrap;
 }
 .rashi-toggle:hover { background: #f2ede0; color: var(--text); }
+.verse-link-btn {
+    font-size: .78rem;
+    color: #8a7a55;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: .3rem .45rem;
+    min-height: 2rem;
+    min-width: 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    line-height: 1;
+}
+.verse-link-btn:hover { background: #f2ede0; color: var(--text); }
 .rashi-panel {
     margin: 0 0 .8rem 0;
     padding: .9rem 1.1rem;

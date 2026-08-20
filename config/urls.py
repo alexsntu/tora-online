@@ -17,10 +17,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
-from library.views import service_worker
+from library.views import robots_txt_view, service_worker, sitemap_xml_view
 
 urlpatterns = [
     path('heaven/', admin.site.urls),
     path('service-worker.js', service_worker, name='service-worker'),
+    path('robots.txt', robots_txt_view, name='robots_txt'),
+    path('sitemap.xml', sitemap_xml_view, name='sitemap'),
     path('', include('library.urls')),
 ]

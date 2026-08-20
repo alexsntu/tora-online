@@ -37,6 +37,10 @@
                 navigator.serviceWorker.register("/service-worker.js").catch(function () {});
             });
         }
+        (function () {
+            var saved = parseInt(localStorage.getItem("tora-font-scale"), 10);
+            document.documentElement.style.fontSize = (isNaN(saved) ? 100 : saved) + "%";
+        })();
     </script>
 </head>
 <body>
@@ -45,6 +49,13 @@
             <img class="site-emblem" src="{% static 'library/icons/logo-header.png' %}" alt="" width="256" height="256">
             <span>Тора онлайн для Бней Ноах</span>
         </a>
+        <div class="site-header-tools">
+            <a class="header-tool-link" href="{% url 'library:info' %}">О портале</a>
+            <div class="font-size-control" role="group" aria-label="Размер шрифта">
+                <button type="button" id="font-size-dec" aria-label="Уменьшить шрифт">А−</button>
+                <button type="button" id="font-size-inc" aria-label="Увеличить шрифт">А+</button>
+            </div>
+        </div>
     </header>
     <main>
         {% if messages %}
@@ -95,6 +106,47 @@
                 btn.classList.remove("is-visible");
                 hint.classList.remove("is-visible");
             });
+        })();
+    </script>
+    <script>
+        (function () {
+            var KEY = "tora-font-scale";
+            var MIN = 85, MAX = 150, STEP = 10;
+            var dec = document.getElementById("font-size-dec");
+            var inc = document.getElementById("font-size-inc");
+            if (!dec || !inc) return;
+
+            function current() {
+                var v = parseInt(localStorage.getItem(KEY), 10);
+                return isNaN(v) ? 100 : v;
+            }
+            function apply(scale) {
+                document.documentElement.style.fontSize = scale + "%";
+                localStorage.setItem(KEY, scale);
+            }
+            dec.addEventListener("click", function () { apply(Math.max(MIN, current() - STEP)); });
+            inc.addEventListener("click", function () { apply(Math.min(MAX, current() + STEP)); });
+        })();
+    </script>
+    <script>
+        function toraCopyVerseLink(chapter, verse, btnEl) {
+            var url = window.location.href.split("#")[0] + "#v-" + chapter + "-" + verse;
+            var done = function () {
+                var original = btnEl.textContent;
+                btnEl.textContent = "✓";
+                setTimeout(function () { btnEl.textContent = original; }, 1500);
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(done).catch(function () {});
+            }
+        }
+        (function () {
+            var m = /^#v-(\d+)-(\d+)$/.exec(window.location.hash);
+            if (!m) return;
+            var el = document.getElementById("v-" + m[1] + "-" + m[2]);
+            if (!el) return;
+            el.classList.add("verse-flash");
+            setTimeout(function () { el.classList.remove("verse-flash"); }, 2200);
         })();
     </script>
 </body>

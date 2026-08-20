@@ -45,6 +45,8 @@
          {% if verse.materials.all %}@click="if (open !== {{ verse.id }}) { fetch('{% url 'library:track_event' %}', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({event_type: 'material_open', verse_id: {{ verse.id }}}), keepalive: true}) }; open = (open === {{ verse.id }} ? null : {{ verse.id }})"{% endif %}>
         <span class="verse-num">
             {{ verse.chapter }}:{{ verse.verse }}
+            <button type="button" class="verse-link-btn" aria-label="Скопировать ссылку на стих {{ verse.chapter }}:{{ verse.verse }}" title="Скопировать ссылку на стих"
+                    @click.stop="toraCopyVerseLink({{ verse.chapter }}, {{ verse.verse }}, $event.currentTarget)">🔗</button>
             {% for c in verse.commentaries.all %}
             <button type="button" class="rashi-toggle" @click.stop="openRashi = (openRashi === {{ c.id }} ? null : {{ c.id }})">{{ c.source }}</button>
             {% endfor %}
