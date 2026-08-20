@@ -13,7 +13,8 @@ def convert_body_to_html(apps, schema_editor):
     for post in WeeklyPost.objects.all():
         if '<' in post.body:
             continue
-        paragraphs = post.body.split('\n\n')
+        normalized = post.body.replace('\r\n', '\n')
+        paragraphs = normalized.split('\n\n')
         html = ''.join(f'<p>{escape(p).replace(chr(10), "<br>")}</p>' for p in paragraphs if p.strip())
         post.body = html
         post.save(update_fields=['body'])
