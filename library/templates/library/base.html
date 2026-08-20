@@ -18,7 +18,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Tora Online для Бней Ноах{% endblock %}</title>
     <meta name="theme-color" content="#7c3223">
-    <meta name="description" content="{{ meta_description|default:"Электронная библиотека Торы и Танаха на русском и иврите с видеоуроками и статьями для Бней Ноах" }}">
+    <meta name="author" content="Дмитрий Калашник">
+    <meta name="description" content="{{ meta_description|default:"Уроки Торы для Бней Ноах от Дмитрия Калашника: авторские уроки на основе комментариев мудрецов с лингвистическим анализом. Электронная библиотека Торы и Танаха на русском и иврите." }}">
+    {% if structured_data_json %}<script type="application/ld+json">{{ structured_data_json|safe }}</script>{% endif %}
     <link rel="manifest" href="{% static 'library/manifest.json' %}">
     <link rel="icon" href="{% static 'library/icons/favicon.ico' %}" sizes="any">
     <link rel="icon" href="{% static 'library/icons/icon-512.png' %}" type="image/png">

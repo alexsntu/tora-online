@@ -52,12 +52,38 @@ def build_nav_data(verses):
     return data
 
 
+SITE_TAGLINE = "Уроки Торы для Бней Ноах от Дмитрия Калашника"
+AUTHOR_DESCRIPTION = "Авторские уроки на основе комментариев мудрецов с лингвистическим анализом"
+AUTHOR_PERSON_LD = {"@type": "Person", "name": "Дмитрий Калашник", "description": AUTHOR_DESCRIPTION}
+
+
 def resolve_meta(manual_title, manual_description, fallback_title, fallback_description):
     """SEO-заголовок/описание страницы: ручное поле из админки, если заполнено,
     иначе - автоматически сформированное из содержимого (fallback_*)."""
     title = (manual_title or "").strip() or fallback_title
     description = (manual_description or "").strip() or fallback_description
     return title, Truncator(description).chars(300) if description else ""
+
+
+def breadcrumbs_ld(request, items):
+    """items: [(название, path), ...] от главной к текущей странице -> узел BreadcrumbList."""
+    return {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": i + 1,
+                "name": name,
+                "item": request.build_absolute_uri(path),
+            }
+            for i, (name, path) in enumerate(items)
+        ],
+    }
+
+
+def structured_data_json(*graph_items):
+    """Оборачивает один или несколько узлов schema.org в единый JSON-LD <script>."""
+    return json.dumps({"@context": "https://schema.org", "@graph": list(graph_items)}, ensure_ascii=False)
 
 
 def attach_parasha_starts(verses, book):
@@ -92,6 +118,19 @@ def home(request):
 
     questions_preview = Question.objects.filter(is_published=True).exclude(answer="")[:3]
 
+    website_ld = {
+        "@type": "WebSite",
+        "name": "Tora Online для Бней Ноах",
+        "description": f"{SITE_TAGLINE}: {AUTHOR_DESCRIPTION.lower()}.",
+        "url": request.build_absolute_uri(reverse("library:home")),
+        "author": AUTHOR_PERSON_LD,
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": request.build_absolute_uri(reverse("library:topics_search")) + "?q={search_term_string}",
+            "query-input": "required name=search_term_string",
+        },
+    }
+
     return render(
         request,
         "library/home.html",
@@ -99,6 +138,7 @@ def home(request):
             "top_categories": top_categories,
             "today": today_info(),
             "questions_preview": questions_preview,
+            "structured_data_json": structured_data_json(website_ld),
         },
     )
 
@@ -119,12 +159,26 @@ def book_view(request, book_slug):
         f"{book.name_ru} — Tora Online",
         book.description_ru or f"Текст книги {book.name_ru} на иврите с параллельным переводом на русский.",
     )
+    book_url = reverse("library:book", args=[book.slug])
+    breadcrumbs = breadcrumbs_ld(request, [
+        ("Оглавление", reverse("library:home")),
+        (book.name_ru, book_url),
+    ])
+    book_ld = {
+        "@type": "Book",
+        "name": book.name_ru,
+        "alternateName": book.name_he,
+        "description": meta_description,
+        "url": request.build_absolute_uri(book_url),
+        "inLanguage": ["he", "ru"],
+    }
     return render(
         request,
         "library/book.html",
         {
             "book": book, "chapters": chapters, "parashot": parashot,
             "meta_title": meta_title, "meta_description": meta_description,
+            "structured_data_json": structured_data_json(breadcrumbs, book_ld),
         },
     )
 
@@ -149,6 +203,11 @@ def chapter_view(request, book_slug, chapter):
 
     first_verse_text = verses[0].text_ru if verses else ""
     title = f"{book.name_ru}, глава {chapter}"
+    breadcrumbs = breadcrumbs_ld(request, [
+        ("Оглавление", reverse("library:home")),
+        (book.name_ru, reverse("library:book", args=[book.slug])),
+        (f"Глава {chapter}", reverse("library:chapter", args=[book.slug, chapter])),
+    ])
     context = {
         "book": book,
         "chapter": chapter,
@@ -160,6 +219,7 @@ def chapter_view(request, book_slug, chapter):
         "current_chapter": chapter,
         "meta_title": f"{title} — Tora Online",
         "meta_description": Truncator(f"{title} на иврите с параллельным переводом. {first_verse_text}").chars(300),
+        "structured_data_json": structured_data_json(breadcrumbs),
     }
     return render(request, "library/chapter.html", context)
 
@@ -191,6 +251,11 @@ def parasha_view(request, parasha_slug):
         f"Недельная глава «{parasha.name_ru}»: {start.book.name_ru} {start.chapter}:{start.verse} — "
         f"{end.chapter}:{end.verse}, текст на иврите и русском.",
     )
+    breadcrumbs = breadcrumbs_ld(request, [
+        ("Оглавление", reverse("library:home")),
+        (start.book.name_ru, reverse("library:book", args=[start.book.slug])),
+        (parasha.name_ru, reverse("library:parasha", args=[parasha.slug])),
+    ])
     context = {
         "book": start.book,
         "parasha": parasha,
@@ -201,6 +266,7 @@ def parasha_view(request, parasha_slug):
         "nav_data": build_nav_data(verses),
         "meta_title": meta_title,
         "meta_description": meta_description,
+        "structured_data_json": structured_data_json(breadcrumbs),
     }
     return render(request, "library/chapter.html", context)
 
@@ -525,10 +591,32 @@ def question_detail_view(request, pk):
         f"{Truncator(question.display_title).words(12)} — Tora Online",
         question.answer or question.display_title,
     )
+    breadcrumbs = breadcrumbs_ld(request, [
+        ("Оглавление", reverse("library:home")),
+        ("Вопросы и ответы", reverse("library:questions")),
+        (Truncator(question.display_title).words(8), reverse("library:question_detail", args=[question.pk])),
+    ])
+    qa_ld = {
+        "@type": "QAPage",
+        "mainEntity": {
+            "@type": "Question",
+            "name": question.display_title,
+            "text": question.text,
+            "answerCount": 1,
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": question.answer,
+                "author": AUTHOR_PERSON_LD,
+            },
+        },
+    }
     return render(
         request,
         "library/question_detail.html",
-        {"question": question, "meta_title": meta_title, "meta_description": meta_description},
+        {
+            "question": question, "meta_title": meta_title, "meta_description": meta_description,
+            "structured_data_json": structured_data_json(breadcrumbs, qa_ld),
+        },
     )
 
 
