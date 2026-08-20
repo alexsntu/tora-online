@@ -50,6 +50,9 @@
             {% for c in verse.commentaries.all %}
             <button type="button" class="rashi-toggle" @click.stop="openRashi = (openRashi === {{ c.id }} ? null : {{ c.id }})">{{ c.source }}</button>
             {% endfor %}
+            {% if verse.materials.all %}
+            <span class="materials-count" aria-label="Комментариев: {{ verse.materials.all|length }}">✦ {{ verse.materials.all|length }}</span>
+            {% endif %}
         </span>
         <span class="verse-he" dir="rtl" lang="he">{{ verse.text_he }}</span>
         {% if verse.text_ru_slivniak %}

@@ -69,6 +69,7 @@
         {% endif %}
         {% block content %}{% endblock %}
     </main>
+    <div id="tora-toast" class="tora-toast" role="status" aria-live="polite"></div>
     <script>
         (function () {
             var btn = document.getElementById("install-app-btn");
@@ -131,15 +132,31 @@
         })();
     </script>
     <script>
+        function toraShowToast(text) {
+            var toast = document.getElementById("tora-toast");
+            if (!toast) return;
+            toast.textContent = text;
+            toast.classList.add("is-visible");
+            clearTimeout(toast._hideTimer);
+            toast._hideTimer = setTimeout(function () {
+                toast.classList.remove("is-visible");
+            }, 2500);
+        }
         function toraCopyVerseLink(chapter, verse, btnEl) {
             var url = window.location.href.split("#")[0] + "#v-" + chapter + "-" + verse;
             var done = function () {
                 var original = btnEl.textContent;
                 btnEl.textContent = "✓";
                 setTimeout(function () { btnEl.textContent = original; }, 1500);
+                toraShowToast("Ссылка скопирована — вы можете поделиться ей.");
+            };
+            var failed = function () {
+                toraShowToast("Не удалось скопировать ссылку.");
             };
             if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(url).then(done).catch(function () {});
+                navigator.clipboard.writeText(url).then(done).catch(failed);
+            } else {
+                failed();
             }
         }
         (function () {
