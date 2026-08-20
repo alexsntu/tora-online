@@ -111,3 +111,36 @@
     background: #7c3223;
     color: #fff;
 }
+
+/* Мини-редактор для WeeklyPost.body (см. admin-richtext.js) - вместо голого textarea. */
+.richtext-toolbar {
+    display: flex;
+    gap: 0.3rem;
+    margin-bottom: 0.3rem;
+}
+.richtext-toolbar button {
+    width: 2.2rem;
+    height: 2.2rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 1rem;
+}
+.richtext-toolbar button:hover {
+    background: #f2ede0;
+}
+.richtext-editor {
+    min-height: 12rem;
+    max-width: 900px;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background: #fff;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+.richtext-editor:focus {
+    outline: 2px solid #b4890f;
+    outline-offset: -1px;
+}

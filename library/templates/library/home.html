@@ -4,21 +4,22 @@
 {% include "library/_today_widget.html" %}
 
 {% if weekly_post %}
-<section class="weekly-post">
-    {% if weekly_post.image %}
-    <img class="weekly-post-image" src="{{ weekly_post.image.url }}" alt="{{ weekly_post.title }}">
-    {% endif %}
-    <div class="weekly-post-body">
-        <h2>{{ weekly_post.title }}</h2>
-        <p class="weekly-post-text">{{ weekly_post.body|linebreaksbr }}</p>
-        {% if weekly_post.url_youtube or weekly_post.url_rutube or weekly_post.url_vk %}
-        <div class="channel-links">
-            {% if weekly_post.url_youtube %}<a class="channel-link" href="{{ weekly_post.url_youtube }}" target="_blank" rel="noopener">YouTube ↗</a>{% endif %}
-            {% if weekly_post.url_rutube %}<a class="channel-link" href="{{ weekly_post.url_rutube }}" target="_blank" rel="noopener">RuTube ↗</a>{% endif %}
-            {% if weekly_post.url_vk %}<a class="channel-link" href="{{ weekly_post.url_vk }}" target="_blank" rel="noopener">VK Видео ↗</a>{% endif %}
-        </div>
+<section class="weekly-post" x-data="{ expanded: false }">
+    <div class="weekly-post-header">
+        {% if weekly_post.image %}
+        <img class="weekly-post-image" src="{{ weekly_post.image.url }}" alt="{{ weekly_post.title }}">
         {% endif %}
+        <h2>{{ weekly_post.title }}</h2>
     </div>
+    <button type="button" class="weekly-post-toggle" @click="expanded = !expanded" x-text="expanded ? 'Свернуть ▲' : 'Читать полностью ▼'"></button>
+    <div class="weekly-post-text" :class="{ 'is-collapsed': !expanded }">{{ weekly_post.body|safe }}</div>
+    {% if weekly_post.url_youtube or weekly_post.url_rutube or weekly_post.url_vk %}
+    <div class="channel-links">
+        {% if weekly_post.url_youtube %}<a class="channel-link" href="{{ weekly_post.url_youtube }}" target="_blank" rel="noopener">YouTube ↗</a>{% endif %}
+        {% if weekly_post.url_rutube %}<a class="channel-link" href="{{ weekly_post.url_rutube }}" target="_blank" rel="noopener">RuTube ↗</a>{% endif %}
+        {% if weekly_post.url_vk %}<a class="channel-link" href="{{ weekly_post.url_vk }}" target="_blank" rel="noopener">VK Видео ↗</a>{% endif %}
+    </div>
+    {% endif %}
 </section>
 {% endif %}
 

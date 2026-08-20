@@ -351,7 +351,9 @@ class WeeklyPost(models.Model):
         help_text="Например: Ки Теце - Парашат а-Шавуа 5786/2026",
     )
     image = models.ImageField("Картинка", upload_to="weekly_posts/", blank=True)
-    body = models.TextField("Текст поста")
+    body = models.TextField(
+        "Текст поста", help_text="Можно выделять текст и делать жирным/курсивом/подчёркнутым.",
+    )
     url_youtube = models.URLField("Ссылка на YouTube", blank=True)
     url_rutube = models.URLField("Ссылка на RuTube", blank=True)
     url_vk = models.URLField("Ссылка на VK Видео", blank=True)

@@ -396,6 +396,10 @@ class WeeklyPostAdmin(admin.ModelAdmin):
     fields = ("title", "image", "body", "url_youtube", "url_rutube", "url_vk", "is_published", "created_at")
     readonly_fields = ("created_at",)
 
+    class Media:
+        css = {"all": ("library/admin-extra.css",)}
+        js = ("library/admin-richtext.js",)
+
 
 @admin.register(AnalyticsEvent)
 class AnalyticsEventAdmin(admin.ModelAdmin):
