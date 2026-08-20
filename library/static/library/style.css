@@ -585,17 +585,15 @@ summary::marker { color: var(--gold); }
     white-space: nowrap;
 }
 .topic-entry-sage {
-    flex-shrink: 0;
     color: #8a7a55;
     font-size: .78rem;
     font-style: italic;
-    white-space: nowrap;
 }
 
 @media (max-width: 640px) {
     .topic-entry { flex-direction: column; align-items: flex-start; gap: .3rem; }
-    .topic-entry-meta { flex-wrap: wrap; }
 }
+.topic-entry-meta { flex-wrap: wrap; }
 .topics-panel { margin: -.3rem 0 1rem 0; }
 .topics-panel-ref { margin-bottom: .8rem; font-size: .85rem; }
 .topics-panel-ref a { color: var(--accent-dark); }
