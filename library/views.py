@@ -10,6 +10,7 @@ from django.db.models import Count, Q
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.text import Truncator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
@@ -21,7 +22,7 @@ from .hebrew_calendar import (
     convert_hebrew_to_gregorian,
     today_info,
 )
-from .models import AnalyticsEvent, Book, Category, ErrorReport, Material, Parasha, Question, Sage, Verse
+from .models import AnalyticsEvent, Book, Category, ErrorReport, Material, Parasha, Question, Sage, SiteSettings, Verse
 
 
 def ru_plural(n, one, few, many):
@@ -49,6 +50,14 @@ def build_nav_data(verses):
     for v in verses:
         data.setdefault(str(v.chapter), []).append([v.verse, bool(v.materials.all())])
     return data
+
+
+def resolve_meta(manual_title, manual_description, fallback_title, fallback_description):
+    """SEO-заголовок/описание страницы: ручное поле из админки, если заполнено,
+    иначе - автоматически сформированное из содержимого (fallback_*)."""
+    title = (manual_title or "").strip() or fallback_title
+    description = (manual_description or "").strip() or fallback_description
+    return title, Truncator(description).chars(300) if description else ""
 
 
 def attach_parasha_starts(verses, book):
@@ -105,10 +114,18 @@ def book_view(request, book_slug):
         .select_related("start_verse", "end_verse")
         .order_by("order")
     )
+    meta_title, meta_description = resolve_meta(
+        book.meta_title, book.meta_description,
+        f"{book.name_ru} — Tora Online",
+        book.description_ru or f"Текст книги {book.name_ru} на иврите с параллельным переводом на русский.",
+    )
     return render(
         request,
         "library/book.html",
-        {"book": book, "chapters": chapters, "parashot": parashot},
+        {
+            "book": book, "chapters": chapters, "parashot": parashot,
+            "meta_title": meta_title, "meta_description": meta_description,
+        },
     )
 
 
@@ -130,15 +147,19 @@ def chapter_view(request, book_slug, chapter):
 
     AnalyticsEvent.objects.create(event_type=AnalyticsEvent.CHAPTER_VIEW, book=book, chapter=chapter)
 
+    first_verse_text = verses[0].text_ru if verses else ""
+    title = f"{book.name_ru}, глава {chapter}"
     context = {
         "book": book,
         "chapter": chapter,
         "verses": verses,
-        "title": f"{book.name_ru}, глава {chapter}",
+        "title": title,
         "prev_chapter": chapter - 1 if chapter > 1 else None,
         "next_chapter": chapter + 1 if chapter < max_chapter else None,
         "nav_data": build_nav_data(nav_verses),
         "current_chapter": chapter,
+        "meta_title": f"{title} — Tora Online",
+        "meta_description": Truncator(f"{title} на иврите с параллельным переводом. {first_verse_text}").chars(300),
     }
     return render(request, "library/chapter.html", context)
 
@@ -163,14 +184,23 @@ def parasha_view(request, parasha_slug):
         Parasha.objects.filter(order__gt=parasha.order).order_by("order").first()
     )
 
+    title = f"Недельная глава «{parasha.name_ru}»"
+    meta_title, meta_description = resolve_meta(
+        parasha.meta_title, parasha.meta_description,
+        f"{title} — Tora Online",
+        f"Недельная глава «{parasha.name_ru}»: {start.book.name_ru} {start.chapter}:{start.verse} — "
+        f"{end.chapter}:{end.verse}, текст на иврите и русском.",
+    )
     context = {
         "book": start.book,
         "parasha": parasha,
         "verses": verses,
-        "title": f"Недельная глава «{parasha.name_ru}»",
+        "title": title,
         "prev_parasha": prev_parasha,
         "next_parasha": next_parasha,
         "nav_data": build_nav_data(verses),
+        "meta_title": meta_title,
+        "meta_description": meta_description,
     }
     return render(request, "library/chapter.html", context)
 
@@ -306,7 +336,16 @@ def sage_detail_view(request, sage_slug):
         parashot = _group_entries_by_parasha(list(book_entries), parashot_by_book)
         books.append({"book": book, "parashot": parashot})
 
-    return render(request, "library/sage_detail.html", {"sage": sage, "books": books})
+    meta_title, meta_description = resolve_meta(
+        sage.meta_title, sage.meta_description,
+        f"{sage.name_ru} — Tora Online",
+        sage.bio or f"Комментарии к Торе, опирающиеся на учение {sage.name_ru}.",
+    )
+    return render(
+        request,
+        "library/sage_detail.html",
+        {"sage": sage, "books": books, "meta_title": meta_title, "meta_description": meta_description},
+    )
 
 
 @csrf_exempt
@@ -432,6 +471,10 @@ def robots_txt_view(request):
         "Allow: /",
         f"Sitemap: {request.build_absolute_uri(reverse('sitemap'))}",
     ]
+    extra = SiteSettings.load().robots_extra.strip()
+    if extra:
+        lines.append("")
+        lines.extend(line.strip() for line in extra.splitlines() if line.strip())
     return HttpResponse("\n".join(lines), content_type="text/plain")
 
 
@@ -477,7 +520,16 @@ def questions_view(request):
 
 def question_detail_view(request, pk):
     question = get_object_or_404(Question, pk=pk, is_published=True)
-    return render(request, "library/question_detail.html", {"question": question})
+    meta_title, meta_description = resolve_meta(
+        question.meta_title, question.meta_description,
+        f"{Truncator(question.display_title).words(12)} — Tora Online",
+        question.answer or question.display_title,
+    )
+    return render(
+        request,
+        "library/question_detail.html",
+        {"question": question, "meta_title": meta_title, "meta_description": meta_description},
+    )
 
 
 def _new_captcha(request):

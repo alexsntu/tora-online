@@ -39,6 +39,14 @@ class Book(models.Model):
         "Краткое описание", max_length=255, blank=True,
         help_text="Одна строка о содержании книги - показывается на главной, как на Sefaria",
     )
+    meta_title = models.CharField(
+        "SEO-заголовок страницы", max_length=255, blank=True,
+        help_text="Заголовок вкладки браузера и сниппета в поиске. Пусто - формируется автоматически из названия книги.",
+    )
+    meta_description = models.CharField(
+        "SEO-описание страницы", max_length=300, blank=True,
+        help_text="Показывается в сниппете поисковой выдачи. Пусто - берётся краткое описание книги (или формируется автоматически).",
+    )
 
     class Meta:
         ordering = ["order"]
@@ -80,6 +88,14 @@ class Parasha(models.Model):
     )
     end_verse = models.ForeignKey(
         Verse, verbose_name="Последний стих", related_name="parasha_end_of", on_delete=models.PROTECT,
+    )
+    meta_title = models.CharField(
+        "SEO-заголовок страницы", max_length=255, blank=True,
+        help_text="Пусто - формируется автоматически из названия недельной главы.",
+    )
+    meta_description = models.CharField(
+        "SEO-описание страницы", max_length=300, blank=True,
+        help_text="Показывается в сниппете поисковой выдачи. Пусто - формируется автоматически из книги и диапазона стихов.",
     )
 
     class Meta:
@@ -208,6 +224,14 @@ class Sage(models.Model):
     name_ru = models.CharField("Имя", max_length=255)
     slug = models.SlugField("Слаг (для ссылки)", unique=True)
     bio = models.TextField("Биография", blank=True, help_text="Короткая справка: кто это и когда жил")
+    meta_title = models.CharField(
+        "SEO-заголовок страницы", max_length=255, blank=True,
+        help_text="Пусто - формируется автоматически из имени мудреца.",
+    )
+    meta_description = models.CharField(
+        "SEO-описание страницы", max_length=300, blank=True,
+        help_text="Показывается в сниппете поисковой выдачи. Пусто - берётся начало биографии.",
+    )
 
     class Meta:
         ordering = ["name_ru"]
@@ -233,6 +257,14 @@ class Question(models.Model):
     is_published = models.BooleanField("Опубликовать на сайте", default=False)
     created_at = models.DateTimeField("Дата вопроса", auto_now_add=True)
     answered_at = models.DateTimeField("Дата ответа", null=True, blank=True)
+    meta_title = models.CharField(
+        "SEO-заголовок страницы", max_length=255, blank=True,
+        help_text="Пусто - формируется автоматически из заголовка вопроса.",
+    )
+    meta_description = models.CharField(
+        "SEO-описание страницы", max_length=300, blank=True,
+        help_text="Показывается в сниппете поисковой выдачи. Пусто - берётся начало ответа.",
+    )
 
     class Meta:
         ordering = ["-created_at"]
@@ -275,3 +307,30 @@ class ErrorReport(models.Model):
 
     def __str__(self):
         return self.description[:60]
+
+
+class SiteSettings(models.Model):
+    """Настройки сайта - одна запись (синглтон). Пока только robots.txt,
+    остальное (User-agent/Allow/Sitemap) собирается автоматически в коде."""
+
+    robots_extra = models.TextField(
+        "Дополнительные строки robots.txt", blank=True,
+        help_text="По одной директиве на строку, например: Disallow: /heaven/ - "
+        "добавляются в конец robots.txt после основных правил.",
+    )
+
+    class Meta:
+        verbose_name = "настройки сайта"
+        verbose_name_plural = "Настройки сайта"
+
+    def __str__(self):
+        return "Настройки сайта"
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def load(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj

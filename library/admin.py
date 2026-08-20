@@ -1,12 +1,14 @@
 from django import forms
 from django.contrib import admin
-from django.http import JsonResponse
-from django.urls import path
+from django.http import HttpResponseRedirect, JsonResponse
+from django.urls import path, reverse
 
 from axes.admin import AccessAttemptAdmin, IsLockedOutFilter
 from axes.models import AccessAttempt
 
-from .models import AnalyticsEvent, Book, Category, Verse, Parasha, Material, ErrorReport, Question, Sage, Topic
+from .models import (
+    AnalyticsEvent, Book, Category, Verse, Parasha, Material, ErrorReport, Question, Sage, SiteSettings, Topic,
+)
 from .views import analytics_dashboard
 
 admin.site.site_header = "Tora Online — панель управления"
@@ -341,7 +343,10 @@ class QuestionAdmin(admin.ModelAdmin):
     list_display = ("text_preview", "is_answered", "is_published", "created_at", "answered_at")
     list_filter = (QuestionStatusFilter,)
     search_fields = ("text", "answer", "asker_name", "asker_email")
-    fields = ("text", "asker_name", "asker_email", "created_at", "answer", "title", "is_published", "answered_at")
+    fields = (
+        "text", "asker_name", "asker_email", "created_at", "answer", "title", "is_published", "answered_at",
+        "meta_title", "meta_description",
+    )
     readonly_fields = ("asker_name", "asker_email", "created_at", "answered_at")
 
     @admin.display(description="Вопрос")
@@ -364,6 +369,23 @@ class ErrorReportAdmin(admin.ModelAdmin):
     @admin.display(description="Описание")
     def description_preview(self, obj):
         return obj.description[:80]
+
+
+@admin.register(SiteSettings)
+class SiteSettingsAdmin(admin.ModelAdmin):
+    """Синглтон - одна запись на весь сайт, нельзя добавить вторую или удалить единственную."""
+
+    fields = ("robots_extra",)
+
+    def has_add_permission(self, request):
+        return not SiteSettings.objects.exists()
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def changelist_view(self, request, extra_context=None):
+        obj = SiteSettings.load()
+        return HttpResponseRedirect(reverse("admin:library_sitesettings_change", args=[obj.pk]))
 
 
 @admin.register(AnalyticsEvent)

@@ -1,5 +1,5 @@
 {% extends "library/base.html" %}
-{% block title %}{{ question.display_title|truncatewords:12 }} — Tora Online{% endblock %}
+{% block title %}{{ meta_title }}{% endblock %}
 {% block content %}
 <nav class="breadcrumbs">
     <a href="{% url 'library:questions' %}">← Вопросы и ответы</a>
