@@ -8,7 +8,7 @@
 <h1>Указатель тем</h1>
 <p class="topics-intro">Все наши комментарии по книгам. Выберите книгу, чтобы увидеть темы по недельным главам.</p>
 
-{% include "library/_topics_search.html" %}
+{% include "library/_topics_search.html" with extra_class="topics-search-live-home" %}
 
 <div class="book-grid">
     {% for book in books %}
