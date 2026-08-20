@@ -331,7 +331,7 @@ h1 { font-family: var(--font-display); color: var(--maroon); }
 @media (min-width: 641px) {
     .weekly-post-image {
         float: left;
-        width: 320px;
+        width: 384px;
         height: auto;
         margin: 0 1.4rem 1rem 0;
     }
