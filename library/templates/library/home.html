@@ -14,6 +14,7 @@
             <div class="weekly-post-text" :class="{ 'is-collapsed': !expanded }">{{ weekly_post.body|safe }}</div>
             <button type="button" class="weekly-post-toggle" @click="expanded = !expanded" x-text="expanded ? 'Свернуть ▲' : 'Читать полностью ▼'"></button>
             {% if weekly_post.url_youtube or weekly_post.url_rutube or weekly_post.url_vk %}
+            <p class="weekly-post-links-label">Смотреть урок:</p>
             <div class="weekly-post-links">
                 {% if weekly_post.url_youtube %}
                 <a class="weekly-post-link-btn" href="{{ weekly_post.url_youtube }}" target="_blank" rel="noopener">
