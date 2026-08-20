@@ -22,7 +22,9 @@ from .hebrew_calendar import (
     convert_hebrew_to_gregorian,
     today_info,
 )
-from .models import AnalyticsEvent, Book, Category, ErrorReport, Material, Parasha, Question, Sage, SiteSettings, Verse
+from .models import (
+    AnalyticsEvent, Book, Category, ErrorReport, Material, Parasha, Question, Sage, SiteSettings, Verse, WeeklyPost,
+)
 
 
 def ru_plural(n, one, few, many):
@@ -117,6 +119,7 @@ def home(request):
     top_categories = children_by_parent.get(None, [])
 
     questions_preview = Question.objects.filter(is_published=True).exclude(answer="")[:3]
+    weekly_post = WeeklyPost.objects.filter(is_published=True).first()
 
     website_ld = {
         "@type": "WebSite",
@@ -138,6 +141,7 @@ def home(request):
             "top_categories": top_categories,
             "today": today_info(),
             "questions_preview": questions_preview,
+            "weekly_post": weekly_post,
             "structured_data_json": structured_data_json(website_ld),
         },
     )

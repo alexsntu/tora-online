@@ -334,3 +334,29 @@ class SiteSettings(models.Model):
     def load(cls):
         obj, _ = cls.objects.get_or_create(pk=1)
         return obj
+
+
+class WeeklyPost(models.Model):
+    """Еженедельный пост о новом уроке по недельной главе - тот же пост, что
+    публикуется в Telegram-канале (картинка + текст + ссылки на видео).
+    Показывается блоком на главной странице (последний опубликованный)."""
+
+    title = models.CharField(
+        "Заголовок", max_length=255,
+        help_text="Например: Ки Теце - Парашат а-Шавуа 5786/2026",
+    )
+    image = models.ImageField("Картинка", upload_to="weekly_posts/", blank=True)
+    body = models.TextField("Текст поста")
+    url_youtube = models.URLField("Ссылка на YouTube", blank=True)
+    url_rutube = models.URLField("Ссылка на RuTube", blank=True)
+    url_vk = models.URLField("Ссылка на VK Видео", blank=True)
+    is_published = models.BooleanField("Опубликовать на сайте", default=True)
+    created_at = models.DateTimeField("Дата публикации", auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "еженедельный пост"
+        verbose_name_plural = "Еженедельные посты (главная страница)"
+
+    def __str__(self):
+        return self.title

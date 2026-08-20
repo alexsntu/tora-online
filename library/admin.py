@@ -8,6 +8,7 @@ from axes.models import AccessAttempt
 
 from .models import (
     AnalyticsEvent, Book, Category, Verse, Parasha, Material, ErrorReport, Question, Sage, SiteSettings, Topic,
+    WeeklyPost,
 )
 from .views import analytics_dashboard
 
@@ -386,6 +387,14 @@ class SiteSettingsAdmin(admin.ModelAdmin):
     def changelist_view(self, request, extra_context=None):
         obj = SiteSettings.load()
         return HttpResponseRedirect(reverse("admin:library_sitesettings_change", args=[obj.pk]))
+
+
+@admin.register(WeeklyPost)
+class WeeklyPostAdmin(admin.ModelAdmin):
+    list_display = ("title", "is_published", "created_at")
+    list_filter = ("is_published",)
+    fields = ("title", "image", "body", "url_youtube", "url_rutube", "url_vk", "is_published", "created_at")
+    readonly_fields = ("created_at",)
 
 
 @admin.register(AnalyticsEvent)
