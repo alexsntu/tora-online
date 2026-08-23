@@ -57,6 +57,10 @@ HAFTARAH_BOOKS = {
     "yirmeyahu": ("Йирмея", "יִרְמְיָהוּ", "Jeremiah"),
     "shofetim-book": ("Шофтим (Судьи)", "שׁוֹפְטִים", "Judges"),
     "shmuel-2": ("Шмуэль II", "שְׁמוּאֵל ב׳", "II_Samuel"),
+    "shmuel-1": ("Шмуэль I", "שְׁמוּאֵל א׳", "I_Samuel"),
+    "micha": ("Миха", "מִיכָה", "Micah"),
+    "zecharia": ("Зехария", "זְכַרְיָה", "Zechariah"),
+    "yehoshua": ("Йегошуа", "יְהוֹשֻׁעַ", "Joshua"),
 }
 
 # slug -> (name_ru, name_he, order) — порядок сквозной по всей Торе (1..54)

@@ -160,7 +160,12 @@ class Haftarah(models.Model):
         for seg in segments:
             fc, fv = seg["first"]
             lc, lv = seg["last"]
-            span = f"{fc}:{fv}-{lv}" if fc == lc else f"{fc}:{fv}-{lc}:{lv}"
+            if (fc, fv) == (lc, lv):
+                span = f"{fc}:{fv}"
+            elif fc == lc:
+                span = f"{fc}:{fv}-{lv}"
+            else:
+                span = f"{fc}:{fv}-{lc}:{lv}"
             parts.append(f"{seg['book']} {span}" if seg["book"] != prev_book else span)
             prev_book = seg["book"]
         return ", ".join(parts)

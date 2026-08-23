@@ -27,13 +27,28 @@ BOOK_ALIASES = {
     "Йирмейа": "yirmeyahu",
     "Шофетим": "shofetim-book",
     "Шемуэйл II": "shmuel-2",
+    "Шемуэйл I": "shmuel-1",
+    "Миха": "micha",
+    "Ошэйа": "hoshea",
+    "Зехарйа": "zecharia",
+    "Йег̃ошуа̃": "yehoshua",
 }
 BOOK_ALIASES_SORTED = sorted(BOOK_ALIASES, key=len, reverse=True)
 
 TRADITION_LABELS = {"Ашкеназим": Haftarah.TRADITION_ASHKENAZI, "Сефарадим": Haftarah.TRADITION_SEPHARDI}
 BOTH = frozenset(TRADITION_LABELS.values())
 
-RANGE_IN_TEXT_RE = re.compile(r"(\d+):(\d+)\s*-\s*(?:(\d+):)?(\d+)")
+
+# Диапазон "2:4-28" / "2:4-3:8", ИЛИ одиночный стих "3:4" без тире вовсе (напр.
+# Масъэй, ашкеназская традиция дочитывает всего один стих 3:4 "для хорошего конца").
+RANGE_IN_TEXT_RE = re.compile(r"(\d+):(\d+)(?:\s*-\s*(?:(\d+):)?(\d+))?")
+
+
+def _parse_range_match(match):
+    sc, sv, ec, ev = match.groups()
+    return int(sc), int(sv), int(ec or sc), int(ev or sv)
+
+
 COLON_TRADITION_RE = re.compile(r"^(Ашкеназим|Сефарадим):\s*(.*)$")
 IZ_KNIGI_RE = re.compile(r"^из книги\s+(?:«([^»]+)»|(\S+))", re.IGNORECASE)
 PAREN_RE = re.compile(r"^\((.+)\)$")
@@ -79,10 +94,7 @@ def parse_haftarah_file(path: Path):
         текстом (напр. Шмот), это не должно перетирать уже верно заданную вторую."""
         if current_traditions != BOTH:
             return
-        ranges = [
-            (int(sc), int(sv), int(ec or sc), int(ev))
-            for sc, sv, ec, ev in RANGE_IN_TEXT_RE.findall(rest)
-        ]
+        ranges = [_parse_range_match(m) for m in RANGE_IN_TEXT_RE.finditer(rest)]
         if not ranges:
             return
         range_by_tradition.setdefault(Haftarah.TRADITION_ASHKENAZI, (current_book_slug, ranges))
@@ -110,10 +122,7 @@ def parse_haftarah_file(path: Path):
                 rest = book_rest
             # может быть несколько несмежных диапазонов через запятую, напр.
             # "Ашкеназим: 6:1-7:6, 9:5-6"
-            ranges = [
-                (int(sc), int(sv), int(ec or sc), int(ev))
-                for sc, sv, ec, ev in RANGE_IN_TEXT_RE.findall(rest)
-            ]
+            ranges = [_parse_range_match(m) for m in RANGE_IN_TEXT_RE.finditer(rest)]
             if ranges:
                 range_by_tradition[TRADITION_LABELS[label]] = (book_slug_here, ranges)
             continue
