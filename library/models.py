@@ -141,20 +141,29 @@ class Haftarah(models.Model):
     def range_display(self):
         """Например "Йешаяу 42:5-43:10" - книга(и) и диапазон(ы) глав:стихов, чтобы
         было понятно, какой именно текст, не открывая саму гафтару. Составная гафтара
-        из нескольких книг (напр. Вайеце) даёт несколько сегментов через запятую."""
-        from itertools import groupby
-
-        verses = list(self.verses.all())
+        из нескольких книг или несмежных участков (напр. Вайеце, Итро, Мишпатим) даёт
+        несколько сегментов через запятую - границы сегментов проставлены при импорте
+        (поле HaftarahVerse.segment), не выводятся эвристикой задним числом, т.к.
+        соседство глав само по себе не гарантирует непрерывность чтения."""
         segments = []
-        for book_name_ru, group in groupby(verses, key=lambda v: v.book_name_ru):
-            group = list(group)
-            first, last = group[0], group[-1]
-            if first.chapter == last.chapter:
-                span = f"{first.chapter}:{first.verse}-{last.verse}"
+        for v in self.verses.all():
+            if segments and segments[-1]["segment"] == v.segment:
+                segments[-1]["last"] = (v.chapter, v.verse)
             else:
-                span = f"{first.chapter}:{first.verse}-{last.chapter}:{last.verse}"
-            segments.append(f"{book_name_ru} {span}")
-        return ", ".join(segments)
+                segments.append({
+                    "segment": v.segment, "book": v.book_name_ru,
+                    "first": (v.chapter, v.verse), "last": (v.chapter, v.verse),
+                })
+
+        parts = []
+        prev_book = None
+        for seg in segments:
+            fc, fv = seg["first"]
+            lc, lv = seg["last"]
+            span = f"{fc}:{fv}-{lv}" if fc == lc else f"{fc}:{fv}-{lc}:{lv}"
+            parts.append(f"{seg['book']} {span}" if seg["book"] != prev_book else span)
+            prev_book = seg["book"]
+        return ", ".join(parts)
 
 
 class HaftarahVerse(models.Model):
@@ -163,6 +172,11 @@ class HaftarahVerse(models.Model):
         "Порядок", default=0,
         help_text="Порядок чтения - не всегда совпадает с сортировкой по главе:стиху "
         "(составная гафтара может переходить на другую книгу и обратно).",
+    )
+    segment = models.PositiveSmallIntegerField(
+        "Сегмент", default=0,
+        help_text="Номер непрерывного участка чтения - проставляется при импорте "
+        "по границам, объявленным в источнике (не выводится по соседству глав).",
     )
     book_name_ru = models.CharField("Книга-источник (рус.)", max_length=100)
     book_name_he = models.CharField("Книга-источник (иврит)", max_length=100, blank=True)

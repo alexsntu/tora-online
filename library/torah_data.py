@@ -54,6 +54,8 @@ HAFTARAH_BOOKS = {
     "amos": ("Амос", "עָמוֹס", "Amos"),
     "ovadia": ("Овадия", "עֹבַדְיָה", "Obadiah"),
     "yechezkel": ("Йехезкель", "יְחֶזְקֵאל", "Ezekiel"),
+    "yirmeyahu": ("Йирмея", "יִרְמְיָהוּ", "Jeremiah"),
+    "shofetim-book": ("Шофтим (Судьи)", "שׁוֹפְטִים", "Judges"),
 }
 
 # slug -> (name_ru, name_he, order) — порядок сквозной по всей Торе (1..54)

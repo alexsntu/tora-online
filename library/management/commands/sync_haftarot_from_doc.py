@@ -8,11 +8,13 @@ from django.core.management.base import BaseCommand
 
 from library.torah_data import PARASHOT
 
-# Общий гугл-док с гафтарот: одна вкладка Google Docs = одна недельная глава.
+# Гугл-доки с гафтарот, один на книгу Торы: вкладка Google Docs = недельная глава.
 # Экспорт в текст (?format=txt) отдаёт ВСЕ вкладки одним файлом подряд, каждая
 # со своим заголовком "Г̃афтара недельной главы Торы «...»".
-DOC_ID = "1YeMEN4iGC9-JP0IUeQOcaubvAJ2f9-jEux8eceXQZwU"
-EXPORT_URL = f"https://docs.google.com/document/d/{DOC_ID}/export?format=txt"
+DOC_IDS = [
+    "1YeMEN4iGC9-JP0IUeQOcaubvAJ2f9-jEux8eceXQZwU",  # Берешит
+    "1YES1JySEnjgXI2xPbLIK5OUsaUqNSL0JT34DVSYj-Ek",  # Шмот
+]
 
 TEXTS_RU_HAFTARAH_DIR = Path(settings.BASE_DIR) / "texts" / "ru_haftarah"
 
@@ -29,6 +31,11 @@ DOC_PARASHA_ALIASES = {
     "Вайэшэв": "vayeshev",
     "Микэц": "miketz",
     "Вайхи": "vayechi",
+    "Йитро": "yitro",
+    "Терума": "teruma",
+    "Ки тиса": "ki-tisa",
+    "Вайакг̃эль": "vayakhel",
+    "Пекудэй": "pekudei",
 }
 
 NAME_RU_TO_SLUG = {name_ru: slug for slug, (name_ru, name_he, order) in PARASHOT.items()}
@@ -43,18 +50,35 @@ class Command(BaseCommand):
     )
 
     def handle(self, *args, **options):
+        written = []
+        for doc_id in DOC_IDS:
+            written += self.sync_one_doc(doc_id)
+
+        if not written:
+            self.stdout.write(self.style.WARNING("Ни одной вкладки не удалось разложить в файлы"))
+            return
+
+        self.stdout.write(self.style.SUCCESS(f"Разложено вкладок: {len(written)}"))
+        for title, path in written:
+            self.stdout.write(f"  {title} -> {path.relative_to(settings.BASE_DIR)}")
+
+        self.stdout.write("Запускаю import_haftarot...")
+        call_command("import_haftarot")
+
+    def sync_one_doc(self, doc_id):
+        export_url = f"https://docs.google.com/document/d/{doc_id}/export?format=txt"
         try:
-            with urllib.request.urlopen(EXPORT_URL, timeout=20) as resp:
+            with urllib.request.urlopen(export_url, timeout=20) as resp:
                 raw = resp.read().decode("utf-8-sig")
         except (urllib.error.URLError, TimeoutError, OSError) as e:
-            self.stderr.write(self.style.ERROR(f"Не удалось скачать документ: {e}"))
-            return
+            self.stderr.write(self.style.ERROR(f"Не удалось скачать документ {doc_id}: {e}"))
+            return []
 
         lines = raw.splitlines()
         header_idxs = [i for i, line in enumerate(lines) if HAFTARAH_HEADER_MARKER in line]
         if not header_idxs:
-            self.stdout.write(self.style.WARNING("В документе не нашлось ни одной вкладки с гафтарой"))
-            return
+            self.stdout.write(self.style.WARNING(f"Документ {doc_id}: не нашлось ни одной вкладки с гафтарой"))
+            return []
 
         written = []
         for n, j in enumerate(header_idxs):
@@ -77,13 +101,4 @@ class Command(BaseCommand):
             out_path.write_text("\n".join(block_lines).strip() + "\n", encoding="utf-8")
             written.append((title, out_path))
 
-        if not written:
-            self.stdout.write(self.style.WARNING("Ни одной вкладки не удалось разложить в файлы"))
-            return
-
-        self.stdout.write(self.style.SUCCESS(f"Разложено вкладок: {len(written)}"))
-        for title, path in written:
-            self.stdout.write(f"  {title} -> {path.relative_to(settings.BASE_DIR)}")
-
-        self.stdout.write("Запускаю import_haftarot...")
-        call_command("import_haftarot")
+        return written

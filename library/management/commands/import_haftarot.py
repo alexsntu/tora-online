@@ -24,6 +24,8 @@ BOOK_ALIASES = {
     "Амос": "amos",
     "Овадйа": "ovadia",
     "Йехэзкэйл": "yechezkel",
+    "Йирмейа": "yirmeyahu",
+    "Шофетим": "shofetim-book",
 }
 BOOK_ALIASES_SORTED = sorted(BOOK_ALIASES, key=len, reverse=True)
 
@@ -32,7 +34,7 @@ BOTH = frozenset(TRADITION_LABELS.values())
 
 RANGE_IN_TEXT_RE = re.compile(r"(\d+):(\d+)\s*-\s*(?:(\d+):)?(\d+)")
 COLON_TRADITION_RE = re.compile(r"^(Ашкеназим|Сефарадим):\s*(.*)$")
-IZ_KNIGI_RE = re.compile(r"^Из книги «([^»]+)»")
+IZ_KNIGI_RE = re.compile(r"^из книги\s+(?:«([^»]+)»|(\S+))", re.IGNORECASE)
 PAREN_RE = re.compile(r"^\((.+)\)$")
 BOTH_SUFFIX_RE = re.compile(r"\(ашкеназим и сефарадим\)\s*$", re.IGNORECASE)
 VERSE_MARKER_RE = re.compile(r"\((\d+)\)")
@@ -65,6 +67,26 @@ def parse_haftarah_file(path: Path):
     current_book_slug = None
     current_chapter = None
 
+    def set_default_ranges_if_needed(rest):
+        """Диапазон, объявленный ОДИН раз (не отдельно на традицию - "Ашкеназим:"/
+        "Сефарадим:") - значит общий на обе традиции, включая все несмежные куски
+        через запятую ("Йирмейа 34:8-22, 33:25-26"). Работает только пока традиции
+        ещё не разделились (current_traditions is BOTH) - иначе это просто книга
+        для уже выбранного раздела (Вайеце), диапазон в тексте не нужен. Не трогает
+        традицию, для которой диапазон уже объявлен явно ("Ашкеназим:"/"Сефарадим:")
+        - источник иногда повторяет диапазон одной традиции бare-строкой перед её
+        текстом (напр. Шмот), это не должно перетирать уже верно заданную вторую."""
+        if current_traditions != BOTH:
+            return
+        ranges = [
+            (int(sc), int(sv), int(ec or sc), int(ev))
+            for sc, sv, ec, ev in RANGE_IN_TEXT_RE.findall(rest)
+        ]
+        if not ranges:
+            return
+        range_by_tradition.setdefault(Haftarah.TRADITION_ASHKENAZI, ranges)
+        range_by_tradition.setdefault(Haftarah.TRADITION_SEPHARDI, ranges)
+
     for raw_line in path.read_text(encoding="utf-8-sig").splitlines():
         line = raw_line.strip()
         if not line:
@@ -77,17 +99,22 @@ def parse_haftarah_file(path: Path):
         m = COLON_TRADITION_RE.match(line)
         if m:
             label, rest = m.groups()
-            rm = RANGE_IN_TEXT_RE.search(rest)
-            if rm:
-                sc, sv, ec, ev = rm.groups()
-                range_by_tradition[TRADITION_LABELS[label]] = (int(sc), int(sv), int(ec or sc), int(ev))
+            # может быть несколько несмежных диапазонов через запятую, напр.
+            # "Ашкеназим: 6:1-7:6, 9:5-6"
+            ranges = [
+                (int(sc), int(sv), int(ec or sc), int(ev))
+                for sc, sv, ec, ev in RANGE_IN_TEXT_RE.findall(rest)
+            ]
+            if ranges:
+                range_by_tradition[TRADITION_LABELS[label]] = ranges
             continue
 
         m = IZ_KNIGI_RE.match(line)
         if m:
-            slug, _ = resolve_book_prefix(m.group(1))
+            slug, _ = resolve_book_prefix(m.group(1) or m.group(2))
             if slug:
                 current_book_slug = slug
+                set_default_ranges_if_needed(line[m.end():])
             continue
 
         m = PAREN_RE.match(line)
@@ -95,6 +122,7 @@ def parse_haftarah_file(path: Path):
             slug, rest = resolve_book_prefix(m.group(1))
             if slug and RANGE_IN_TEXT_RE.match(rest):
                 current_book_slug = slug
+                set_default_ranges_if_needed(rest)
             continue
 
         m = BOTH_SUFFIX_RE.search(line)
@@ -102,11 +130,19 @@ def parse_haftarah_file(path: Path):
             slug, rest = resolve_book_prefix(line[:m.start()].strip())
             if slug:
                 current_book_slug = slug
+                set_default_ranges_if_needed(rest)
+            continue
+
+        if line in BOOK_ALIASES:
+            # голое имя книги на отдельной строке, без диапазона в этой же
+            # строке - диапазон придёт отдельно из "Ашкеназим:"/"Сефарадим:"
+            current_book_slug = BOOK_ALIASES[line]
             continue
 
         slug, rest = resolve_book_prefix(line)
         if slug and RANGE_IN_TEXT_RE.match(rest):
             current_book_slug = slug
+            set_default_ranges_if_needed(rest)
             continue
 
         if line.isdigit():
@@ -132,22 +168,25 @@ def parse_haftarah_file(path: Path):
 
 
 def verses_for_tradition(tradition, verses, range_by_tradition):
-    """Стихи для одной традиции: помеченные конкретной традицией - как есть;
-    помеченные BOTH ("общий поток") - только если попадают в её диапазон
-    (если диапазон вообще объявлен - иначе весь поток идёт в обе традиции)."""
+    """Стихи для одной традиции: помеченные конкретной традицией - как есть (range_idx
+    всегда None, весь такой раздел и так один непрерывный кусок текста источника);
+    помеченные BOTH ("общий поток") - только если попадают в её диапазон, с пометкой
+    НОМЕРА диапазона (range_idx) - на случай нескольких несмежных диапазонов у одной
+    традиции (напр. "6:1-7:6, 9:5-6") - чтобы не склеить их в один при отображении."""
     result = []
     for v in verses:
         if v["traditions"] != BOTH:
             if tradition in v["traditions"]:
-                result.append(v)
+                result.append({**v, "range_idx": None})
             continue
-        rng = range_by_tradition.get(tradition)
-        if rng is None:
-            result.append(v)
+        ranges = range_by_tradition.get(tradition)
+        if ranges is None:
+            result.append({**v, "range_idx": None})
             continue
-        sc, sv, ec, ev = rng
-        if (sc, sv) <= (v["chapter"], v["verse"]) <= (ec, ev):
-            result.append(v)
+        for idx, (sc, sv, ec, ev) in enumerate(ranges):
+            if (sc, sv) <= (v["chapter"], v["verse"]) <= (ec, ev):
+                result.append({**v, "range_idx": idx})
+                break
     return result
 
 
@@ -211,14 +250,20 @@ class Command(BaseCommand):
 
             haftarah, _ = Haftarah.objects.update_or_create(parasha=parasha, tradition=tradition)
             haftarah.verses.all().delete()
+            segment = -1
+            prev_key = None
             for order, v in enumerate(tradition_verses):
+                key = (v["book_slug"], v["range_idx"])
+                if key != prev_key:
+                    segment += 1
+                    prev_key = key
                 book_name_ru, book_name_he, _ = HAFTARAH_BOOKS[v["book_slug"]]
                 he_verses = he_cache.get((v["book_slug"], v["chapter"]))
                 text_he = ""
                 if he_verses and 1 <= v["verse"] <= len(he_verses):
                     text_he = he_verses[v["verse"] - 1]
                 HaftarahVerse.objects.create(
-                    haftarah=haftarah, order=order,
+                    haftarah=haftarah, order=order, segment=segment,
                     book_name_ru=book_name_ru, book_name_he=book_name_he,
                     chapter=v["chapter"], verse=v["verse"],
                     text_he=text_he, text_ru=v["text"],
