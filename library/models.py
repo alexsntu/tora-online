@@ -112,6 +112,51 @@ class Parasha(models.Model):
         return self.name_ru
 
 
+class Haftarah(models.Model):
+    """Гафтара недельной главы - отдельный раздел, не часть обычного текста Танаха
+    (книги Пророков-источники не добавляются как Book, весь текст живёт только здесь,
+    см. HaftarahVerse)."""
+    TRADITION_ASHKENAZI = "ashkenazi"
+    TRADITION_SEPHARDI = "sephardi"
+    TRADITION_CHOICES = [
+        (TRADITION_ASHKENAZI, "Ашкеназская"),
+        (TRADITION_SEPHARDI, "Сефардская"),
+    ]
+
+    parasha = models.ForeignKey(
+        Parasha, verbose_name="Недельная глава", related_name="haftarot", on_delete=models.CASCADE,
+    )
+    tradition = models.CharField("Традиция", max_length=20, choices=TRADITION_CHOICES)
+    book_name_ru = models.CharField("Книга-источник (рус.)", max_length=100)
+    book_name_he = models.CharField("Книга-источник (иврит)", max_length=100, blank=True)
+
+    class Meta:
+        ordering = ["parasha__order", "tradition"]
+        unique_together = ("parasha", "tradition")
+        verbose_name = "гафтара"
+        verbose_name_plural = "Гафтарот"
+
+    def __str__(self):
+        return f"{self.parasha.name_ru} ({self.get_tradition_display()})"
+
+
+class HaftarahVerse(models.Model):
+    haftarah = models.ForeignKey(Haftarah, verbose_name="Гафтара", related_name="verses", on_delete=models.CASCADE)
+    chapter = models.PositiveSmallIntegerField("Глава")
+    verse = models.PositiveSmallIntegerField("Стих")
+    text_he = models.TextField("Текст (иврит)", blank=True)
+    text_ru = models.TextField("Текст (рус.)", blank=True)
+
+    class Meta:
+        ordering = ["chapter", "verse"]
+        unique_together = ("haftarah", "chapter", "verse")
+        verbose_name = "стих гафтары"
+        verbose_name_plural = "Стихи гафтары"
+
+    def __str__(self):
+        return f"{self.haftarah} {self.chapter}:{self.verse}"
+
+
 class Material(models.Model):
     TYPE_VIDEO = "video"
     TYPE_ARTICLE = "article"

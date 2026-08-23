@@ -7,6 +7,15 @@
 
 <h1>{{ title }}</h1>
 
+{% if parasha.haftarot.all %}
+<p class="translation-toggle-label">
+    Гафтара:
+    {% for haftarah in parasha.haftarot.all %}
+    <a href="{% url 'library:haftarah' parasha.slug haftarah.tradition %}">{{ haftarah.get_tradition_display }}</a>{% if not forloop.last %} · {% endif %}
+    {% endfor %}
+</p>
+{% endif %}
+
 {% include "library/_quick_nav.html" %}
 {% include "library/_nav.html" %}
 

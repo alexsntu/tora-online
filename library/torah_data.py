@@ -41,6 +41,13 @@ BOOKS = {
     ),
 }
 
+# slug -> (name_ru, name_he, sefaria_name) — книги-источники гафтарот (Невиим).
+# Не входят в BOOKS/Category специально: гафтара - отдельный раздел, не часть
+# обычного текста Танаха на сайте (см. library.models.Haftarah).
+HAFTARAH_BOOKS = {
+    "yeshayahu": ("Йешаяу", "יְשַׁעְיָהוּ", "Isaiah"),
+}
+
 # slug -> (name_ru, name_he, order) — порядок сквозной по всей Торе (1..54)
 PARASHOT = {
     "bereshit": ("Берешит", "בְּרֵאשִׁית", 1),

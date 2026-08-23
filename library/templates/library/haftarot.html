@@ -1,0 +1,28 @@
+{% extends "library/base.html" %}
+{% block title %}{{ meta_title }}{% endblock %}
+{% block content %}
+<nav class="breadcrumbs">
+    <a href="{% url 'library:home' %}">← Оглавление</a>
+</nav>
+
+<h1>Афторот</h1>
+<p class="topics-intro">
+    Гафтара — отрывок из книг Пророков (Невиим), который читают вместе с каждой недельной главой Торы.
+    Список ниже — по недельным главам, в порядке годового цикла чтения.
+</p>
+
+<ul class="parasha-list">
+    {% for parasha in parashot %}
+    <li>
+        <span>{{ parasha.name_ru }}</span>
+        <span class="range">
+            {% for haftarah in parasha.haftarot.all %}
+            <a href="{% url 'library:haftarah' parasha.slug haftarah.tradition %}">{{ haftarah.get_tradition_display }}</a>{% if not forloop.last %} · {% endif %}
+            {% empty %}
+            <span class="empty-note">пока не добавлено</span>
+            {% endfor %}
+        </span>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

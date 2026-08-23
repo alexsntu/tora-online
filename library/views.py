@@ -23,7 +23,8 @@ from .hebrew_calendar import (
     today_info,
 )
 from .models import (
-    AnalyticsEvent, Book, Category, ErrorReport, Material, Parasha, Question, Sage, SiteSettings, Verse, WeeklyPost,
+    AnalyticsEvent, Book, Category, ErrorReport, Haftarah, Material, Parasha, Question, Sage, SiteSettings, Verse,
+    WeeklyPost,
 )
 
 
@@ -416,6 +417,46 @@ def sage_detail_view(request, sage_slug):
         "library/sage_detail.html",
         {"sage": sage, "books": books, "meta_title": meta_title, "meta_description": meta_description},
     )
+
+
+def haftarot_view(request):
+    """Указатель гафтарот: отдельный раздел, не часть обычного текста Танаха -
+    список по недельным главам (как и читаются гафтарот - глава за главой)."""
+    parashot = Parasha.objects.order_by("order").prefetch_related("haftarot")
+    meta_title, meta_description = resolve_meta(
+        "", "",
+        "Афторот (гафтарот) — Tora Online",
+        "Гафтарот (чтения из книг Пророков) для каждой недельной главы Торы, ашкеназская и сефардская традиции.",
+    )
+    return render(request, "library/haftarot.html", {
+        "parashot": parashot,
+        "title": "Афторот",
+        "meta_title": meta_title,
+        "meta_description": meta_description,
+    })
+
+
+def haftarah_view(request, parasha_slug, tradition):
+    parasha = get_object_or_404(Parasha, slug=parasha_slug)
+    haftarah = get_object_or_404(Haftarah, parasha=parasha, tradition=tradition)
+    other_haftarot = parasha.haftarot.exclude(pk=haftarah.pk)
+
+    title = f"Гафтара «{parasha.name_ru}» ({haftarah.get_tradition_display()})"
+    meta_title, meta_description = resolve_meta(
+        "", "",
+        f"{title} — Tora Online",
+        f"Гафтара недельной главы «{parasha.name_ru}» ({haftarah.get_tradition_display()} традиция), "
+        f"из книги {haftarah.book_name_ru}, текст на иврите и русском.",
+    )
+    return render(request, "library/haftarah.html", {
+        "parasha": parasha,
+        "haftarah": haftarah,
+        "verses": haftarah.verses.all(),
+        "other_haftarot": other_haftarot,
+        "title": title,
+        "meta_title": meta_title,
+        "meta_description": meta_description,
+    })
 
 
 @csrf_exempt

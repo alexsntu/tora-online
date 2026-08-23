@@ -16,6 +16,15 @@
         <strong>{{ today.parasha_ru }}</strong>
         {% endif %}
     </span>
+    {% if today.parasha_obj.haftarot.all %}
+    <span class="today-bar-sep">✦</span>
+    <span class="today-bar-parasha">
+        Афтара:
+        {% for haftarah in today.parasha_obj.haftarot.all %}
+        <a href="{% url 'library:haftarah' today.parasha_obj.slug haftarah.tradition %}">{{ haftarah.get_tradition_display }}</a>{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    </span>
+    {% endif %}
     {% if not hide_calendar_link %}
     <a class="today-bar-calendar" href="{% url 'library:calendar' %}">Календарь и конвертер дат →</a>
     {% endif %}

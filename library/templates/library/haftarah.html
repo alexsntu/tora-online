@@ -1,0 +1,40 @@
+{% extends "library/base.html" %}
+{% block title %}{{ meta_title }}{% endblock %}
+{% block content %}
+<nav class="breadcrumbs">
+    <a href="{% url 'library:home' %}">← Оглавление</a>
+    · <a href="{% url 'library:haftarot' %}">Афторот</a>
+</nav>
+
+<h1>Гафтара недельной главы «{{ parasha.name_ru }}»</h1>
+<p class="book-description">
+    Из книги {{ haftarah.book_name_ru }}{% if haftarah.book_name_he %} <span class="he-label" dir="rtl">({{ haftarah.book_name_he }})</span>{% endif %}
+    — {{ haftarah.get_tradition_display }} традиция.
+</p>
+
+{% if other_haftarot %}
+<p class="translation-toggle-label">
+    Другая традиция:
+    {% for other in other_haftarot %}
+    <a href="{% url 'library:haftarah' parasha.slug other.tradition %}">{{ other.get_tradition_display }}</a>
+    {% endfor %}
+</p>
+{% endif %}
+
+<div class="verses">
+    {% for verse in verses %}
+    {% ifchanged verse.chapter %}
+    <h2 class="chapter-marker">Глава {{ verse.chapter }}</h2>
+    {% endifchanged %}
+    <div class="verse-row" id="v-{{ verse.chapter }}-{{ verse.verse }}">
+        <span class="verse-num">{{ verse.chapter }}:{{ verse.verse }}</span>
+        <span class="verse-he" dir="rtl" lang="he">{{ verse.text_he }}</span>
+        <span class="verse-ru" lang="ru">{{ verse.text_ru }}</span>
+    </div>
+    {% endfor %}
+</div>
+
+<nav class="breadcrumbs">
+    <a href="{% url 'library:parasha' parasha.slug %}">← К недельной главе «{{ parasha.name_ru }}»</a>
+</nav>
+{% endblock %}

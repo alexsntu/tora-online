@@ -7,8 +7,8 @@ from axes.admin import AccessAttemptAdmin, IsLockedOutFilter
 from axes.models import AccessAttempt
 
 from .models import (
-    AnalyticsEvent, Book, Category, Verse, Parasha, Material, ErrorReport, Question, Sage, SiteSettings, Topic,
-    WeeklyPost,
+    AnalyticsEvent, Book, Category, Verse, Parasha, Haftarah, HaftarahVerse, Material, ErrorReport, Question, Sage,
+    SiteSettings, Topic, WeeklyPost,
 )
 from .views import analytics_dashboard
 
@@ -92,6 +92,18 @@ class VerseAdmin(admin.ModelAdmin):
 class ParashaAdmin(admin.ModelAdmin):
     list_display = ("name_ru", "name_he", "slug", "order", "start_verse", "end_verse")
     prepopulated_fields = {"slug": ("name_ru",)}
+
+
+class HaftarahVerseInline(admin.TabularInline):
+    model = HaftarahVerse
+    extra = 0
+
+
+@admin.register(Haftarah)
+class HaftarahAdmin(admin.ModelAdmin):
+    list_display = ("parasha", "tradition", "book_name_ru")
+    list_filter = ("tradition",)
+    inlines = [HaftarahVerseInline]
 
 
 def _verse_picker_data(request):
