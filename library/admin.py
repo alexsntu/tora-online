@@ -7,8 +7,8 @@ from axes.admin import AccessAttemptAdmin, IsLockedOutFilter
 from axes.models import AccessAttempt
 
 from .models import (
-    AnalyticsEvent, Book, Category, Verse, Parasha, Haftarah, HaftarahVerse, Material, ErrorReport, Question, Sage,
-    SiteSettings, Topic, WeeklyPost,
+    AnalyticsEvent, Book, Category, Verse, Parasha, Haftarah, HaftarahOccasion, HaftarahVerse, Material, ErrorReport,
+    Question, Sage, SiteSettings, Topic, WeeklyPost,
 )
 from .views import analytics_dashboard
 
@@ -100,11 +100,17 @@ class HaftarahVerseInline(admin.TabularInline):
     ordering = ("order",)
 
 
+@admin.register(HaftarahOccasion)
+class HaftarahOccasionAdmin(admin.ModelAdmin):
+    list_display = ("name_ru", "name_he", "slug", "category", "order")
+    list_filter = ("category",)
+    prepopulated_fields = {"slug": ("name_ru",)}
+
+
 @admin.register(Haftarah)
 class HaftarahAdmin(admin.ModelAdmin):
-    list_display = ("parasha", "tradition", "range_display")
-    list_filter = ("tradition",)
-    inlines = [HaftarahVerseInline]
+    list_display = ("__str__", "parasha", "occasion", "tradition", "range_display")
+    list_filter = ("tradition", "occasion__category")
     inlines = [HaftarahVerseInline]
 
 

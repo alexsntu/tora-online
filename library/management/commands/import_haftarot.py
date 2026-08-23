@@ -32,6 +32,9 @@ BOOK_ALIASES = {
     "Ошэйа": "hoshea",
     "Зехарйа": "zecharia",
     "Йег̃ошуа̃": "yehoshua",
+    "Йех̃эзкэль": "yechezkel",
+    "Йоэйл": "yoel",
+    "Йеошуа": "yehoshua",
 }
 BOOK_ALIASES_SORTED = sorted(BOOK_ALIASES, key=len, reverse=True)
 
@@ -53,15 +56,19 @@ COLON_TRADITION_RE = re.compile(r"^(Ашкеназим|Сефарадим):\s*(.
 IZ_KNIGI_RE = re.compile(r"^из книги\s+(?:«([^»]+)»|(\S+))", re.IGNORECASE)
 PAREN_RE = re.compile(r"^\((.+)\)$")
 BOTH_SUFFIX_RE = re.compile(r"\(ашкеназим и сефарадим\)\s*$", re.IGNORECASE)
+ONLY_TRADITION_RE = re.compile(r"только (ашкеназим|сефарадим)", re.IGNORECASE)
 VERSE_MARKER_RE = re.compile(r"\((\d+)\)")
 
 
 def resolve_book_prefix(text):
     """Если строка начинается с известного названия книги (BOOK_ALIASES), возвращает
-    (слаг, остаток строки после названия) - иначе (None, text)."""
+    (слаг, остаток строки после названия) - иначе (None, text). Разделитель после
+    названия - пробел ИЛИ запятая ("Шемуэйл I, 20:18")."""
     for label in BOOK_ALIASES_SORTED:
-        if text == label or text.startswith(label + " "):
-            return BOOK_ALIASES[label], text[len(label):].strip()
+        if text == label:
+            return BOOK_ALIASES[label], ""
+        if text.startswith(label) and len(text) > len(label) and text[len(label)] in " ,":
+            return BOOK_ALIASES[label], text[len(label):].lstrip(" ,")
     return None, text
 
 
@@ -86,16 +93,23 @@ def parse_haftarah_file(path: Path):
     def set_default_ranges_if_needed(rest):
         """Диапазон, объявленный ОДИН раз (не отдельно на традицию - "Ашкеназим:"/
         "Сефарадим:") - значит общий на обе традиции, включая все несмежные куски
-        через запятую ("Йирмейа 34:8-22, 33:25-26"). Работает только пока традиции
-        ещё не разделились (current_traditions is BOTH) - иначе это просто книга
-        для уже выбранного раздела (Вайеце), диапазон в тексте не нужен. Не трогает
-        традицию, для которой диапазон уже объявлен явно ("Ашкеназим:"/"Сефарадим:")
-        - источник иногда повторяет диапазон одной традиции бare-строкой перед её
-        текстом (напр. Шмот), это не должно перетирать уже верно заданную вторую."""
-        if current_traditions != BOTH:
-            return
+        через запятую ("Йирмейа 34:8-22, 33:25-26"). Заодно выставляет текущую главу
+        по началу первого диапазона - источник иногда сразу начинает текст первого
+        стиха, не объявляя главу отдельной строкой (напр. "2:14-4:7", а текст стиха
+        (14) идёт следующей строкой без "2" перед ним); настоящая строка-глава,
+        если есть, всё равно переопределит это ниже. Часть с range_by_tradition
+        работает только пока традиции ещё не разделились (current_traditions is
+        BOTH) - иначе это просто книга для уже выбранного раздела (Вайеце). Не
+        трогает традицию, для которой диапазон уже объявлен явно ("Ашкеназим:"/
+        "Сефарадим:") - источник иногда повторяет диапазон одной традиции
+        bare-строкой перед её текстом (напр. Шмот), это не должно перетирать уже
+        верно заданную вторую."""
+        nonlocal current_chapter
         ranges = [_parse_range_match(m) for m in RANGE_IN_TEXT_RE.finditer(rest)]
         if not ranges:
+            return
+        current_chapter = ranges[0][0]
+        if current_traditions != BOTH:
             return
         range_by_tradition.setdefault(Haftarah.TRADITION_ASHKENAZI, (current_book_slug, ranges))
         range_by_tradition.setdefault(Haftarah.TRADITION_SEPHARDI, (current_book_slug, ranges))
@@ -107,6 +121,14 @@ def parse_haftarah_file(path: Path):
 
         if line in TRADITION_LABELS:
             current_traditions = frozenset({TRADITION_LABELS[line]})
+            continue
+
+        m = ONLY_TRADITION_RE.search(line)
+        if m:
+            # "2-й отрывок (только ашкеназим)" и т.п. - переключение традиции,
+            # даже если это не вся строка (проверяем раньше PAREN_RE, чтобы
+            # скобочная форма не была молча принята за обычное примечание).
+            current_traditions = frozenset({TRADITION_LABELS[m.group(1).capitalize()]})
             continue
 
         m = COLON_TRADITION_RE.match(line)
@@ -158,10 +180,17 @@ def parse_haftarah_file(path: Path):
             continue
 
         slug, rest = resolve_book_prefix(line)
-        if slug and RANGE_IN_TEXT_RE.match(rest):
-            current_book_slug = slug
-            set_default_ranges_if_needed(rest)
-            continue
+        if slug:
+            if rest.isdigit():
+                # "Мелахим II 11" - книга и номер главы вместе, без двоеточия
+                # (глава:стих начнётся со следующей строки текста).
+                current_book_slug = slug
+                current_chapter = int(rest)
+                continue
+            if RANGE_IN_TEXT_RE.match(rest):
+                current_book_slug = slug
+                set_default_ranges_if_needed(rest)
+                continue
 
         if line.isdigit():
             current_chapter = int(line)
@@ -214,6 +243,67 @@ def verses_for_tradition(tradition, verses, range_by_tradition):
     return result
 
 
+def import_haftarah_file(txt_file: Path, target: dict, stdout, style):
+    """Общий импорт одного файла гафтары в Haftarah(**target) - target это
+    {"parasha": obj} или {"occasion": obj}. Используется и import_haftarot
+    (недельные главы), и import_haftarot_occasions (особые даты)."""
+    range_by_tradition, all_verses = parse_haftarah_file(txt_file)
+    if not all_verses:
+        stdout.write(style.WARNING(f"{txt_file}: не найдено ни одного стиха"))
+        return
+
+    book_slugs_used = {v["book_slug"] for v in all_verses}
+    unknown = book_slugs_used - HAFTARAH_BOOKS.keys()
+    if unknown:
+        stdout.write(style.WARNING(
+            f"{txt_file}: неизвестные книги {unknown} - добавь в HAFTARAH_BOOKS "
+            "(library/torah_data.py), пропускаю"
+        ))
+        return
+
+    he_cache = {}
+    for book_slug in book_slugs_used:
+        _, _, sefaria_name = HAFTARAH_BOOKS[book_slug]
+        chapters_needed = sorted({v["chapter"] for v in all_verses if v["book_slug"] == book_slug})
+        he_cache_dir = TEXTS_HE_CACHE_DIR / "_haftarah" / book_slug
+        for chapter in chapters_needed:
+            he_cache[(book_slug, chapter)] = fetch_hebrew_chapter(sefaria_name, chapter, he_cache_dir)
+
+    created = []
+    for tradition in (Haftarah.TRADITION_ASHKENAZI, Haftarah.TRADITION_SEPHARDI):
+        tradition_verses = verses_for_tradition(tradition, all_verses, range_by_tradition)
+        if not tradition_verses:
+            continue
+
+        haftarah, _ = Haftarah.objects.update_or_create(tradition=tradition, **target)
+        haftarah.verses.all().delete()
+        segment = -1
+        prev_key = None
+        for order, v in enumerate(tradition_verses):
+            key = (v["book_slug"], v["range_idx"])
+            if key != prev_key:
+                segment += 1
+                prev_key = key
+            book_name_ru, book_name_he, _ = HAFTARAH_BOOKS[v["book_slug"]]
+            he_verses = he_cache.get((v["book_slug"], v["chapter"]))
+            text_he = ""
+            if he_verses and 1 <= v["verse"] <= len(he_verses):
+                text_he = he_verses[v["verse"] - 1]
+            HaftarahVerse.objects.create(
+                haftarah=haftarah, order=order, segment=segment,
+                book_name_ru=book_name_ru, book_name_he=book_name_he,
+                chapter=v["chapter"], verse=v["verse"],
+                text_he=text_he, text_ru=v["text"],
+            )
+        created.append(tradition)
+
+    if not created:
+        stdout.write(style.WARNING(f"{txt_file}: не удалось определить ни одной традиции"))
+        return
+
+    stdout.write(style.SUCCESS(f"{txt_file.parent.name}: гафтара создана/обновлена: {', '.join(created)}"))
+
+
 class Command(BaseCommand):
     help = (
         "Импортирует тексты гафтарот из texts/ru_haftarah/<недельная_глава>/haftarah.txt "
@@ -241,63 +331,4 @@ class Command(BaseCommand):
             if not txt_file.exists():
                 self.stdout.write(self.style.WARNING(f"{parasha_dir}: нет файла haftarah.txt"))
                 continue
-            self.import_haftarah_file(parasha, txt_file)
-
-    def import_haftarah_file(self, parasha: Parasha, txt_file: Path):
-        range_by_tradition, all_verses = parse_haftarah_file(txt_file)
-        if not all_verses:
-            self.stdout.write(self.style.WARNING(f"{txt_file}: не найдено ни одного стиха"))
-            return
-
-        book_slugs_used = {v["book_slug"] for v in all_verses}
-        unknown = book_slugs_used - HAFTARAH_BOOKS.keys()
-        if unknown:
-            self.stdout.write(self.style.WARNING(
-                f"{txt_file}: неизвестные книги {unknown} - добавь в HAFTARAH_BOOKS "
-                "(library/torah_data.py), пропускаю"
-            ))
-            return
-
-        he_cache = {}
-        for book_slug in book_slugs_used:
-            _, _, sefaria_name = HAFTARAH_BOOKS[book_slug]
-            chapters_needed = sorted({v["chapter"] for v in all_verses if v["book_slug"] == book_slug})
-            he_cache_dir = TEXTS_HE_CACHE_DIR / "_haftarah" / book_slug
-            for chapter in chapters_needed:
-                he_cache[(book_slug, chapter)] = fetch_hebrew_chapter(sefaria_name, chapter, he_cache_dir)
-
-        created = []
-        for tradition in (Haftarah.TRADITION_ASHKENAZI, Haftarah.TRADITION_SEPHARDI):
-            tradition_verses = verses_for_tradition(tradition, all_verses, range_by_tradition)
-            if not tradition_verses:
-                continue
-
-            haftarah, _ = Haftarah.objects.update_or_create(parasha=parasha, tradition=tradition)
-            haftarah.verses.all().delete()
-            segment = -1
-            prev_key = None
-            for order, v in enumerate(tradition_verses):
-                key = (v["book_slug"], v["range_idx"])
-                if key != prev_key:
-                    segment += 1
-                    prev_key = key
-                book_name_ru, book_name_he, _ = HAFTARAH_BOOKS[v["book_slug"]]
-                he_verses = he_cache.get((v["book_slug"], v["chapter"]))
-                text_he = ""
-                if he_verses and 1 <= v["verse"] <= len(he_verses):
-                    text_he = he_verses[v["verse"] - 1]
-                HaftarahVerse.objects.create(
-                    haftarah=haftarah, order=order, segment=segment,
-                    book_name_ru=book_name_ru, book_name_he=book_name_he,
-                    chapter=v["chapter"], verse=v["verse"],
-                    text_he=text_he, text_ru=v["text"],
-                )
-            created.append(tradition)
-
-        if not created:
-            self.stdout.write(self.style.WARNING(f"{txt_file}: не удалось определить ни одной традиции"))
-            return
-
-        self.stdout.write(self.style.SUCCESS(
-            f"{txt_file.parent.name}: гафтара создана/обновлена: {', '.join(created)}"
-        ))
+            import_haftarah_file(txt_file, {"parasha": parasha}, self.stdout, self.style)

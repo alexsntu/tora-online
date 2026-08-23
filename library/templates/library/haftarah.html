@@ -6,7 +6,7 @@
     · <a href="{% url 'library:haftarot' %}">Афторот</a>
 </nav>
 
-<h1>Гафтара недельной главы «{{ parasha.name_ru }}»</h1>
+<h1>{{ heading }}</h1>
 <p class="book-description">
     {{ haftarah.range_display }} — {{ haftarah.get_tradition_display }} традиция.
 </p>
@@ -15,7 +15,7 @@
 <p class="translation-toggle-label">
     Другая традиция:
     {% for other in other_haftarot %}
-    <a href="{% url 'library:haftarah' parasha.slug other.tradition %}">{{ other.get_tradition_display }}</a>
+    <a href="{% url other_url_name other_url_arg other.tradition %}">{{ other.get_tradition_display }}</a>
     {% endfor %}
 </p>
 {% endif %}
@@ -37,6 +37,6 @@
 </div>
 
 <nav class="breadcrumbs">
-    <a href="{% url 'library:parasha' parasha.slug %}">← К недельной главе «{{ parasha.name_ru }}»</a>
+    <a href="{{ back_url }}">← {{ back_label }}</a>
 </nav>
 {% endblock %}

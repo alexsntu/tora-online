@@ -23,8 +23,8 @@ from .hebrew_calendar import (
     today_info,
 )
 from .models import (
-    AnalyticsEvent, Book, Category, ErrorReport, Haftarah, Material, Parasha, Question, Sage, SiteSettings, Verse,
-    WeeklyPost,
+    AnalyticsEvent, Book, Category, ErrorReport, Haftarah, HaftarahOccasion, Material, Parasha, Question, Sage,
+    SiteSettings, Verse, WeeklyPost,
 )
 
 
@@ -420,9 +420,9 @@ def sage_detail_view(request, sage_slug):
 
 
 def haftarot_view(request):
-    """Указатель гафтарот: отдельный раздел, не часть обычного текста Танаха -
-    оглавление по книгам Торы (как в оглавлении библиотеки), внутри - по недельным
-    главам в порядке годового цикла чтения."""
+    """Указатель гафтарот: отдельный раздел, не часть обычного текста Танаха. Четыре
+    подраздела: недельные главы (по книгам Торы, в порядке годового цикла), потом
+    три раздела особых дат - Афторот к датам / Шалош Регалим / Арба Парашийот."""
     parashot = (
         Parasha.objects.select_related("start_verse__book")
         .prefetch_related("haftarot__verses")
@@ -432,13 +432,25 @@ def haftarot_view(request):
         {"book": book, "parashot": list(group)}
         for book, group in groupby(parashot, key=lambda p: p.start_verse.book)
     ]
+
+    occasions = HaftarahOccasion.objects.prefetch_related("haftarot__verses").order_by("category", "order")
+    occasions_by_category = {
+        category: list(group) for category, group in groupby(occasions, key=lambda o: o.category)
+    }
+    occasion_sections = [
+        {"label": label, "occasions": occasions_by_category.get(key, [])}
+        for key, label in HaftarahOccasion.CATEGORY_CHOICES
+    ]
+
     meta_title, meta_description = resolve_meta(
         "", "",
         "Афторот (гафтарот) — Tora Online",
-        "Гафтарот (чтения из книг Пророков) для каждой недельной главы Торы, ашкеназская и сефардская традиции.",
+        "Гафтарот (чтения из книг Пророков) для каждой недельной главы Торы, для праздничных дат, "
+        "Шалош Регалим и Арба Парашийот - ашкеназская и сефардская традиции.",
     )
     return render(request, "library/haftarot.html", {
         "books": books,
+        "occasion_sections": occasion_sections,
         "title": "Афторот",
         "meta_title": meta_title,
         "meta_description": meta_description,
@@ -458,10 +470,41 @@ def haftarah_view(request, parasha_slug, tradition):
         f"{haftarah.range_display}, текст на иврите и русском.",
     )
     return render(request, "library/haftarah.html", {
-        "parasha": parasha,
+        "heading": f"Гафтара недельной главы «{parasha.name_ru}»",
+        "back_url": reverse("library:parasha", args=[parasha.slug]),
+        "back_label": f"К недельной главе «{parasha.name_ru}»",
         "haftarah": haftarah,
         "verses": haftarah.verses.all(),
         "other_haftarot": other_haftarot,
+        "other_url_name": "library:haftarah",
+        "other_url_arg": parasha.slug,
+        "title": title,
+        "meta_title": meta_title,
+        "meta_description": meta_description,
+    })
+
+
+def haftarah_occasion_view(request, occasion_slug, tradition):
+    occasion = get_object_or_404(HaftarahOccasion, slug=occasion_slug)
+    haftarah = get_object_or_404(Haftarah, occasion=occasion, tradition=tradition)
+    other_haftarot = occasion.haftarot.exclude(pk=haftarah.pk)
+
+    title = f"Гафтара «{occasion.name_ru}» ({haftarah.get_tradition_display()})"
+    meta_title, meta_description = resolve_meta(
+        "", "",
+        f"{title} — Tora Online",
+        f"Гафтара «{occasion.name_ru}» ({haftarah.get_tradition_display()} традиция), "
+        f"{haftarah.range_display}, текст на иврите и русском.",
+    )
+    return render(request, "library/haftarah.html", {
+        "heading": f"Гафтара «{occasion.name_ru}»",
+        "back_url": reverse("library:haftarot"),
+        "back_label": "Афторот",
+        "haftarah": haftarah,
+        "verses": haftarah.verses.all(),
+        "other_haftarot": other_haftarot,
+        "other_url_name": "library:haftarah_occasion",
+        "other_url_arg": occasion.slug,
         "title": title,
         "meta_title": meta_title,
         "meta_description": meta_description,
@@ -615,8 +658,11 @@ def sitemap_xml_view(request):
     for parasha in Parasha.objects.all():
         paths.append(reverse("library:parasha", args=[parasha.slug]))
 
-    for haftarah in Haftarah.objects.select_related("parasha"):
+    for haftarah in Haftarah.objects.filter(parasha__isnull=False).select_related("parasha"):
         paths.append(reverse("library:haftarah", args=[haftarah.parasha.slug, haftarah.tradition]))
+
+    for haftarah in Haftarah.objects.filter(occasion__isnull=False).select_related("occasion"):
+        paths.append(reverse("library:haftarah_occasion", args=[haftarah.occasion.slug, haftarah.tradition]))
 
     books_with_materials = Book.objects.annotate(materials_count=Count("verses__materials", distinct=True)).filter(
         materials_count__gt=0

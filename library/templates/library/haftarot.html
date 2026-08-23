@@ -7,10 +7,11 @@
 
 <h1>Афторот</h1>
 <p class="topics-intro">
-    Гафтара — отрывок из книг Пророков (Невиим), который читают вместе с каждой недельной главой Торы.
-    Список ниже — по недельным главам, в порядке годового цикла чтения.
+    Гафтара — отрывок из книг Пророков (Невиим), который читают вместе с каждой недельной главой Торы
+    или в особые даты еврейского календаря.
 </p>
 
+<h2 class="book-section-heading">Афторот к недельным главам</h2>
 {% for book_group in books %}
 <details class="category-block" open>
     <summary class="category-summary">{{ book_group.book.name_ru }}</summary>
@@ -29,5 +30,25 @@
         {% endfor %}
     </ul>
 </details>
+{% endfor %}
+
+{% for section in occasion_sections %}
+<h2 class="book-section-heading">{{ section.label }}</h2>
+<ul class="parasha-list">
+    {% for occasion in section.occasions %}
+    <li>
+        <span>{{ occasion.name_ru }}</span>
+        <span class="range">
+            {% for haftarah in occasion.haftarot.all %}
+            <a href="{% url 'library:haftarah_occasion' occasion.slug haftarah.tradition %}">{{ haftarah.get_tradition_display }}: {{ haftarah.range_display }}</a>{% if not forloop.last %} · {% endif %}
+            {% empty %}
+            <span class="empty-note">пока не добавлено</span>
+            {% endfor %}
+        </span>
+    </li>
+    {% empty %}
+    <li><span class="empty-note">пока не добавлено</span></li>
+    {% endfor %}
+</ul>
 {% endfor %}
 {% endblock %}

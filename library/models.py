@@ -112,10 +112,39 @@ class Parasha(models.Model):
         return self.name_ru
 
 
+class HaftarahOccasion(models.Model):
+    """Праздник/особая дата, к которой читается отдельная гафтара - не привязана
+    к недельной главе (см. Haftarah.occasion). Три раздела над недельными главами
+    в /haftarot/: даты (Рош а-Шана, Йом-Кипур, Ханука...), Шалош Регалим (Песах,
+    Шавуот, Суккот), Арба Парашийот (Шкалим/Захор/Пара/аХодеш)."""
+    CATEGORY_DATES = "dates"
+    CATEGORY_REGALIM = "regalim"
+    CATEGORY_ARBA_PARSHIYOT = "arba_parshiyot"
+    CATEGORY_CHOICES = [
+        (CATEGORY_DATES, "Афторот к датам"),
+        (CATEGORY_REGALIM, "Афторот на Шалош Регалим"),
+        (CATEGORY_ARBA_PARSHIYOT, "Специальные главы Торы на праздники (Арба Парашийот)"),
+    ]
+
+    slug = models.SlugField("Слаг (для ссылки)", unique=True)
+    name_ru = models.CharField("Название (рус.)", max_length=100)
+    name_he = models.CharField("Название (иврит)", max_length=100, blank=True)
+    category = models.CharField("Раздел", max_length=20, choices=CATEGORY_CHOICES)
+    order = models.PositiveSmallIntegerField("Порядок", default=0)
+
+    class Meta:
+        ordering = ["category", "order"]
+        verbose_name = "особая дата (для гафтары)"
+        verbose_name_plural = "Особые даты (для гафтарот)"
+
+    def __str__(self):
+        return self.name_ru
+
+
 class Haftarah(models.Model):
-    """Гафтара недельной главы - отдельный раздел, не часть обычного текста Танаха
-    (книги Пророков-источники не добавляются как Book, весь текст живёт только здесь,
-    см. HaftarahVerse)."""
+    """Гафтара недельной главы или особой даты - отдельный раздел, не часть обычного
+    текста Танаха (книги Пророков-источники не добавляются как Book, весь текст
+    живёт только здесь, см. HaftarahVerse). Ровно одно из parasha/occasion заполнено."""
     TRADITION_ASHKENAZI = "ashkenazi"
     TRADITION_SEPHARDI = "sephardi"
     TRADITION_CHOICES = [
@@ -125,17 +154,23 @@ class Haftarah(models.Model):
 
     parasha = models.ForeignKey(
         Parasha, verbose_name="Недельная глава", related_name="haftarot", on_delete=models.CASCADE,
+        null=True, blank=True,
+    )
+    occasion = models.ForeignKey(
+        HaftarahOccasion, verbose_name="Особая дата", related_name="haftarot", on_delete=models.CASCADE,
+        null=True, blank=True,
     )
     tradition = models.CharField("Традиция", max_length=20, choices=TRADITION_CHOICES)
 
     class Meta:
-        ordering = ["parasha__order", "tradition"]
-        unique_together = ("parasha", "tradition")
+        ordering = ["parasha__order", "occasion__category", "occasion__order", "tradition"]
+        unique_together = [("parasha", "tradition"), ("occasion", "tradition")]
         verbose_name = "гафтара"
         verbose_name_plural = "Гафтарот"
 
     def __str__(self):
-        return f"{self.parasha.name_ru} ({self.get_tradition_display()})"
+        name = self.parasha.name_ru if self.parasha_id else self.occasion.name_ru
+        return f"{name} ({self.get_tradition_display()})"
 
     @property
     def range_display(self):

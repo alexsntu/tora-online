@@ -21,6 +21,7 @@ urlpatterns = [
     path("calendar/", views.calendar_view, name="calendar"),
     path("info/", views.info_view, name="info"),
     path("haftarot/", views.haftarot_view, name="haftarot"),
+    path("haftarot/date/<slug:occasion_slug>/<str:tradition>/", views.haftarah_occasion_view, name="haftarah_occasion"),
     path("haftarot/<slug:parasha_slug>/<str:tradition>/", views.haftarah_view, name="haftarah"),
     path("<slug:book_slug>/<int:chapter>/", views.chapter_view, name="chapter"),
     path("<slug:book_slug>/", views.book_view, name="book"),
