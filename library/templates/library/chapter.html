@@ -11,7 +11,7 @@
 <p class="translation-toggle-label">
     Гафтара:
     {% for haftarah in parasha.haftarot.all %}
-    <a href="{% url 'library:haftarah' parasha.slug haftarah.tradition %}">{{ haftarah.get_tradition_display }}</a>{% if not forloop.last %} · {% endif %}
+    <a href="{% url 'library:haftarah' parasha.slug haftarah.tradition %}">{{ haftarah.get_tradition_display }}: {{ haftarah.range_display }}</a>{% if not forloop.last %} · {% endif %}
     {% endfor %}
 </p>
 {% endif %}

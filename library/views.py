@@ -421,15 +421,24 @@ def sage_detail_view(request, sage_slug):
 
 def haftarot_view(request):
     """Указатель гафтарот: отдельный раздел, не часть обычного текста Танаха -
-    список по недельным главам (как и читаются гафтарот - глава за главой)."""
-    parashot = Parasha.objects.order_by("order").prefetch_related("haftarot")
+    оглавление по книгам Торы (как в оглавлении библиотеки), внутри - по недельным
+    главам в порядке годового цикла чтения."""
+    parashot = (
+        Parasha.objects.select_related("start_verse__book")
+        .prefetch_related("haftarot__verses")
+        .order_by("order")
+    )
+    books = [
+        {"book": book, "parashot": list(group)}
+        for book, group in groupby(parashot, key=lambda p: p.start_verse.book)
+    ]
     meta_title, meta_description = resolve_meta(
         "", "",
         "Афторот (гафтарот) — Tora Online",
         "Гафтарот (чтения из книг Пророков) для каждой недельной главы Торы, ашкеназская и сефардская традиции.",
     )
     return render(request, "library/haftarot.html", {
-        "parashot": parashot,
+        "books": books,
         "title": "Афторот",
         "meta_title": meta_title,
         "meta_description": meta_description,

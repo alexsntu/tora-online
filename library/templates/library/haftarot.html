@@ -11,18 +11,23 @@
     Список ниже — по недельным главам, в порядке годового цикла чтения.
 </p>
 
-<ul class="parasha-list">
-    {% for parasha in parashot %}
-    <li>
-        <span>{{ parasha.name_ru }}</span>
-        <span class="range">
-            {% for haftarah in parasha.haftarot.all %}
-            <a href="{% url 'library:haftarah' parasha.slug haftarah.tradition %}">{{ haftarah.get_tradition_display }}</a>{% if not forloop.last %} · {% endif %}
-            {% empty %}
-            <span class="empty-note">пока не добавлено</span>
-            {% endfor %}
-        </span>
-    </li>
-    {% endfor %}
-</ul>
+{% for book_group in books %}
+<details class="category-block" open>
+    <summary class="category-summary">{{ book_group.book.name_ru }}</summary>
+    <ul class="parasha-list">
+        {% for parasha in book_group.parashot %}
+        <li>
+            <span>{{ parasha.name_ru }}</span>
+            <span class="range">
+                {% for haftarah in parasha.haftarot.all %}
+                <a href="{% url 'library:haftarah' parasha.slug haftarah.tradition %}">{{ haftarah.get_tradition_display }}: {{ haftarah.range_display }}</a>{% if not forloop.last %} · {% endif %}
+                {% empty %}
+                <span class="empty-note">пока не добавлено</span>
+                {% endfor %}
+            </span>
+        </li>
+        {% endfor %}
+    </ul>
+</details>
+{% endfor %}
 {% endblock %}

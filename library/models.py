@@ -139,6 +139,20 @@ class Haftarah(models.Model):
     def __str__(self):
         return f"{self.parasha.name_ru} ({self.get_tradition_display()})"
 
+    @property
+    def range_display(self):
+        """Например "Йешаяу 42:5-43:10" - книга и диапазон глав:стихов, чтобы
+        было понятно, какой именно текст, не открывая саму гафтару."""
+        verses = list(self.verses.all())
+        if not verses:
+            return self.book_name_ru
+        first, last = verses[0], verses[-1]
+        if first.chapter == last.chapter:
+            span = f"{first.chapter}:{first.verse}-{last.verse}"
+        else:
+            span = f"{first.chapter}:{first.verse}-{last.chapter}:{last.verse}"
+        return f"{self.book_name_ru} {span}"
+
 
 class HaftarahVerse(models.Model):
     haftarah = models.ForeignKey(Haftarah, verbose_name="Гафтара", related_name="verses", on_delete=models.CASCADE)
