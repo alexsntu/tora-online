@@ -61,6 +61,7 @@ HAFTARAH_BOOKS = {
     "micha": ("Миха", "מִיכָה", "Micah"),
     "zecharia": ("Зехария", "זְכַרְיָה", "Zechariah"),
     "yehoshua": ("Йегошуа", "יְהוֹשֻׁעַ", "Joshua"),
+    "yona": ("Йона", "יוֹנָה", "Jonah"),
 }
 
 # slug -> (name_ru, name_he, order) — порядок сквозной по всей Торе (1..54)

@@ -36,6 +36,7 @@ BOOK_ALIASES = {
     "Йоэйл": "yoel",
     "Йеошуа": "yehoshua",
     "Йег̃ошуа": "yehoshua",
+    "Йона": "yona",
 }
 BOOK_ALIASES_SORTED = sorted(BOOK_ALIASES, key=len, reverse=True)
 

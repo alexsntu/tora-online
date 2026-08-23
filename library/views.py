@@ -500,6 +500,7 @@ def haftarah_occasion_view(request, occasion_slug, tradition):
         "heading": f"Гафтара «{occasion.name_ru}»",
         "back_url": reverse("library:haftarot"),
         "back_label": "Афторот",
+        "occasion": occasion,
         "haftarah": haftarah,
         "verses": haftarah.verses.all(),
         "other_haftarot": other_haftarot,

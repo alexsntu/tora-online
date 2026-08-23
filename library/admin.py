@@ -7,8 +7,8 @@ from axes.admin import AccessAttemptAdmin, IsLockedOutFilter
 from axes.models import AccessAttempt
 
 from .models import (
-    AnalyticsEvent, Book, Category, Verse, Parasha, Haftarah, HaftarahOccasion, HaftarahVerse, Material, ErrorReport,
-    Question, Sage, SiteSettings, Topic, WeeklyPost,
+    AnalyticsEvent, Book, Category, Verse, Parasha, Haftarah, HaftarahOccasion, HaftarahVerse, OccasionMaftirVerse,
+    Material, ErrorReport, Question, Sage, SiteSettings, Topic, WeeklyPost,
 )
 from .views import analytics_dashboard
 
@@ -100,11 +100,19 @@ class HaftarahVerseInline(admin.TabularInline):
     ordering = ("order",)
 
 
+class OccasionMaftirVerseInline(admin.TabularInline):
+    model = OccasionMaftirVerse
+    extra = 0
+    ordering = ("order",)
+    autocomplete_fields = ["verse"]
+
+
 @admin.register(HaftarahOccasion)
 class HaftarahOccasionAdmin(admin.ModelAdmin):
-    list_display = ("name_ru", "name_he", "slug", "category", "order")
+    list_display = ("name_ru", "name_he", "slug", "category", "order", "maftir_range_display")
     list_filter = ("category",)
     prepopulated_fields = {"slug": ("name_ru",)}
+    inlines = [OccasionMaftirVerseInline]
 
 
 @admin.register(Haftarah)

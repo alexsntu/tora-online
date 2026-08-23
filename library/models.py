@@ -140,6 +140,64 @@ class HaftarahOccasion(models.Model):
     def __str__(self):
         return self.name_ru
 
+    @property
+    def maftir_range_display(self):
+        """Как Haftarah.range_display, но для мафтира - книга(и) и диапазон(ы),
+        собранные из существующих стихов Торы (см. OccasionMaftirVerse). Границы
+        сегментов - явное поле OccasionMaftirVerse.segment (не эвристика по
+        соседству стихов - несмежные куски одной книги, напр. "32:11-14, 34:1-10",
+        иначе слились бы в один диапазон)."""
+        segments = []
+        for mv in self.maftir_verses.select_related("verse__book").order_by("order"):
+            v = mv.verse
+            if segments and segments[-1]["segment"] == mv.segment:
+                segments[-1]["last"] = (v.chapter, v.verse)
+            else:
+                segments.append({
+                    "segment": mv.segment, "book": v.book.name_ru,
+                    "first": (v.chapter, v.verse), "last": (v.chapter, v.verse),
+                })
+
+        parts = []
+        prev_book = None
+        for seg in segments:
+            fc, fv = seg["first"]
+            lc, lv = seg["last"]
+            if (fc, fv) == (lc, lv):
+                span = f"{fc}:{fv}"
+            elif fc == lc:
+                span = f"{fc}:{fv}-{lv}"
+            else:
+                span = f"{fc}:{fv}-{lc}:{lv}"
+            parts.append(f"{seg['book']} {span}" if seg["book"] != prev_book else span)
+            prev_book = seg["book"]
+        return ", ".join(parts)
+
+
+class OccasionMaftirVerse(models.Model):
+    """Стих мафтира (доп. отрывок Торы) для особой даты - ссылка на уже
+    загруженный основной текст Торы (library.models.Verse), без дублирования:
+    и Арба Парашийот, и большинство праздничных мафтиров - это существующие
+    стихи Шмот/Ваикра/Бемидбар/Дварим, только объявленные заново для другого
+    случая чтения."""
+    occasion = models.ForeignKey(
+        HaftarahOccasion, verbose_name="Особая дата", related_name="maftir_verses", on_delete=models.CASCADE,
+    )
+    order = models.PositiveSmallIntegerField("Порядок", default=0)
+    segment = models.PositiveSmallIntegerField(
+        "Сегмент", default=0,
+        help_text="Номер непрерывного участка - несмежные куски одной книги не сливаются в отображении.",
+    )
+    verse = models.ForeignKey(Verse, verbose_name="Стих Торы", on_delete=models.PROTECT, related_name="+")
+
+    class Meta:
+        ordering = ["order"]
+        verbose_name = "стих мафтира"
+        verbose_name_plural = "Стихи мафтира"
+
+    def __str__(self):
+        return f"{self.occasion} - {self.verse}"
+
 
 class Haftarah(models.Model):
     """Гафтара недельной главы или особой даты - отдельный раздел, не часть обычного

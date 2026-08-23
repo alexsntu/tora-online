@@ -20,6 +20,26 @@
 </p>
 {% endif %}
 
+{% if occasion.maftir_verses.all %}
+<h2 class="book-section-heading">Мафтир: {{ occasion.maftir_range_display }}</h2>
+<div class="verses">
+    {% for mv in occasion.maftir_verses.all %}
+    {% ifchanged mv.verse.book.name_ru %}
+    <h3 class="chapter-marker">{{ mv.verse.book.name_ru }}{% if mv.verse.book.name_he %} <span class="he-label" dir="rtl">({{ mv.verse.book.name_he }})</span>{% endif %}</h3>
+    {% endifchanged %}
+    {% ifchanged mv.verse.chapter %}
+    <h4 class="chapter-marker">Глава {{ mv.verse.chapter }}</h4>
+    {% endifchanged %}
+    <div class="verse-row" id="maftir-v-{{ forloop.counter }}">
+        <span class="verse-num">{{ mv.verse.chapter }}:{{ mv.verse.verse }}</span>
+        <span class="verse-he" dir="rtl" lang="he">{{ mv.verse.text_he }}</span>
+        <span class="verse-ru" lang="ru">{{ mv.verse.text_ru }}</span>
+    </div>
+    {% endfor %}
+</div>
+<h2 class="book-section-heading">Гафтара</h2>
+{% endif %}
+
 <div class="verses">
     {% for verse in verses %}
     {% ifchanged verse.book_name_ru %}
