@@ -1,0 +1,89 @@
+import urllib.error
+import urllib.request
+from pathlib import Path
+
+from django.conf import settings
+from django.core.management import call_command
+from django.core.management.base import BaseCommand
+
+from library.torah_data import PARASHOT
+
+# Общий гугл-док с гафтарот: одна вкладка Google Docs = одна недельная глава.
+# Экспорт в текст (?format=txt) отдаёт ВСЕ вкладки одним файлом подряд, каждая
+# со своим заголовком "Г̃афтара недельной главы Торы «...»".
+DOC_ID = "1YeMEN4iGC9-JP0IUeQOcaubvAJ2f9-jEux8eceXQZwU"
+EXPORT_URL = f"https://docs.google.com/document/d/{DOC_ID}/export?format=txt"
+
+TEXTS_RU_HAFTARAH_DIR = Path(settings.BASE_DIR) / "texts" / "ru_haftarah"
+
+HAFTARAH_HEADER_MARKER = "афтара недельной главы Торы"
+
+# Заголовок вкладки в документе иногда пишется не так, как у нас в PARASHOT
+# (другой вариант транслитерации/написания) - явные исключения сюда.
+DOC_PARASHA_ALIASES = {
+    "Лех-леха": "lech-lecha",
+    "Вайэра": "vayera",
+    "Хайей Сара": "chayei-sara",
+    "Толедот": "toldot",
+    "Вайэцэ": "vayetze",
+    "Вайэшэв": "vayeshev",
+    "Микэц": "miketz",
+    "Вайхи": "vayechi",
+}
+
+NAME_RU_TO_SLUG = {name_ru: slug for slug, (name_ru, name_he, order) in PARASHOT.items()}
+
+
+class Command(BaseCommand):
+    help = (
+        "Скачивает общий документ с гафтарот (Google Docs, вкладка = недельная глава), "
+        "раскладывает найденные вкладки по texts/ru_haftarah/<глава>/haftarah.txt "
+        "и запускает import_haftarot. Разбор структуры текста (книга, диапазоны, "
+        "традиции) - в import_haftarot, здесь только нарезка на вкладки."
+    )
+
+    def handle(self, *args, **options):
+        try:
+            with urllib.request.urlopen(EXPORT_URL, timeout=20) as resp:
+                raw = resp.read().decode("utf-8-sig")
+        except (urllib.error.URLError, TimeoutError, OSError) as e:
+            self.stderr.write(self.style.ERROR(f"Не удалось скачать документ: {e}"))
+            return
+
+        lines = raw.splitlines()
+        header_idxs = [i for i, line in enumerate(lines) if HAFTARAH_HEADER_MARKER in line]
+        if not header_idxs:
+            self.stdout.write(self.style.WARNING("В документе не нашлось ни одной вкладки с гафтарой"))
+            return
+
+        written = []
+        for n, j in enumerate(header_idxs):
+            title = lines[j - 1].strip() if j > 0 else ""
+            start = j - 1 if j > 0 else j
+            end = (header_idxs[n + 1] - 1) if n + 1 < len(header_idxs) else len(lines)
+            block_lines = lines[start:end]
+
+            parasha_slug = NAME_RU_TO_SLUG.get(title) or DOC_PARASHA_ALIASES.get(title)
+            if not parasha_slug:
+                self.stdout.write(self.style.WARNING(
+                    f"Вкладка с заголовком '{title}' - не нахожу такую недельную главу "
+                    "в library/torah_data.py PARASHOT, пропускаю"
+                ))
+                continue
+
+            out_dir = TEXTS_RU_HAFTARAH_DIR / parasha_slug
+            out_dir.mkdir(parents=True, exist_ok=True)
+            out_path = out_dir / "haftarah.txt"
+            out_path.write_text("\n".join(block_lines).strip() + "\n", encoding="utf-8")
+            written.append((title, out_path))
+
+        if not written:
+            self.stdout.write(self.style.WARNING("Ни одной вкладки не удалось разложить в файлы"))
+            return
+
+        self.stdout.write(self.style.SUCCESS(f"Разложено вкладок: {len(written)}"))
+        for title, path in written:
+            self.stdout.write(f"  {title} -> {path.relative_to(settings.BASE_DIR)}")
+
+        self.stdout.write("Запускаю import_haftarot...")
+        call_command("import_haftarot")

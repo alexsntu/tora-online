@@ -8,8 +8,7 @@
 
 <h1>Гафтара недельной главы «{{ parasha.name_ru }}»</h1>
 <p class="book-description">
-    Из книги {{ haftarah.book_name_ru }}{% if haftarah.book_name_he %} <span class="he-label" dir="rtl">({{ haftarah.book_name_he }})</span>{% endif %}
-    — {{ haftarah.get_tradition_display }} традиция.
+    {{ haftarah.range_display }} — {{ haftarah.get_tradition_display }} традиция.
 </p>
 
 {% if other_haftarot %}
@@ -23,10 +22,13 @@
 
 <div class="verses">
     {% for verse in verses %}
-    {% ifchanged verse.chapter %}
-    <h2 class="chapter-marker">Глава {{ verse.chapter }}</h2>
+    {% ifchanged verse.book_name_ru %}
+    <h2 class="chapter-marker">{{ verse.book_name_ru }}{% if verse.book_name_he %} <span class="he-label" dir="rtl">({{ verse.book_name_he }})</span>{% endif %}</h2>
     {% endifchanged %}
-    <div class="verse-row" id="v-{{ verse.chapter }}-{{ verse.verse }}">
+    {% ifchanged verse.chapter %}
+    <h3 class="chapter-marker">Глава {{ verse.chapter }}</h3>
+    {% endifchanged %}
+    <div class="verse-row" id="v-{{ forloop.counter }}">
         <span class="verse-num">{{ verse.chapter }}:{{ verse.verse }}</span>
         <span class="verse-he" dir="rtl" lang="he">{{ verse.text_he }}</span>
         <span class="verse-ru" lang="ru">{{ verse.text_ru }}</span>

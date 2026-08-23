@@ -97,12 +97,14 @@ class ParashaAdmin(admin.ModelAdmin):
 class HaftarahVerseInline(admin.TabularInline):
     model = HaftarahVerse
     extra = 0
+    ordering = ("order",)
 
 
 @admin.register(Haftarah)
 class HaftarahAdmin(admin.ModelAdmin):
-    list_display = ("parasha", "tradition", "book_name_ru")
+    list_display = ("parasha", "tradition", "range_display")
     list_filter = ("tradition",)
+    inlines = [HaftarahVerseInline]
     inlines = [HaftarahVerseInline]
 
 

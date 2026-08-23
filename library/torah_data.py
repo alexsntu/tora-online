@@ -46,6 +46,14 @@ BOOKS = {
 # обычного текста Танаха на сайте (см. library.models.Haftarah).
 HAFTARAH_BOOKS = {
     "yeshayahu": ("Йешаяу", "יְשַׁעְיָהוּ", "Isaiah"),
+    "melachim-1": ("Мелахим I", "מְלָכִים א׳", "I_Kings"),
+    "melachim-2": ("Мелахим II", "מְלָכִים ב׳", "II_Kings"),
+    "malachi": ("Малахи", "מַלְאָכִי", "Malachi"),
+    "hoshea": ("Ошеа", "הוֹשֵׁעַ", "Hosea"),
+    "yoel": ("Йоэль", "יוֹאֵל", "Joel"),
+    "amos": ("Амос", "עָמוֹס", "Amos"),
+    "ovadia": ("Овадия", "עֹבַדְיָה", "Obadiah"),
+    "yechezkel": ("Йехезкель", "יְחֶזְקֵאל", "Ezekiel"),
 }
 
 # slug -> (name_ru, name_he, order) — порядок сквозной по всей Торе (1..54)

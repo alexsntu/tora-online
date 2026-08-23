@@ -455,7 +455,7 @@ def haftarah_view(request, parasha_slug, tradition):
         "", "",
         f"{title} — Tora Online",
         f"Гафтара недельной главы «{parasha.name_ru}» ({haftarah.get_tradition_display()} традиция), "
-        f"из книги {haftarah.book_name_ru}, текст на иврите и русском.",
+        f"{haftarah.range_display}, текст на иврите и русском.",
     )
     return render(request, "library/haftarah.html", {
         "parasha": parasha,

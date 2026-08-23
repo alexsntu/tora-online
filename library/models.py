@@ -127,8 +127,6 @@ class Haftarah(models.Model):
         Parasha, verbose_name="Недельная глава", related_name="haftarot", on_delete=models.CASCADE,
     )
     tradition = models.CharField("Традиция", max_length=20, choices=TRADITION_CHOICES)
-    book_name_ru = models.CharField("Книга-источник (рус.)", max_length=100)
-    book_name_he = models.CharField("Книга-источник (иврит)", max_length=100, blank=True)
 
     class Meta:
         ordering = ["parasha__order", "tradition"]
@@ -141,34 +139,45 @@ class Haftarah(models.Model):
 
     @property
     def range_display(self):
-        """Например "Йешаяу 42:5-43:10" - книга и диапазон глав:стихов, чтобы
-        было понятно, какой именно текст, не открывая саму гафтару."""
+        """Например "Йешаяу 42:5-43:10" - книга(и) и диапазон(ы) глав:стихов, чтобы
+        было понятно, какой именно текст, не открывая саму гафтару. Составная гафтара
+        из нескольких книг (напр. Вайеце) даёт несколько сегментов через запятую."""
+        from itertools import groupby
+
         verses = list(self.verses.all())
-        if not verses:
-            return self.book_name_ru
-        first, last = verses[0], verses[-1]
-        if first.chapter == last.chapter:
-            span = f"{first.chapter}:{first.verse}-{last.verse}"
-        else:
-            span = f"{first.chapter}:{first.verse}-{last.chapter}:{last.verse}"
-        return f"{self.book_name_ru} {span}"
+        segments = []
+        for book_name_ru, group in groupby(verses, key=lambda v: v.book_name_ru):
+            group = list(group)
+            first, last = group[0], group[-1]
+            if first.chapter == last.chapter:
+                span = f"{first.chapter}:{first.verse}-{last.verse}"
+            else:
+                span = f"{first.chapter}:{first.verse}-{last.chapter}:{last.verse}"
+            segments.append(f"{book_name_ru} {span}")
+        return ", ".join(segments)
 
 
 class HaftarahVerse(models.Model):
     haftarah = models.ForeignKey(Haftarah, verbose_name="Гафтара", related_name="verses", on_delete=models.CASCADE)
+    order = models.PositiveSmallIntegerField(
+        "Порядок", default=0,
+        help_text="Порядок чтения - не всегда совпадает с сортировкой по главе:стиху "
+        "(составная гафтара может переходить на другую книгу и обратно).",
+    )
+    book_name_ru = models.CharField("Книга-источник (рус.)", max_length=100)
+    book_name_he = models.CharField("Книга-источник (иврит)", max_length=100, blank=True)
     chapter = models.PositiveSmallIntegerField("Глава")
     verse = models.PositiveSmallIntegerField("Стих")
     text_he = models.TextField("Текст (иврит)", blank=True)
     text_ru = models.TextField("Текст (рус.)", blank=True)
 
     class Meta:
-        ordering = ["chapter", "verse"]
-        unique_together = ("haftarah", "chapter", "verse")
+        ordering = ["order"]
         verbose_name = "стих гафтары"
         verbose_name_plural = "Стихи гафтары"
 
     def __str__(self):
-        return f"{self.haftarah} {self.chapter}:{self.verse}"
+        return f"{self.haftarah} - {self.book_name_ru} {self.chapter}:{self.verse}"
 
 
 class Material(models.Model):
