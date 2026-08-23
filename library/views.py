@@ -23,8 +23,8 @@ from .hebrew_calendar import (
     today_info,
 )
 from .models import (
-    AnalyticsEvent, Book, Category, ErrorReport, Haftarah, HaftarahOccasion, Material, Parasha, Question, Sage,
-    SiteSettings, Verse, WeeklyPost,
+    AliyahMarker, AnalyticsEvent, Book, Category, ErrorReport, Haftarah, HaftarahOccasion, Material, Parasha,
+    Question, Sage, SiteSettings, Verse, WeeklyPost,
 )
 
 
@@ -98,6 +98,19 @@ def attach_parasha_starts(verses, book):
     verses = list(verses)
     for v in verses:
         v.starts_parasha = starts.get((v.chapter, v.verse))
+    return verses
+
+
+def attach_aliyah_starts(verses, book):
+    """Помечает стихи, с которых начинается одна из 7 алий (verse.starts_aliyah -
+    номер алии 1-7, или None)."""
+    starts = {
+        (a.start_verse.chapter, a.start_verse.verse): a.number
+        for a in AliyahMarker.objects.filter(start_verse__book=book).select_related("start_verse")
+    }
+    verses = list(verses)
+    for v in verses:
+        v.starts_aliyah = starts.get((v.chapter, v.verse))
     return verses
 
 
@@ -203,6 +216,7 @@ def chapter_view(request, book_slug, chapter):
 
     nav_verses = Verse.objects.filter(book=book).prefetch_related("materials").order_by("chapter", "verse")
     verses = attach_parasha_starts(verses, book)
+    verses = attach_aliyah_starts(verses, book)
 
     AnalyticsEvent.objects.create(event_type=AnalyticsEvent.CHAPTER_VIEW, book=book, chapter=chapter)
 
@@ -241,6 +255,7 @@ def parasha_view(request, parasha_slug):
         .prefetch_related("materials__sages", "commentaries")
     )
     verses = attach_parasha_starts(verses, start.book)
+    verses = attach_aliyah_starts(verses, start.book)
 
     prev_parasha = (
         Parasha.objects.filter(order__lt=parasha.order).order_by("-order").first()

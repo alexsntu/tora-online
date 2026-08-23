@@ -7,8 +7,8 @@ from axes.admin import AccessAttemptAdmin, IsLockedOutFilter
 from axes.models import AccessAttempt
 
 from .models import (
-    AnalyticsEvent, Book, Category, Verse, Parasha, Haftarah, HaftarahOccasion, HaftarahVerse, OccasionMaftirVerse,
-    Material, ErrorReport, Question, Sage, SiteSettings, Topic, WeeklyPost,
+    AliyahMarker, AnalyticsEvent, Book, Category, Verse, Parasha, Haftarah, HaftarahOccasion, HaftarahVerse,
+    OccasionMaftirVerse, Material, ErrorReport, Question, Sage, SiteSettings, Topic, WeeklyPost,
 )
 from .views import analytics_dashboard
 
@@ -88,10 +88,18 @@ class VerseAdmin(admin.ModelAdmin):
     search_fields = ("text_ru", "text_he")
 
 
+class AliyahMarkerInline(admin.TabularInline):
+    model = AliyahMarker
+    extra = 0
+    ordering = ("number",)
+    autocomplete_fields = ["start_verse"]
+
+
 @admin.register(Parasha)
 class ParashaAdmin(admin.ModelAdmin):
     list_display = ("name_ru", "name_he", "slug", "order", "start_verse", "end_verse")
     prepopulated_fields = {"slug": ("name_ru",)}
+    inlines = [AliyahMarkerInline]
 
 
 class HaftarahVerseInline(admin.TabularInline):

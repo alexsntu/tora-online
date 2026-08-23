@@ -112,6 +112,26 @@ class Parasha(models.Model):
         return self.name_ru
 
 
+class AliyahMarker(models.Model):
+    """Начало одной из 7 алий (традиционное деление недельной главы для чтения
+    в синагоге по семи вызываемым) - только начальный стих, конец алии это
+    просто стих перед началом следующей. Источник границ - Sefaria (структура
+    "alts.Parasha" в индексе книги: /api/v2/index/<Book>), не привязан к
+    календарю конкретного года, поэтому не путается со сдвоенными чтениями."""
+    parasha = models.ForeignKey(Parasha, verbose_name="Недельная глава", related_name="aliyot", on_delete=models.CASCADE)
+    number = models.PositiveSmallIntegerField("Номер алии (1-7)")
+    start_verse = models.ForeignKey(Verse, verbose_name="Первый стих", on_delete=models.PROTECT, related_name="+")
+
+    class Meta:
+        ordering = ["parasha__order", "number"]
+        unique_together = ("parasha", "number")
+        verbose_name = "алия"
+        verbose_name_plural = "Алиёт (деление на чтения)"
+
+    def __str__(self):
+        return f"{self.parasha.name_ru}, {self.number}-я алия"
+
+
 class HaftarahOccasion(models.Model):
     """Праздник/особая дата, к которой читается отдельная гафтара - не привязана
     к недельной главе (см. Haftarah.occasion). Три раздела над недельными главами

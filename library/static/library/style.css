@@ -614,6 +614,19 @@ summary::marker { color: var(--gold); }
 }
 .parasha-marker:hover { background: var(--accent-dark); }
 
+.aliyah-marker {
+    display: inline-block;
+    margin: 1rem 0 .3rem 0;
+    padding: .2rem .7rem;
+    background: var(--gold);
+    color: #fff;
+    border-radius: 3px;
+    font-family: var(--font-display);
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: .02em;
+}
+
 .quick-nav {
     margin-bottom: 1rem;
     padding: .9rem 1.1rem;
