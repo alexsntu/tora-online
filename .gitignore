@@ -10,3 +10,4 @@ staticfiles/
 media/
 passenger_wsgi.py
 .restart-app
+zvezdny-bank/
