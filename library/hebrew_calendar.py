@@ -1,8 +1,6 @@
 """Еврейский календарь: сегодняшняя дата, конвертация Григорианский/Еврейский,
 недельная глава (парашат hа-шавуа) - на pyluach, без внешних сервисов."""
 
-import re
-
 from pyluach import dates, parshios
 
 GREGORIAN_MONTHS_RU = [
@@ -29,6 +27,32 @@ HEBREW_MONTHS_RU = {
 
 # Обратно: русское родительное -> английское имя месяца pyluach (для конвертера дат)
 HEBREW_MONTHS_RU_TO_EN = {v: k for k, v in HEBREW_MONTHS_RU.items()}
+
+# pyluach.parshios.getparsha_string() (англ.) -> наш slug (library.models.Parasha).
+# Используется вместо сравнения ивритских названий: pyluach иногда выводит написание
+# без вав/йод (מלא/חסר варианты, напр. "תבא" вместо "תבוא" у нас), из-за чего
+# посимвольное сравнение с никудом ошибочно не находило совпадение.
+PARASHA_EN_TO_SLUG = {
+    "Bereishis": "bereshit", "Noach": "noach", "Lech Lecha": "lech-lecha",
+    "Vayeira": "vayera", "Chayei Sarah": "chayei-sara", "Toldos": "toldot",
+    "Vayeitzei": "vayetze", "Vayishlach": "vayishlach", "Vayeishev": "vayeshev",
+    "Mikeitz": "miketz", "Vayigash": "vayigash", "Vayechi": "vayechi",
+    "Shemos": "shmot", "Va'eira": "vaera", "Bo": "bo", "Beshalach": "beshalach",
+    "Yisro": "yitro", "Mishpatim": "mishpatim", "Terumah": "teruma",
+    "Tetzaveh": "tetzave", "Ki Sisa": "ki-tisa",
+    "Vayakhel": "vayakhel", "Pekudei": "pekudei",
+    "Vayikra": "vaikra", "Tzav": "tzav", "Shemini": "shmini",
+    "Tazria": "tazria", "Metzora": "metzora",
+    "Acharei Mos": "achrei-mot", "Kedoshim": "kedoshim", "Emor": "emor",
+    "Behar": "behar", "Bechukosai": "bechukotai",
+    "Bamidbar": "bemidbar", "Nasso": "naso", "Beha'aloscha": "behaalotcha",
+    "Shelach": "shlach", "Korach": "korach", "Chukas": "chukat", "Balak": "balak",
+    "Pinchas": "pinchas", "Mattos": "matot", "Masei": "masei",
+    "Devarim": "devarim", "Va'eschanan": "vaetchanan", "Eikev": "eikev",
+    "Re'eh": "reeh", "Shoftim": "shoftim", "Ki Seitzei": "ki-teitzei",
+    "Ki Savo": "ki-tavo", "Nitzavim": "nitzavim", "Vayeilech": "vayeilech",
+    "Haazinu": "haazinu", "Vezos Haberachah": "vezot-habracha",
+}
 
 # Транслитерация pyluach.parshios.getparsha_string() (англ.) -> русское название,
 # для отображения текста виджета даже пока соответствующая книга ещё не
@@ -96,17 +120,6 @@ def parasha_name_ru_fallback(parasha_en):
     parts = [p.strip() for p in parasha_en.split(",")]
     return "-".join(PARASHA_NAMES_RU.get(p, p) for p in parts)
 
-_NIKKUD_RE = re.compile(r"[֑-ׇ]")
-
-
-def _normalize_hebrew(text):
-    """Убирает никуд/кантилляцию и приводит макаф к пробелу - для сравнения
-    "בְּרֵאשִׁית" (наши данные, с никудом) и "בראשית" (вывод pyluach, без)."""
-    text = _NIKKUD_RE.sub("", text)
-    text = text.replace("־", " ")
-    return " ".join(text.split())
-
-
 def format_gregorian_ru(greg_date):
     return f"{greg_date.day} {GREGORIAN_MONTHS_RU[greg_date.month - 1]} {greg_date.year}"
 
@@ -118,18 +131,17 @@ def format_hebrew_ru(heb_date):
 
 def find_parasha_for_date(greg_date, israel=False):
     """Возвращает объект library.models.Parasha для данной секулярной даты,
-    если она у нас загружена в базе (сверка по ивритскому названию, без
-    никуда) - или None, если это сдвоенное чтение или книга ещё не добавлена."""
+    если она у нас загружена в базе (сверка по slug через PARASHA_EN_TO_SLUG)
+    - или None, если это сдвоенное чтение или книга ещё не добавлена."""
     from .models import Parasha
 
-    he_name = parshios.getparsha_string(greg_date, hebrew=True, israel=israel)
-    if not he_name or "," in he_name:
+    parasha_en = parshios.getparsha_string(greg_date, israel=israel)
+    if not parasha_en or "," in parasha_en:
         return None
-    target = _normalize_hebrew(he_name)
-    for p in Parasha.objects.all():
-        if _normalize_hebrew(p.name_he) == target:
-            return p
-    return None
+    slug = PARASHA_EN_TO_SLUG.get(parasha_en)
+    if not slug:
+        return None
+    return Parasha.objects.filter(slug=slug).first()
 
 
 def today_info(israel=False):
