@@ -16,6 +16,7 @@ DOC_IDS = [
     "1YES1JySEnjgXI2xPbLIK5OUsaUqNSL0JT34DVSYj-Ek",  # Шмот
     "12KAO637KSw3bc8CXMY68LnbMA5qXA2NlQ0aTN0ser0o",  # Ваикра
     "1YUsVVsYmgRjhYY5BqKvHSe1N6zUMvic0NwglFS4NQ2A",  # Бемидбар
+    "1ZxFYM7nxCs4XmtTWEOzr6SDCJCcVP2tDKgLzavbYSpU",  # Дварим
 ]
 
 TEXTS_RU_HAFTARAH_DIR = Path(settings.BASE_DIR) / "texts" / "ru_haftarah"
@@ -47,6 +48,13 @@ DOC_PARASHA_ALIASES = {
     "Шелах-леха": "shlach",
     "Пинехас": "pinchas",
     "Масъэй": "masei",
+    "Деварим": "devarim",
+    "Экэв": "eikev",
+    "Шофетим": "shoftim",
+    "Ки тецэ": "ki-teitzei",
+    "Ки таво": "ki-tavo",
+    "Г̃аазину": "haazinu",
+    "Ве-зот г̃абераха": "vezot-habracha",
 }
 
 NAME_RU_TO_SLUG = {name_ru: slug for slug, (name_ru, name_he, order) in PARASHOT.items()}
