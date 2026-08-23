@@ -592,7 +592,7 @@ def robots_txt_view(request):
 def sitemap_xml_view(request):
     """Простая карта сайта (без django.contrib.sitemaps - список URL невелик
     и не меняется настолько часто, чтобы городить отдельное приложение)."""
-    url_names = ["home", "topics", "sages", "questions", "calendar", "info"]
+    url_names = ["home", "topics", "sages", "questions", "calendar", "info", "haftarot"]
     paths = [reverse(f"library:{name}") for name in url_names]
 
     for book in Book.objects.all():
@@ -605,6 +605,9 @@ def sitemap_xml_view(request):
 
     for parasha in Parasha.objects.all():
         paths.append(reverse("library:parasha", args=[parasha.slug]))
+
+    for haftarah in Haftarah.objects.select_related("parasha"):
+        paths.append(reverse("library:haftarah", args=[haftarah.parasha.slug, haftarah.tradition]))
 
     books_with_materials = Book.objects.annotate(materials_count=Count("verses__materials", distinct=True)).filter(
         materials_count__gt=0
