@@ -35,6 +35,7 @@ BOOK_ALIASES = {
     "Йех̃эзкэль": "yechezkel",
     "Йоэйл": "yoel",
     "Йеошуа": "yehoshua",
+    "Йег̃ошуа": "yehoshua",
 }
 BOOK_ALIASES_SORTED = sorted(BOOK_ALIASES, key=len, reverse=True)
 
@@ -50,6 +51,27 @@ RANGE_IN_TEXT_RE = re.compile(r"(\d+):(\d+)(?:\s*-\s*(?:(\d+):)?(\d+))?")
 def _parse_range_match(match):
     sc, sv, ec, ev = match.groups()
     return int(sc), int(sv), int(ec or sc), int(ev or sv)
+
+
+def find_ranges(text):
+    """Разбирает список диапазонов через запятую, включая сокращённую запись
+    одиночного стиха той же главы после запятой ("5:2-6:1,27" - диапазон 5:2-6:1
+    и ещё стих 6:27 - глава берётся от конца предыдущего диапазона в списке)."""
+    ranges = []
+    last_chapter = None
+    for segment in text.split(","):
+        segment = segment.strip()
+        if not segment:
+            continue
+        m = RANGE_IN_TEXT_RE.search(segment)
+        if m:
+            sc, sv, ec, ev = _parse_range_match(m)
+            ranges.append((sc, sv, ec, ev))
+            last_chapter = ec
+        elif segment.isdigit() and last_chapter is not None:
+            v = int(segment)
+            ranges.append((last_chapter, v, last_chapter, v))
+    return ranges
 
 
 COLON_TRADITION_RE = re.compile(r"^(Ашкеназим|Сефарадим):\s*(.*)$")
@@ -105,7 +127,7 @@ def parse_haftarah_file(path: Path):
         bare-строкой перед её текстом (напр. Шмот), это не должно перетирать уже
         верно заданную вторую."""
         nonlocal current_chapter
-        ranges = [_parse_range_match(m) for m in RANGE_IN_TEXT_RE.finditer(rest)]
+        ranges = find_ranges(rest)
         if not ranges:
             return
         current_chapter = ranges[0][0]
@@ -144,7 +166,7 @@ def parse_haftarah_file(path: Path):
                 rest = book_rest
             # может быть несколько несмежных диапазонов через запятую, напр.
             # "Ашкеназим: 6:1-7:6, 9:5-6"
-            ranges = [_parse_range_match(m) for m in RANGE_IN_TEXT_RE.finditer(rest)]
+            ranges = find_ranges(rest)
             if ranges:
                 range_by_tradition[TRADITION_LABELS[label]] = (book_slug_here, ranges)
             continue

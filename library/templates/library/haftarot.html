@@ -13,7 +13,7 @@
 
 <h2 class="book-section-heading">Афторот к недельным главам</h2>
 {% for book_group in books %}
-<details class="category-block" open>
+<details class="category-block">
     <summary class="category-summary">{{ book_group.book.name_ru }}</summary>
     <ul class="parasha-list">
         {% for parasha in book_group.parashot %}
