@@ -21,7 +21,10 @@ DOC_IDS = [
 
 TEXTS_RU_HAFTARAH_DIR = Path(settings.BASE_DIR) / "texts" / "ru_haftarah"
 
-HAFTARAH_HEADER_MARKER = "афтара недельной главы Торы"
+# Обычно "Г̃афтара недельной главы Торы «...»", но у особых гафтарот (напр.
+# суббота "Шува" перед Йом Кипуром) заголовок другой - "Г̃афтара Шаббата «Шува»
+# глава Ваелех". Общее для всех - начинается с "афтара" (без регистра для "Г/г").
+HAFTARAH_HEADER_MARKERS = ("афтара недельной главы торы", "афтара шаббата")
 
 # Заголовок вкладки в документе иногда пишется не так, как у нас в PARASHOT
 # (другой вариант транслитерации/написания) - явные исключения сюда.
@@ -55,6 +58,7 @@ DOC_PARASHA_ALIASES = {
     "Ки таво": "ki-tavo",
     "Г̃аазину": "haazinu",
     "Ве-зот г̃абераха": "vezot-habracha",
+    "Ваелех": "vayeilech",
 }
 
 NAME_RU_TO_SLUG = {name_ru: slug for slug, (name_ru, name_he, order) in PARASHOT.items()}
@@ -94,7 +98,10 @@ class Command(BaseCommand):
             return []
 
         lines = raw.splitlines()
-        header_idxs = [i for i, line in enumerate(lines) if HAFTARAH_HEADER_MARKER in line]
+        header_idxs = [
+            i for i, line in enumerate(lines)
+            if any(marker in line.lower() for marker in HAFTARAH_HEADER_MARKERS)
+        ]
         if not header_idxs:
             self.stdout.write(self.style.WARNING(f"Документ {doc_id}: не нашлось ни одной вкладки с гафтарой"))
             return []
