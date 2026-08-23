@@ -26,6 +26,7 @@ BOOK_ALIASES = {
     "Йехэзкэйл": "yechezkel",
     "Йирмейа": "yirmeyahu",
     "Шофетим": "shofetim-book",
+    "Шемуэйл II": "shmuel-2",
 }
 BOOK_ALIASES_SORTED = sorted(BOOK_ALIASES, key=len, reverse=True)
 
@@ -84,8 +85,8 @@ def parse_haftarah_file(path: Path):
         ]
         if not ranges:
             return
-        range_by_tradition.setdefault(Haftarah.TRADITION_ASHKENAZI, ranges)
-        range_by_tradition.setdefault(Haftarah.TRADITION_SEPHARDI, ranges)
+        range_by_tradition.setdefault(Haftarah.TRADITION_ASHKENAZI, (current_book_slug, ranges))
+        range_by_tradition.setdefault(Haftarah.TRADITION_SEPHARDI, (current_book_slug, ranges))
 
     for raw_line in path.read_text(encoding="utf-8-sig").splitlines():
         line = raw_line.strip()
@@ -99,6 +100,14 @@ def parse_haftarah_file(path: Path):
         m = COLON_TRADITION_RE.match(line)
         if m:
             label, rest = m.groups()
+            # книга может быть встроена прямо тут ("Ашкеназим: Амос 9:7-15") -
+            # тогда у традиций РАЗНЫЕ книги (не просто разные диапазоны в одной);
+            # запоминаем её при этой традиции и заодно как текущую для текста,
+            # который последует непосредственно за этой строкой.
+            book_slug_here, book_rest = resolve_book_prefix(rest)
+            if book_slug_here:
+                current_book_slug = book_slug_here
+                rest = book_rest
             # может быть несколько несмежных диапазонов через запятую, напр.
             # "Ашкеназим: 6:1-7:6, 9:5-6"
             ranges = [
@@ -106,7 +115,7 @@ def parse_haftarah_file(path: Path):
                 for sc, sv, ec, ev in RANGE_IN_TEXT_RE.findall(rest)
             ]
             if ranges:
-                range_by_tradition[TRADITION_LABELS[label]] = ranges
+                range_by_tradition[TRADITION_LABELS[label]] = (book_slug_here, ranges)
             continue
 
         m = IZ_KNIGI_RE.match(line)
@@ -172,16 +181,22 @@ def verses_for_tradition(tradition, verses, range_by_tradition):
     всегда None, весь такой раздел и так один непрерывный кусок текста источника);
     помеченные BOTH ("общий поток") - только если попадают в её диапазон, с пометкой
     НОМЕРА диапазона (range_idx) - на случай нескольких несмежных диапазонов у одной
-    традиции (напр. "6:1-7:6, 9:5-6") - чтобы не склеить их в один при отображении."""
+    традиции (напр. "6:1-7:6, 9:5-6") - чтобы не склеить их в один при отображении.
+    Если для традиции объявлена ещё и своя книга (напр. Кедошим: ашкеназская - Амос,
+    сефардская - Йехэзкэйл, в одном общем потоке verses) - проверяем и её, иначе
+    чисто числовое совпадение диапазонов может случайно задеть чужую книгу."""
     result = []
     for v in verses:
         if v["traditions"] != BOTH:
             if tradition in v["traditions"]:
                 result.append({**v, "range_idx": None})
             continue
-        ranges = range_by_tradition.get(tradition)
-        if ranges is None:
+        declared = range_by_tradition.get(tradition)
+        if declared is None:
             result.append({**v, "range_idx": None})
+            continue
+        book_slug, ranges = declared
+        if book_slug and book_slug != v["book_slug"]:
             continue
         for idx, (sc, sv, ec, ev) in enumerate(ranges):
             if (sc, sv) <= (v["chapter"], v["verse"]) <= (ec, ev):
