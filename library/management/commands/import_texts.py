@@ -16,6 +16,22 @@ VERSE_LINE_RE = re.compile(r"^(\d+):(\d+)\s+(.+)$")
 HTML_TAG_RE = re.compile(r"<[^>]+>")
 SECTION_MARKER_RE = re.compile(r"\{[פס]\}")
 
+# Разрыв параши: у Sefaria стоит отдельным span'ом в конце стиха, ПОСЛЕ которого
+# начинается открытая (פ, petucha) или закрытая (ס, setuma) параша.
+PETUCHA_SPAN_RE = re.compile(r'<span class="mam-spi-pe">.*?</span>', re.DOTALL)
+SETUMA_SPAN_RE = re.compile(r'<span class="mam-spi-samekh">.*?</span>', re.DOTALL)
+
+# <small>/<b> в источнике используются для ДВУХ разных вещей: настоящая маленькая
+# буква масоретского текста (см. clean_hebrew_verse) - и просто уменьшенный
+# кегль значка паузы paseq (׀), не буква вовсе. Отличаем по содержимому: если
+# внутри голый paseq - это оформление, не буква, тег разворачиваем.
+PASEQ_WRAP_RE = re.compile(r"<(?:small|b)>(\s*׀\s*)</(?:small|b)>")
+
+# После обработки petucha/setuma/paseq - убираем всю оставшуюся разметку (span'ы
+# mam-kq и т.п., <br>), но НЕ трогаем <big>/<small> - это настоящие большие и
+# маленькие буквы масоретского текста, их нужно показать в тексте на сайте.
+STRIP_TAGS_KEEP_BIG_SMALL_RE = re.compile(r"</?(?!big\b|small\b)[a-zA-Z][^>]*>")
+
 TEXTS_RU_DIR = Path(settings.BASE_DIR) / "texts" / "ru"
 TEXTS_HE_CACHE_DIR = Path(settings.BASE_DIR) / "texts" / "he"
 TEXTS_RU_SLIVNIAK_CACHE_DIR = Path(settings.BASE_DIR) / "texts" / "ru_slivniak"
@@ -36,8 +52,30 @@ def clean_hebrew(raw: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
+def clean_hebrew_verse(raw: str):
+    """Как clean_hebrew, но для основного текста Танаха: сохраняет <big>/<small>
+    (большие и маленькие буквы масоретского текста) и отдельно возвращает разрыв
+    параши, отмеченный сразу после этого стиха. Возвращает (text, section_break),
+    где section_break - "petucha"/"setuma"/"" ."""
+    text = html.unescape(raw)
+
+    section_break = ""
+    if PETUCHA_SPAN_RE.search(text):
+        section_break = Verse.SECTION_BREAK_PETUCHA
+        text = PETUCHA_SPAN_RE.sub("", text)
+    elif SETUMA_SPAN_RE.search(text):
+        section_break = Verse.SECTION_BREAK_SETUMA
+        text = SETUMA_SPAN_RE.sub("", text)
+
+    text = PASEQ_WRAP_RE.sub(r"\1", text)
+    text = SECTION_MARKER_RE.sub("", text)
+    text = STRIP_TAGS_KEEP_BIG_SMALL_RE.sub("", text)
+    return re.sub(r"\s+", " ", text).strip(), section_break
+
+
 def fetch_hebrew_chapter(sefaria_name: str, chapter: int, cache_dir: Path):
-    """Возвращает список стихов на иврите для главы, используя локальный кэш json."""
+    """Возвращает список стихов на иврите для главы - [{"text":..., "section_break":...}, ...],
+    используя локальный кэш json."""
     cache_dir.mkdir(parents=True, exist_ok=True)
     cache_file = cache_dir / f"{chapter}.json"
     if cache_file.exists():
@@ -51,7 +89,10 @@ def fetch_hebrew_chapter(sefaria_name: str, chapter: int, cache_dir: Path):
     except (urllib.error.URLError, TimeoutError, OSError):
         return None
 
-    he_verses = [clean_hebrew(v) for v in data.get("he", [])]
+    he_verses = []
+    for v in data.get("he", []):
+        text, section_break = clean_hebrew_verse(v)
+        he_verses.append({"text": text, "section_break": section_break})
     with open(cache_file, "w", encoding="utf-8") as f:
         json.dump(he_verses, f, ensure_ascii=False, indent=2)
     return he_verses
@@ -198,8 +239,10 @@ class Command(BaseCommand):
         for chapter, verse, text_ru in parsed:
             he_verses = he_by_chapter.get(chapter)
             text_he = ""
+            section_break = ""
             if he_verses and 1 <= verse <= len(he_verses):
-                text_he = he_verses[verse - 1]
+                text_he = he_verses[verse - 1]["text"]
+                section_break = he_verses[verse - 1]["section_break"]
 
             slivniak_verses = slivniak_by_chapter.get(chapter)
             text_ru_slivniak = ""
@@ -212,7 +255,10 @@ class Command(BaseCommand):
                 book=book,
                 chapter=chapter,
                 verse=verse,
-                defaults={"text_ru": text_ru, "text_he": text_he, "text_ru_slivniak": text_ru_slivniak},
+                defaults={
+                    "text_ru": text_ru, "text_he": text_he, "text_ru_slivniak": text_ru_slivniak,
+                    "section_break": section_break,
+                },
             )
             verse_objs.append(obj)
 

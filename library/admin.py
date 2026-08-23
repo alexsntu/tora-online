@@ -83,8 +83,8 @@ class BookAdmin(admin.ModelAdmin):
 
 @admin.register(Verse)
 class VerseAdmin(admin.ModelAdmin):
-    list_display = ("book", "chapter", "verse")
-    list_filter = ("book", "chapter")
+    list_display = ("book", "chapter", "verse", "section_break")
+    list_filter = ("book", "chapter", "section_break")
     search_fields = ("text_ru", "text_he")
 
 

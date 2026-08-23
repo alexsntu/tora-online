@@ -52,7 +52,7 @@
     {% if verse.starts_aliyah %}
     <span class="aliyah-marker">{{ verse.starts_aliyah }}-я алия</span>
     {% endif %}
-    <div class="verse-row {% if verse.materials.all %}has-materials{% endif %}"
+    <div class="verse-row {% if verse.materials.all %}has-materials{% endif %}{% if verse.section_break %} section-break-after-{{ verse.section_break }}{% endif %}"
          id="v-{{ verse.chapter }}-{{ verse.verse }}"
          {% if verse.materials.all %}@click="if (open !== {{ verse.id }}) { fetch('{% url 'library:track_event' %}', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({event_type: 'material_open', verse_id: {{ verse.id }}}), keepalive: true}) }; open = (open === {{ verse.id }} ? null : {{ verse.id }})"{% endif %}>
         <span class="verse-num">
@@ -66,7 +66,7 @@
             <span class="materials-count" aria-label="Комментариев: {{ verse.materials.all|length }}">✦ {{ verse.materials.all|length }}</span>
             {% endif %}
         </span>
-        <span class="verse-he" dir="rtl" lang="he">{{ verse.text_he }}</span>
+        <span class="verse-he" dir="rtl" lang="he">{{ verse.text_he|safe }}{% if verse.section_break %} <span class="section-break-glyph" title="{% if verse.section_break == 'petucha' %}Открытая параша (петуха) - начинается после этого стиха{% else %}Закрытая параша (сетума) - начинается после этого стиха{% endif %}">{% if verse.section_break == 'petucha' %}פ{% else %}ס{% endif %}</span>{% endif %}</span>
         {% if verse.text_ru_slivniak %}
         <span class="verse-ru-wrap">
             <span class="verse-ru-current-label" x-text="translation === 'classic' ? 'Классический перевод' : 'Перевод Д. Сливняка'"></span>

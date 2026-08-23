@@ -796,6 +796,21 @@ summary::marker { color: var(--gold); }
 }
 .verse-row:last-child { border-bottom: none; }
 .verse-row:not(.has-materials):hover { background: rgba(180, 137, 15, 0.06); }
+.verse-row.section-break-after-petucha { margin-bottom: 1.4rem; border-bottom: 2px solid var(--gold); }
+.verse-row.section-break-after-setuma { margin-bottom: .6rem; }
+
+.section-break-glyph {
+    display: inline-block;
+    margin-inline-start: .3em;
+    padding: 0 .3em;
+    font-family: var(--font-hebrew);
+    font-weight: 700;
+    font-size: .85em;
+    color: var(--gold);
+    border: 1px solid var(--gold);
+    border-radius: 3px;
+    cursor: help;
+}
 @keyframes verse-flash-anim {
     0% { background: var(--highlight); }
     100% { background: transparent; }

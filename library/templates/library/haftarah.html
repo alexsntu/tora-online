@@ -32,7 +32,7 @@
     {% endifchanged %}
     <div class="verse-row" id="maftir-v-{{ forloop.counter }}">
         <span class="verse-num">{{ mv.verse.chapter }}:{{ mv.verse.verse }}</span>
-        <span class="verse-he" dir="rtl" lang="he">{{ mv.verse.text_he }}</span>
+        <span class="verse-he" dir="rtl" lang="he">{{ mv.verse.text_he|safe }}</span>
         <span class="verse-ru" lang="ru">{{ mv.verse.text_ru }}</span>
     </div>
     {% endfor %}
@@ -50,7 +50,7 @@
     {% endifchanged %}
     <div class="verse-row" id="v-{{ forloop.counter }}">
         <span class="verse-num">{{ verse.chapter }}:{{ verse.verse }}</span>
-        <span class="verse-he" dir="rtl" lang="he">{{ verse.text_he }}</span>
+        <span class="verse-he" dir="rtl" lang="he">{{ verse.text_he|safe }}</span>
         <span class="verse-ru" lang="ru">{{ verse.text_ru }}</span>
     </div>
     {% endfor %}

@@ -311,7 +311,7 @@ def import_haftarah_file(txt_file: Path, target: dict, stdout, style):
             he_verses = he_cache.get((v["book_slug"], v["chapter"]))
             text_he = ""
             if he_verses and 1 <= v["verse"] <= len(he_verses):
-                text_he = he_verses[v["verse"] - 1]
+                text_he = he_verses[v["verse"] - 1]["text"]
             HaftarahVerse.objects.create(
                 haftarah=haftarah, order=order, segment=segment,
                 book_name_ru=book_name_ru, book_name_he=book_name_he,

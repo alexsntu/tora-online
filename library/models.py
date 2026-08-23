@@ -63,6 +63,13 @@ class Book(models.Model):
 
 
 class Verse(models.Model):
+    SECTION_BREAK_PETUCHA = "petucha"
+    SECTION_BREAK_SETUMA = "setuma"
+    SECTION_BREAK_CHOICES = [
+        (SECTION_BREAK_PETUCHA, "פ — открытая (петуха)"),
+        (SECTION_BREAK_SETUMA, "ס — закрытая (сетума)"),
+    ]
+
     book = models.ForeignKey(Book, verbose_name="Книга", related_name="verses", on_delete=models.CASCADE)
     chapter = models.PositiveSmallIntegerField("Глава")
     verse = models.PositiveSmallIntegerField("Стих")
@@ -71,6 +78,10 @@ class Verse(models.Model):
     text_ru_slivniak = models.TextField(
         "Текст (рус., перевод Д. Сливняка)", blank=True,
         help_text="Da Project, 2011, CC BY-NC, с Sefaria",
+    )
+    section_break = models.CharField(
+        "Разрыв параши после стиха", max_length=10, blank=True, choices=SECTION_BREAK_CHOICES,
+        help_text="Открытая (פ) или закрытая (ס) параша, начинающаяся сразу после этого стиха - по масоретской разметке Sefaria.",
     )
 
     class Meta:
