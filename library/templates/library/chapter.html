@@ -66,9 +66,6 @@
             <span class="verse-ru-current-label" x-text="translation === 'classic' ? 'Классический перевод' : 'Перевод Д. Сливняка'"></span>
             <span class="verse-ru" lang="ru" x-show="translation === 'classic'">{{ verse.text_ru }}</span>
             <span class="verse-ru" lang="ru" x-show="translation === 'slivniak'" x-cloak>{{ verse.text_ru_slivniak }}</span>
-            <button type="button" class="translation-alt-toggle"
-                    @click.stop="openAltTranslation = (openAltTranslation === {{ verse.id }} ? null : {{ verse.id }})"
-                    x-text="(openAltTranslation === {{ verse.id }} ? 'Скрыть ' : 'Показать ') + (translation === 'classic' ? 'перевод Сливняка' : 'классический перевод')"></button>
             <span class="verse-ru verse-ru-alt" lang="ru" x-show="openAltTranslation === {{ verse.id }}" x-cloak>
                 <span x-show="translation === 'classic'">{{ verse.text_ru_slivniak }}</span>
                 <span x-show="translation === 'slivniak'">{{ verse.text_ru }}</span>
@@ -77,7 +74,7 @@
         {% else %}
         <span class="verse-ru" lang="ru">{{ verse.text_ru }}</span>
         {% endif %}
-        {% if verse.commentaries.all or verse.materials.all %}
+        {% if verse.commentaries.all or verse.materials.all or verse.text_ru_slivniak %}
         <span class="verse-actions">
             {% for c in verse.commentaries.all %}
             <button type="button" class="rashi-toggle" @click="openRashi = (openRashi === {{ c.id }} ? null : {{ c.id }})">{{ c.source }}</button>
@@ -88,6 +85,11 @@
                 Комментарий
                 <span class="materials-count" aria-label="Комментариев: {{ verse.materials.all|length }}">✦ {{ verse.materials.all|length }}</span>
             </button>
+            {% endif %}
+            {% if verse.text_ru_slivniak %}
+            <button type="button" class="translation-alt-toggle"
+                    @click="openAltTranslation = (openAltTranslation === {{ verse.id }} ? null : {{ verse.id }})"
+                    x-text="(openAltTranslation === {{ verse.id }} ? 'Скрыть ' : 'Показать ') + (translation === 'classic' ? 'перевод Сливняка' : 'классический перевод')"></button>
             {% endif %}
         </span>
         {% endif %}

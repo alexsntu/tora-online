@@ -426,13 +426,16 @@ h1 { font-family: var(--font-display); color: var(--maroon); font-weight: 500; l
 
 @media (max-width: 640px) {
     .promo-section { grid-template-columns: 1fr; }
-    main { padding: 1rem 1rem 3rem; }
+    main { padding: 1rem .6rem 3rem; }
     body { font-size: 16px; }
-    .site-header { padding: .9rem 1rem 1.1rem; }
+    .site-header { padding: .9rem .8rem 1.1rem; }
     .site-title { font-size: 1.15rem; gap: .4rem; }
     .site-emblem { width: 1.4rem; height: 1.4rem; }
     h1 { font-size: 1.4rem; }
-    .verses { padding: .3rem .8rem; border-radius: 4px; }
+    /* Область с текстом Торы - на узком экране каждый рем отступа заметно
+       съедает ширину строки, поэтому здесь сокращаем сильнее, чем везде. */
+    .verses { padding: .3rem .2rem; border-radius: 4px; }
+    .chapter-sticky-bar { margin: 0 -.6rem 1rem; padding: .5rem .6rem; font-size: .9rem; }
 }
 
 .about-section {
@@ -571,9 +574,6 @@ summary::marker { color: var(--gold); }
     font-weight: 600;
     color: var(--maroon);
     text-align: center;
-}
-@media (max-width: 640px) {
-    .chapter-sticky-bar { margin: 0 -1rem 1rem; padding: .5rem 1rem; font-size: .9rem; }
 }
 
 .chapter-marker {
@@ -876,7 +876,7 @@ summary::marker { color: var(--gold); }
     transition: background-color .12s ease;
 }
 .verse-row:last-child { border-bottom: none; }
-.verse-row:not(.has-materials):hover { background: rgba(180, 137, 15, 0.06); }
+.verse-row:hover { background: rgba(180, 137, 15, 0.06); }
 .verse-row.section-break-after-petucha { margin-bottom: 1.4rem; border-bottom: 2px solid var(--gold); }
 .verse-row.section-break-after-setuma { margin-bottom: .6rem; }
 
@@ -963,9 +963,13 @@ summary::marker { color: var(--gold); }
     letter-spacing: .04em;
     color: #a3936a;
 }
+/* Такой же размер/отступы, как у .rashi-toggle - чтобы пилюли в .verse-actions
+   смотрелись единым рядом одинаковых по весу кнопок. */
 .translation-alt-toggle {
-    margin-top: .4rem;
-    padding: .3rem .6rem;
+    padding: .45rem .6rem;
+    min-height: 2rem;
+    display: inline-flex;
+    align-items: center;
     border: 1px solid var(--border);
     border-radius: 3px;
     background: none;
@@ -973,6 +977,7 @@ summary::marker { color: var(--gold); }
     font-family: var(--font-body);
     font-size: .78rem;
     cursor: pointer;
+    white-space: nowrap;
 }
 .translation-alt-toggle:hover { background: #f2ede0; color: var(--text); }
 .verse-ru-alt {
@@ -985,21 +990,18 @@ summary::marker { color: var(--gold); }
 }
 
 @media (max-width: 640px) {
-    .verse-row { gap: .3rem; padding: .8rem .6rem; }
+    .verse-row { gap: .3rem; padding: .7rem .3rem; margin: 0 -.2rem; }
     .verse-he { font-size: 1.35rem; }
     .verse-ru { font-size: 1.05rem; }
 }
 
-.has-materials {
-    background: var(--verse-highlight);
-    border-radius: 10px;
-    margin-bottom: .5rem;
-}
+/* Раньше стихи с комментарием выделялись золотой заливкой строки - убрано по
+   просьбе пользователя: теперь единственный индикатор - кнопка "Комментарий"
+   под текстом (см. .comment-toggle), а текст остаётся однородным для чтения. */
 
 .materials-panel {
-    position: relative;
     margin: .2rem 0 .8rem 0;
-    padding: 2.6rem 1.4rem 1.2rem;
+    padding: 1.2rem 1.4rem;
     background: var(--paper);
     border: none;
     border-radius: var(--radius);
@@ -1042,9 +1044,8 @@ summary::marker { color: var(--gold); }
 }
 .verse-link-btn:hover { background: #f2ede0; color: var(--text); }
 .rashi-panel {
-    position: relative;
     margin: 0 0 .8rem 0;
-    padding: 2.6rem 1.1rem .9rem;
+    padding: .9rem 1.1rem;
     background: #faf6ea;
     border: 1px solid var(--border);
     border-radius: var(--radius);
@@ -1056,14 +1057,18 @@ summary::marker { color: var(--gold); }
 }
 
 /* Кнопка "Закрыть ✕" внутри панели Раши/нашего комментария - чтобы не искать
-   глазами исходную кнопку-переключатель наверху, особенно у длинных текстов. */
+   глазами исходную кнопку-переключатель наверху, особенно у длинных текстов.
+   В обычном потоке (не absolute) - выше всего остального содержимого, чтобы
+   никогда не наезжать на заголовок, даже если он длинный и переносится на
+   несколько строк на узком экране. margin-left:auto (физическое свойство, не
+   логическое) прижимает её к правому краю независимо от dir=rtl у панели Раши. */
 .panel-close-btn {
-    position: absolute;
-    top: .7rem;
-    right: .8rem;
-    display: inline-flex;
+    display: flex;
     align-items: center;
+    justify-content: center;
     gap: .3rem;
+    width: fit-content;
+    margin: 0 0 .8rem auto;
     padding: .3rem .7rem;
     border: 1px solid var(--border);
     border-radius: 999px;
@@ -1078,7 +1083,7 @@ summary::marker { color: var(--gold); }
 .panel-close-btn:hover { background: #f2ede0; color: var(--maroon); }
 
 @media (max-width: 640px) {
-    .materials-panel { padding: 1rem; }
+    .materials-panel, .rashi-panel { padding: 1rem; }
     .material a.platform-link { width: 100%; justify-content: center; }
     .nav-btn { width: 2.5rem; height: 2.5rem; font-size: .9rem; }
 }
