@@ -186,6 +186,19 @@
                 toast.classList.remove("is-visible");
             }, 2500);
         }
+        function toraShare(title, url, btnEl) {
+            if (navigator.share) {
+                navigator.share({ title: title, url: url }).catch(function () {});
+                return;
+            }
+            var done = function () { toraShowToast("Ссылка скопирована — вы можете поделиться ей."); };
+            var failed = function () { toraShowToast("Не удалось скопировать ссылку."); };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(done).catch(failed);
+            } else {
+                failed();
+            }
+        }
         function toraCopyVerseLink(chapter, verse, btnEl) {
             var url = window.location.href.split("#")[0] + "#v-" + chapter + "-" + verse;
             var done = function () {

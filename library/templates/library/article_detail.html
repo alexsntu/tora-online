@@ -1,9 +1,18 @@
 {% extends "library/base.html" %}
 {% block title %}{{ meta_title }}{% endblock %}
 {% block content %}
-<nav class="breadcrumbs">
-    <a href="{% url 'library:articles' %}">← Статьи</a>
-</nav>
+<div class="article-toolbar">
+    <nav class="breadcrumbs">
+        <a href="{% url 'library:articles' %}">← Статьи</a>
+    </nav>
+    <button type="button" class="share-btn"
+            onclick="toraShare('{{ material.title|escapejs }}', window.location.href.split('#')[0], this)">
+        <svg class="share-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3v12"/><path d="M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/>
+        </svg>
+        Поделиться
+    </button>
+</div>
 
 <article class="article-full">
     <h1>{{ material.title }}</h1>
