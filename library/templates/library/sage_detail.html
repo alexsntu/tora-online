@@ -32,6 +32,7 @@
                     </span>
                 </button>
                 <div class="materials-panel topics-panel" x-show="open === {{ entry.material.id }}" x-cloak>
+                    <button type="button" class="panel-close-btn" @click="open = null">✕ Закрыть</button>
                     <div class="topics-panel-ref">
                         <a href="{% url 'library:chapter' book_group.book.slug entry.verse.chapter %}#v-{{ entry.verse.chapter }}-{{ entry.verse.verse }}">{{ entry.verse }} — открыть в тексте →</a>
                     </div>

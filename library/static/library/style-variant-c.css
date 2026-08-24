@@ -1,0 +1,100 @@
+/* Вариант C: "Современный манускрипт" - высокий контраст, почти белый фон,
+   почти чёрный текст, золото как яркий акцент (не фон), шрифт Frank Ruhl Libre
+   остаётся только в больших заголовках, весь интерфейс (кнопки, навигация,
+   подписи) - на чистом гротеске (Inter). Плоские карточки с тонкой границей
+   вместо теней. Подключается только локально через ?theme=c. */
+
+:root {
+    --bg: #ffffff;
+    --paper: #ffffff;
+    --text: #17140f;
+    --accent: #9c5a12;
+    --accent-dark: #6e3d0d;
+    --gold: #c8940f;
+    --maroon: #6e2a1c;
+    --highlight: #fff3d6;
+    --highlight-border: #e7c471;
+    --border: #e6e1d6;
+    --verse-highlight: #fff3d6;
+    --verse-highlight-border: #e7c471;
+    --font-ui: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+    background: #fff;
+    background-image: none;
+    font-family: var(--font-ui);
+    color: #1f1b14;
+}
+
+main { max-width: 1180px; padding: 2.4rem 2.5rem 5rem; }
+
+h1, .book-card h3, .about-section h2, .promo-card h2, .book-section-heading,
+.material h3, .weekly-post-content h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -.01em;
+}
+
+/* Всё, что не крупный заголовок - на гротеске, это и даёт "современный" вид */
+body, .header-tool-link, .nav-btn, .channel-link, .zoom-link, .install-app-btn,
+.topic-entry, .topics-intro, .about-section p, .promo-card p, .book-card p,
+.question-card, .material-body, .verse-ru, .breadcrumbs, .site-title,
+.today-bar, .quick-nav-hint, .book-description {
+    font-family: var(--font-ui);
+}
+.verse-he { font-family: var(--font-hebrew); } /* иврит не трогаем */
+
+.site-header {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    box-shadow: none;
+}
+.site-header::after { display: none; }
+.site-title { font-weight: 700; }
+
+/* Плоские карточки - тонкая линия вместо тени/цветной полоски */
+.promo-card, .about-section, .weekly-post, .question-card, .materials-panel, .material {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-top: 1px solid var(--border);
+    border-left: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: none;
+}
+.promo-card:hover { box-shadow: none; border-color: var(--gold); transform: none; }
+
+.book-grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: .9rem; }
+.book-card {
+    padding: 1.2rem 1.3rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    transition: border-color .12s ease;
+}
+.book-card:hover { border-color: var(--gold); }
+.book-card:hover h3 { color: var(--maroon); }
+.book-grid .book-card:nth-of-type(1), .book-grid .book-card:nth-of-type(2) { border-top: 1px solid var(--border); }
+
+/* Медальоны - плоские квадраты со скруглением, без "монетного" объёма */
+.nav-btn {
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    box-shadow: none;
+}
+.nav-btn:hover { box-shadow: none; border-color: var(--gold); transform: none; }
+.nav-btn.active { background: var(--text); color: #fff; border-color: var(--text); }
+.nav-btn.has-materials { background: var(--highlight); border-color: var(--highlight-border); }
+.nav-btn.active.has-materials { background: var(--text); color: #fff; border-color: var(--text); }
+
+.channel-link, .zoom-link {
+    background: var(--text);
+    border-radius: 8px;
+    font-weight: 600;
+    box-shadow: none;
+}
+.channel-link:hover, .zoom-link:hover { background: var(--maroon); }
+
+.has-materials { border-left: 2px solid var(--gold); border-radius: 6px; background: #fffaf0; }
+
+.topic-entry, .question-card { border: 1px solid var(--border); border-radius: 8px; box-shadow: none; }
+.topic-entry:hover, .question-card:hover { border-color: var(--gold); background: #fffdf7; transform: none; }

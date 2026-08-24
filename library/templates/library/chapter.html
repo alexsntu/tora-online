@@ -6,6 +6,7 @@
 </nav>
 
 <h1>{{ title }}</h1>
+<div class="chapter-sticky-bar">{{ book.name_ru }} {{ chapter }}</div>
 
 {% if parasha.haftarot.all %}
 <p class="translation-toggle-label">
@@ -53,18 +54,11 @@
     <span class="aliyah-marker">{{ verse.starts_aliyah }}-я алия</span>
     {% endif %}
     <div class="verse-row {% if verse.materials.all %}has-materials{% endif %}{% if verse.section_break %} section-break-after-{{ verse.section_break }}{% endif %}"
-         id="v-{{ verse.chapter }}-{{ verse.verse }}"
-         {% if verse.materials.all %}@click="if (open !== {{ verse.id }}) { fetch('{% url 'library:track_event' %}', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({event_type: 'material_open', verse_id: {{ verse.id }}}), keepalive: true}) }; open = (open === {{ verse.id }} ? null : {{ verse.id }})"{% endif %}>
-        <span class="verse-num">
-            {{ verse.chapter }}:{{ verse.verse }}
+         id="v-{{ verse.chapter }}-{{ verse.verse }}">
+        <span class="verse-head">
+            <span class="verse-num">{{ verse.chapter }}:{{ verse.verse }}</span>
             <button type="button" class="verse-link-btn" aria-label="Скопировать ссылку на стих {{ verse.chapter }}:{{ verse.verse }}" title="Скопировать ссылку на стих"
                     @click.stop="toraCopyVerseLink({{ verse.chapter }}, {{ verse.verse }}, $event.currentTarget)">🔗</button>
-            {% for c in verse.commentaries.all %}
-            <button type="button" class="rashi-toggle" @click.stop="openRashi = (openRashi === {{ c.id }} ? null : {{ c.id }})">{{ c.source }}</button>
-            {% endfor %}
-            {% if verse.materials.all %}
-            <span class="materials-count" aria-label="Комментариев: {{ verse.materials.all|length }}">✦ {{ verse.materials.all|length }}</span>
-            {% endif %}
         </span>
         <span class="verse-he" dir="rtl" lang="he">{{ verse.text_he|safe }}{% if verse.section_break %} <span class="section-break-glyph" title="{% if verse.section_break == 'petucha' %}Открытая параша (петуха) - начинается после этого стиха{% else %}Закрытая параша (сетума) - начинается после этого стиха{% endif %}">{% if verse.section_break == 'petucha' %}פ{% else %}ס{% endif %}</span>{% endif %}</span>
         {% if verse.text_ru_slivniak %}
@@ -83,14 +77,30 @@
         {% else %}
         <span class="verse-ru" lang="ru">{{ verse.text_ru }}</span>
         {% endif %}
+        {% if verse.commentaries.all or verse.materials.all %}
+        <span class="verse-actions">
+            {% for c in verse.commentaries.all %}
+            <button type="button" class="rashi-toggle" @click="openRashi = (openRashi === {{ c.id }} ? null : {{ c.id }})">{{ c.source }}</button>
+            {% endfor %}
+            {% if verse.materials.all %}
+            <button type="button" class="comment-toggle"
+                    @click="if (open !== {{ verse.id }}) { fetch('{% url 'library:track_event' %}', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({event_type: 'material_open', verse_id: {{ verse.id }}}), keepalive: true}) }; open = (open === {{ verse.id }} ? null : {{ verse.id }})">
+                Комментарий
+                <span class="materials-count" aria-label="Комментариев: {{ verse.materials.all|length }}">✦ {{ verse.materials.all|length }}</span>
+            </button>
+            {% endif %}
+        </span>
+        {% endif %}
     </div>
     {% for c in verse.commentaries.all %}
     <div class="rashi-panel" x-show="openRashi === {{ c.id }}" x-cloak dir="rtl" lang="he">
+        <button type="button" class="panel-close-btn" @click="openRashi = null">✕ Закрыть</button>
         {{ c.text_he|linebreaksbr }}
     </div>
     {% endfor %}
     {% if verse.materials.all %}
     <div class="materials-panel" x-show="open === {{ verse.id }}" x-cloak>
+        <button type="button" class="panel-close-btn" @click="open = null">✕ Закрыть</button>
         {% for m in verse.materials.all %}
         {% include "library/_material.html" %}
         {% endfor %}

@@ -16,18 +16,21 @@
 }
 
 :root {
-    --bg: #f3e8ce;
-    --paper: #fdf9ee;
+    --bg: #faf6ec;
+    --paper: #ffffff;
     --text: #38290f;
     --accent: #a4631f;
     --accent-dark: #7a4813;
     --gold: #b4890f;
     --maroon: #7c3223;
-    --highlight: #f5dd9a;
-    --highlight-border: #c1860f;
-    --border: #ddc998;
-    --verse-highlight: #eceae5;
-    --verse-highlight-border: #b3b0a8;
+    --highlight: #fbeecb;
+    --highlight-border: #e9d093;
+    --border: #ece2c9;
+    --verse-highlight: #fbeecb;
+    --verse-highlight-border: #e9d093;
+    --shadow-soft: 0 1px 3px rgba(56, 41, 15, 0.06), 0 6px 18px rgba(56, 41, 15, 0.06);
+    --shadow-hover: 0 4px 10px rgba(56, 41, 15, 0.09), 0 10px 26px rgba(56, 41, 15, 0.08);
+    --radius: 14px;
 
     --font-hebrew: "Taamey Frank CLM", "Frank Ruhl Libre", Georgia, serif;
     --font-display: "Frank Ruhl Libre", Georgia, serif;
@@ -43,30 +46,41 @@ body {
     font-size: 18px;
     line-height: 1.5;
     background-color: var(--bg);
-    background-image:
-        radial-gradient(ellipse at 15% 20%, rgba(180, 137, 15, 0.07), transparent 45%),
-        radial-gradient(ellipse at 85% 15%, rgba(124, 50, 35, 0.05), transparent 40%),
-        radial-gradient(ellipse at 50% 100%, rgba(124, 50, 35, 0.05), transparent 55%);
-    background-attachment: fixed;
+    position: relative;
+}
+/* Очень лёгкая ромбовидная решётка (в духе сефардской/мавританской геометрии) -
+   на почти незаметной прозрачности, чтобы дать фактуру, не мешая "воздушности". */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-image: url("ornaments/lattice-bg.svg");
+    background-size: 90px 90px;
+    opacity: .05;
+    pointer-events: none;
 }
 
 .site-header {
     position: relative;
-    padding: 1.1rem 1.5rem 1.3rem;
-    background: linear-gradient(180deg, #fffdf5, var(--paper));
-    border-bottom: 3px double var(--gold);
-    box-shadow: 0 2px 10px rgba(56, 41, 15, 0.1);
+    padding: 1.4rem 1.5rem 1.7rem;
+    background: #fff;
+    border-bottom: none;
+    box-shadow: none;
     text-align: center;
 }
 .site-header::after {
     content: "";
+    display: block;
     position: absolute;
     left: 0;
     right: 0;
-    bottom: -5px;
-    height: 2px;
-    background: repeating-linear-gradient(135deg, var(--gold) 0 5px, transparent 5px 10px);
-    opacity: .55;
+    bottom: 0;
+    height: 16px;
+    background-image: url("ornaments/border-strip.svg");
+    background-repeat: repeat-x;
+    background-size: 20px 16px;
+    opacity: .8;
 }
 
 .site-title {
@@ -75,7 +89,7 @@ body {
     gap: .6rem;
     font-family: var(--font-display);
     font-size: 1.5rem;
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: .02em;
     color: var(--maroon);
     text-decoration: none;
@@ -173,12 +187,12 @@ body {
 }
 
 main {
-    max-width: 1200px;
+    max-width: 1160px;
     margin: 0 auto;
-    padding: 1.5rem 2.5rem 4rem;
+    padding: 2.2rem 2.5rem 5rem;
 }
 
-h1 { font-family: var(--font-display); color: var(--maroon); }
+h1 { font-family: var(--font-display); color: var(--maroon); font-weight: 500; letter-spacing: -.01em; }
 
 .today-bar {
     display: flex;
@@ -361,17 +375,30 @@ h1 { font-family: var(--font-display); color: var(--maroon); }
     margin-bottom: 2.5rem;
 }
 .promo-card {
+    position: relative;
+    overflow: hidden;
     padding: 1.2rem 1.4rem;
     background: var(--paper);
-    border: 1px solid var(--border);
-    border-top: 3px solid var(--gold);
-    border-radius: 6px;
-    box-shadow: 0 2px 8px rgba(56, 41, 15, 0.08);
+    border: none;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-soft);
     transition: transform .12s ease, box-shadow .12s ease;
 }
 .promo-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 14px rgba(56, 41, 15, 0.12);
+    box-shadow: var(--shadow-hover);
+}
+.about-section::after, .promo-card::after {
+    content: "";
+    position: absolute;
+    top: .6rem;
+    right: .6rem;
+    width: 22px;
+    height: 22px;
+    background-image: url("ornaments/rosette.svg");
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: .3;
 }
 .promo-card h2 {
     margin: 0 0 .5rem 0;
@@ -389,9 +416,10 @@ h1 { font-family: var(--font-display); color: var(--maroon); }
     background: var(--accent-dark);
     color: #fff;
     text-decoration: none;
-    border-radius: 4px;
+    border-radius: 999px;
     font-size: 1.1rem;
     font-weight: bold;
+    box-shadow: 0 2px 6px rgba(122, 72, 19, 0.25);
     transition: background-color .12s ease, transform .12s ease;
 }
 .channel-link:hover, .zoom-link:hover { background: var(--maroon); transform: translateY(-1px); }
@@ -408,13 +436,14 @@ h1 { font-family: var(--font-display); color: var(--maroon); }
 }
 
 .about-section {
+    position: relative;
+    overflow: hidden;
     margin-bottom: 2.5rem;
     padding: 1.2rem 1.4rem;
     background: var(--paper);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--gold);
-    border-radius: 6px;
-    box-shadow: 0 2px 8px rgba(56, 41, 15, 0.08);
+    border: none;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-soft);
 }
 .about-section h2 {
     margin: 0 0 .6rem 0;
@@ -468,19 +497,22 @@ h1 { font-family: var(--font-display); color: var(--maroon); }
 
 .book-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
     margin: .3rem 0 .8rem 0;
 }
 .book-card {
     display: block;
-    padding: 1rem 1.2rem 1rem 0;
-    border-top: 1px solid var(--border);
+    padding: 1.3rem 1.4rem;
+    background: var(--paper);
+    border: none;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-soft);
     color: inherit;
     text-decoration: none;
+    transition: transform .15s ease, box-shadow .15s ease;
 }
-.book-grid .book-card:nth-child(2n) { padding-left: 1.2rem; padding-right: 0; }
-.book-grid .book-card:nth-of-type(1), .book-grid .book-card:nth-of-type(2) { border-top: none; }
+.book-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
 .book-card h3 {
     margin: 0 0 .4rem 0;
     font-family: var(--font-display);
@@ -492,9 +524,6 @@ h1 { font-family: var(--font-display); color: var(--maroon); }
 
 @media (max-width: 640px) {
     .book-grid { grid-template-columns: 1fr; }
-    .book-grid .book-card,
-    .book-grid .book-card:nth-child(2n) { padding: 1rem 0; border-top: 1px solid var(--border); }
-    .book-grid .book-card:first-child { border-top: none; }
 }
 
 .book-category-label {
@@ -525,6 +554,28 @@ summary::marker { color: var(--gold); }
 .breadcrumbs { margin-bottom: 1rem; }
 .breadcrumbs a { color: var(--accent); text-decoration: none; }
 
+/* Липкая плашка "Книга, глава" - держится вверху экрана при прокрутке длинной
+   главы (как у Сефарии), без JS - чистый position:sticky, т.к. на странице
+   всегда ровно одна глава и её название не меняется по ходу прокрутки. */
+.chapter-sticky-bar {
+    position: sticky;
+    top: 0;
+    z-index: 15;
+    margin: 0 -2.5rem 1rem;
+    padding: .6rem 2.5rem;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 2px 8px rgba(56, 41, 15, 0.06);
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--maroon);
+    text-align: center;
+}
+@media (max-width: 640px) {
+    .chapter-sticky-bar { margin: 0 -1rem 1rem; padding: .5rem 1rem; font-size: .9rem; }
+}
+
 .chapter-marker {
     display: flex;
     align-items: center;
@@ -540,8 +591,11 @@ summary::marker { color: var(--gold); }
 .chapter-marker::after {
     content: "";
     flex: 1;
-    height: 0;
-    border-top: 2px dotted var(--gold);
+    height: 16px;
+    background-image: url("ornaments/border-strip.svg");
+    background-repeat: repeat-x;
+    background-position: center;
+    background-size: 20px 16px;
 }
 
 .topics-intro { color: #6a5a3a; font-size: 1.05rem; margin-bottom: 1.5rem; }
@@ -577,17 +631,17 @@ summary::marker { color: var(--gold); }
     cursor: pointer;
     padding: .5rem .8rem;
     background: var(--paper);
-    border: 1px solid var(--highlight-border);
-    border-radius: 4px;
+    border: none;
+    border-radius: 12px;
     font-family: inherit;
     font-size: .95rem;
     color: var(--text);
     text-align: left;
     text-decoration: none;
-    box-shadow: 0 1px 3px rgba(56, 41, 15, 0.06);
-    transition: background-color .12s ease, transform .12s ease;
+    box-shadow: var(--shadow-soft);
+    transition: background-color .12s ease, transform .12s ease, box-shadow .12s ease;
 }
-.topic-entry:hover { background: var(--highlight); transform: translateY(-1px); }
+.topic-entry:hover { background: #fff; box-shadow: var(--shadow-hover); transform: translateY(-1px); }
 .topic-entry-title { flex: 1 1 auto; }
 .topic-entry-meta {
     flex-shrink: 0;
@@ -711,7 +765,7 @@ summary::marker { color: var(--gold); }
     width: 2.1rem;
     height: 2.1rem;
     padding: 0;
-    border: 1px solid var(--border);
+    border: none;
     border-radius: 50%;
     background: #fff;
     color: var(--text);
@@ -719,25 +773,31 @@ summary::marker { color: var(--gold); }
     font-size: .85rem;
     text-decoration: none;
     cursor: pointer;
+    /* тонкое внутреннее кольцо - как чеканная кромка монеты/медальона */
+    box-shadow: inset 0 0 0 1px rgba(180, 137, 15, .3), 0 1px 2px rgba(56, 41, 15, 0.08);
     transition: transform .1s ease, box-shadow .1s ease, background-color .1s ease;
 }
-.nav-btn:hover { background: #f2e6c4; transform: translateY(-1px); box-shadow: 0 2px 4px rgba(56, 41, 15, 0.15); }
+.nav-btn:hover { background: #f2e6c4; transform: translateY(-1px); box-shadow: inset 0 0 0 1px rgba(180, 137, 15, .3), 0 2px 4px rgba(56, 41, 15, 0.15); }
+/* Активный медальон - та же светлая заливка и тёмный текст, что у "есть комментарий"
+   (не заливка тёмным цветом с белым текстом - недостаточная контрастность была
+   явно отмечена как нечитаемая аудиторией со слабым зрением), различие - двойное
+   маронового цвета кольцо вместо толстой рамки (не сдвигает размер кнопки). */
 .nav-btn.active {
     background: var(--highlight);
-    border: 2px solid var(--maroon);
     color: var(--text);
     font-weight: bold;
+    box-shadow: inset 0 0 0 2px var(--maroon), inset 0 0 0 4px rgba(255, 255, 255, .7);
 }
 .nav-btn.has-materials {
     background: var(--highlight);
-    border-color: var(--highlight-border);
+    box-shadow: inset 0 0 0 1px var(--highlight-border);
     font-weight: bold;
 }
-.nav-btn.has-materials:hover { filter: brightness(0.95); }
+.nav-btn.has-materials:hover { filter: brightness(0.97); }
 .nav-btn.active.has-materials {
     background: var(--highlight);
-    border: 2px solid var(--maroon);
     color: var(--text);
+    box-shadow: inset 0 0 0 2px var(--maroon), inset 0 0 0 4px rgba(255, 255, 255, .7);
 }
 
 .chapter-nav {
@@ -801,15 +861,18 @@ summary::marker { color: var(--gold); }
 }
 .translation-attribution a { color: var(--accent-dark); }
 
+/* Иврит и русский идут друг под другом (не в две колонки бок о бок) - так же
+   на десктопе, как и на телефоне: читается сверху вниз построчно, без бегающих
+   между колонками глаз. Кнопки Раши/нашего комментария - отдельным акцентным
+   рядом снизу (.verse-actions), а не мелкими иконками у номера стиха. */
 .verse-row {
-    display: grid;
-    grid-template-columns: 3.5rem 1fr 1fr;
-    gap: 1.5rem;
-    padding: .8rem .5rem;
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+    padding: 1rem .9rem;
     margin: 0 -.5rem;
     border-bottom: 1px solid var(--border);
-    border-radius: 3px;
-    align-items: start;
+    border-radius: 10px;
     transition: background-color .12s ease;
 }
 .verse-row:last-child { border-bottom: none; }
@@ -835,15 +898,15 @@ summary::marker { color: var(--gold); }
 }
 .verse-row.verse-flash { animation: verse-flash-anim 2.2s ease-out; }
 
-.verse-num {
-    position: relative;
+.verse-head {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: .4rem;
+    align-items: center;
+    gap: .5rem;
+}
+.verse-num {
     color: #a3936a;
     font-size: .85rem;
-    padding-top: .3rem;
+    font-weight: bold;
 }
 .materials-count {
     color: var(--gold);
@@ -851,6 +914,33 @@ summary::marker { color: var(--gold); }
     font-weight: bold;
     white-space: nowrap;
 }
+
+/* Ряд кнопок под текстом стиха - открыть Раши / наш комментарий. Раши -
+   скромная нейтральная кнопка (справочный источник), комментарий - акцентная
+   заливка (наш авторский контент, ему нужно быть заметнее). */
+.verse-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-top: .2rem;
+}
+.comment-toggle {
+    font-family: var(--font-body);
+    font-size: .82rem;
+    font-weight: bold;
+    color: var(--maroon);
+    background: var(--highlight);
+    border: none;
+    border-radius: 999px;
+    padding: .45rem .9rem;
+    min-height: 2rem;
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.comment-toggle:hover { filter: brightness(0.97); }
 
 .verse-he {
     font-family: var(--font-hebrew);
@@ -895,36 +985,25 @@ summary::marker { color: var(--gold); }
 }
 
 @media (max-width: 640px) {
-    .verse-row {
-        grid-template-columns: 1fr;
-        gap: .3rem;
-        padding: .8rem .6rem;
-    }
-    .verse-num { flex-direction: row; align-items: center; padding-top: 0; }
+    .verse-row { gap: .3rem; padding: .8rem .6rem; }
     .verse-he { font-size: 1.35rem; }
-    .verse-ru { font-size: 1.05rem; padding-top: .2rem; border-top: 1px dashed var(--border); margin-top: .3rem; }
+    .verse-ru { font-size: 1.05rem; }
 }
 
 .has-materials {
-    cursor: pointer;
     background: var(--verse-highlight);
-    border-left: 3px solid var(--verse-highlight-border);
-    border-radius: 3px;
+    border-radius: 10px;
     margin-bottom: .5rem;
 }
 
-.has-materials:hover {
-    filter: brightness(0.97);
-}
-
 .materials-panel {
+    position: relative;
     margin: .2rem 0 .8rem 0;
-    padding: 1.2rem 1.4rem;
+    padding: 2.6rem 1.4rem 1.2rem;
     background: var(--paper);
-    border: 1px solid var(--highlight-border);
-    border-left: 3px solid var(--highlight-border);
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(56, 41, 15, 0.08);
+    border: none;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-soft);
 }
 
 .rashi-toggle {
@@ -963,17 +1042,40 @@ summary::marker { color: var(--gold); }
 }
 .verse-link-btn:hover { background: #f2ede0; color: var(--text); }
 .rashi-panel {
+    position: relative;
     margin: 0 0 .8rem 0;
-    padding: .9rem 1.1rem;
+    padding: 2.6rem 1.1rem .9rem;
     background: #faf6ea;
     border: 1px solid var(--border);
-    border-radius: 4px;
+    border-radius: var(--radius);
     font-family: var(--font-hebrew);
     font-size: 1.05rem;
     line-height: 1.8;
     text-align: right;
     color: #4a3d24;
 }
+
+/* Кнопка "Закрыть ✕" внутри панели Раши/нашего комментария - чтобы не искать
+   глазами исходную кнопку-переключатель наверху, особенно у длинных текстов. */
+.panel-close-btn {
+    position: absolute;
+    top: .7rem;
+    right: .8rem;
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    padding: .3rem .7rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: #fff;
+    color: var(--accent-dark);
+    font-family: var(--font-body);
+    font-size: .8rem;
+    font-weight: bold;
+    cursor: pointer;
+    direction: ltr;
+}
+.panel-close-btn:hover { background: #f2ede0; color: var(--maroon); }
 
 @media (max-width: 640px) {
     .materials-panel { padding: 1rem; }
@@ -1109,14 +1211,14 @@ summary::marker { color: var(--gold); }
     display: block;
     padding: .8rem 1rem;
     background: var(--paper);
-    border: 1px solid var(--highlight-border);
-    border-radius: 4px;
+    border: none;
+    border-radius: 12px;
     text-decoration: none;
     color: var(--text);
-    box-shadow: 0 1px 3px rgba(56, 41, 15, 0.06);
-    transition: background-color .12s ease, transform .12s ease;
+    box-shadow: var(--shadow-soft);
+    transition: background-color .12s ease, transform .12s ease, box-shadow .12s ease;
 }
-.question-card:hover { background: var(--highlight); transform: translateY(-1px); }
+.question-card:hover { background: #fff; box-shadow: var(--shadow-hover); transform: translateY(-1px); }
 .question-card-text { margin: 0 0 .3rem 0; font-size: 1.05rem; }
 .question-card-date { color: var(--accent-dark); font-size: .8rem; font-weight: bold; }
 

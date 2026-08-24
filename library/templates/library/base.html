@@ -30,8 +30,35 @@
     <meta name="apple-mobile-web-app-title" content="Тора онлайн">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700&family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700&family=PT+Serif:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'library/style.css' %}">
+    <link rel="stylesheet" id="theme-variant-css" disabled>
+    <script>
+        /* Локальный просмотр альтернативной раскладки (?theme=c в URL) -
+           запоминается в localStorage, ?theme=default сбрасывает. Не влияет на
+           обычных посетителей - активируется только явным параметром в URL.
+           ?theme=b раньше указывал на черновой вариант дизайна - с 2026-08-24
+           он стал основным style.css, отдельного файла для него больше нет. */
+        (function () {
+            var THEME_URLS = {
+                c: "{% static 'library/style-variant-c.css' %}"
+            };
+            var params = new URLSearchParams(location.search);
+            var themeParam = params.get("theme");
+            if (themeParam === "default") {
+                localStorage.removeItem("tora-theme-preview");
+            } else if (themeParam) {
+                localStorage.setItem("tora-theme-preview", themeParam);
+            }
+            var theme = (themeParam && themeParam !== "default") ? themeParam : localStorage.getItem("tora-theme-preview");
+            if (theme && THEME_URLS[theme]) {
+                var link = document.getElementById("theme-variant-css");
+                link.href = THEME_URLS[theme];
+                link.disabled = false;
+                document.documentElement.setAttribute("data-theme-variant", theme);
+            }
+        })();
+    </script>
     <script defer src="https://unpkg.com/alpinejs@3/dist/cdn.min.js"></script>
     <script>
         if ("serviceWorker" in navigator) {
