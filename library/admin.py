@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib import admin
+from django.db import models
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import path, reverse
 
@@ -272,6 +273,38 @@ class MaterialVerseFilter(admin.SimpleListFilter):
         return queryset
 
 
+class MaterialHasVideoFilter(admin.SimpleListFilter):
+    title = "есть видео"
+    parameter_name = "has_video"
+
+    def lookups(self, request, model_admin):
+        return (("yes", "Да"), ("no", "Нет"))
+
+    def queryset(self, request, queryset):
+        # Не завязано на type - видео-ссылки могут быть заполнены и у материала типа "Статья".
+        has_video_q = models.Q(url__gt="") | models.Q(url_rutube__gt="")
+        if self.value() == "yes":
+            return queryset.filter(has_video_q)
+        if self.value() == "no":
+            return queryset.exclude(has_video_q)
+        return queryset
+
+
+class MaterialHasArticleFilter(admin.SimpleListFilter):
+    title = "есть статья"
+    parameter_name = "has_article"
+
+    def lookups(self, request, model_admin):
+        return (("yes", "Да"), ("no", "Нет"))
+
+    def queryset(self, request, queryset):
+        if self.value() == "yes":
+            return queryset.exclude(article_text="")
+        if self.value() == "no":
+            return queryset.filter(article_text="")
+        return queryset
+
+
 MATERIAL_PAGE_SIZES = (10, 25, 50)
 
 
@@ -279,10 +312,14 @@ MATERIAL_PAGE_SIZES = (10, 25, 50)
 class MaterialAdmin(admin.ModelAdmin):
     form = MaterialForm
     change_list_template = "admin/library/material/change_list.html"
-    list_display = ("title", "type", "verses_display", "created_at")
-    list_filter = ("type", MaterialBookFilter, MaterialChapterFilter, MaterialVerseFilter, "sages")
-    search_fields = ("title", "body")
+    list_display = ("title", "type", "has_video", "has_article", "verses_display", "created_at")
+    list_filter = (
+        "type", MaterialHasVideoFilter, MaterialHasArticleFilter,
+        MaterialBookFilter, MaterialChapterFilter, MaterialVerseFilter, "sages",
+    )
+    search_fields = ("title", "body", "article_text")
     list_per_page = MATERIAL_PAGE_SIZES[1]  # 25 по умолчанию
+    readonly_fields = ("article_slug",)  # заполняется автоматически из заголовка в save()
     # verses - выбор через виджет Книга/Глава/Стих (см. admin-verse-picker.js), не filter_horizontal;
     # обязательность (хотя бы 1 стих) проверяется в MaterialForm.clean_verses, не через model.blank=False -
     # required=True на самом (скрытом display:none) select дал бы невидимую браузерную HTML5-валидацию.
@@ -290,7 +327,15 @@ class MaterialAdmin(admin.ModelAdmin):
 
     class Media:
         css = {"all": ("library/admin-extra.css",)}
-        js = ("library/admin-verse-picker.js", "library/admin-sage-picker.js")
+        js = ("library/admin-verse-picker.js", "library/admin-sage-picker.js", "library/admin-article-richtext.js")
+
+    @admin.display(description="Видео", boolean=True)
+    def has_video(self, obj):
+        return bool(obj.url or obj.url_rutube)
+
+    @admin.display(description="Статья", boolean=True)
+    def has_article(self, obj):
+        return obj.has_article
 
     def changelist_view(self, request, extra_context=None):
         # list_per_page переопределяется на инстансе (singleton ModelAdmin) из query-параметра -

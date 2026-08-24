@@ -1,0 +1,45 @@
+{% extends "library/base.html" %}
+{% block title %}{{ meta_title }}{% endblock %}
+{% block content %}
+<nav class="breadcrumbs">
+    <a href="{% url 'library:articles' %}">← Статьи</a>
+</nav>
+
+<article class="article-full">
+    <h1>{{ material.title }}</h1>
+    <p class="article-meta">
+        <span class="article-author">Автор: Дмитрий Калашник</span>
+        {% if material.sages.all %}
+        <span class="article-sages">По учению: {% for sage in material.sages.all %}<a href="{% url 'library:sages' %}">{{ sage.name_ru }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+        {% endif %}
+    </p>
+    {% if verses %}
+    <p class="article-verses">
+        Стихи:
+        {% for v in verses %}<a href="{% url 'library:chapter' v.book.slug v.chapter %}#v-{{ v.chapter }}-{{ v.verse }}">{{ v }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
+    </p>
+    {% endif %}
+
+    <div class="article-body">{{ material.article_text|safe }}</div>
+
+    {% if material.url or material.url_rutube %}
+    <div class="material-links article-video-links">
+        {% if material.url %}
+        <a class="platform-link platform-youtube" href="{{ material.url }}" target="_blank" rel="noopener"
+           onclick="fetch('{% url 'library:track_event' %}', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({event_type: 'outbound_click', material_id: {{ material.id }}, target: 'youtube'}), keepalive: true})">
+            <svg class="platform-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="1" y="4" width="22" height="16" rx="4"/><polygon points="10,8.5 10,15.5 16,12" fill="#fff"/></svg>
+            Смотреть видеоурок на YouTube
+        </a>
+        {% endif %}
+        {% if material.url_rutube %}
+        <a class="platform-link platform-rutube" href="{{ material.url_rutube }}" target="_blank" rel="noopener"
+           onclick="fetch('{% url 'library:track_event' %}', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({event_type: 'outbound_click', material_id: {{ material.id }}, target: 'rutube'}), keepalive: true})">
+            <svg class="platform-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="1" y="4" width="22" height="16" rx="4"/><polygon points="10,8.5 10,15.5 16,12" fill="#fff"/></svg>
+            Смотреть видеоурок на RuTube
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</article>
+{% include "library/_report_error.html" %}
+{% endblock %}

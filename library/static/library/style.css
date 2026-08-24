@@ -583,6 +583,7 @@ summary::marker { color: var(--gold); }
     font-size: .95rem;
     color: var(--text);
     text-align: left;
+    text-decoration: none;
     box-shadow: 0 1px 3px rgba(56, 41, 15, 0.06);
     transition: background-color .12s ease, transform .12s ease;
 }
@@ -1139,6 +1140,37 @@ summary::marker { color: var(--gold); }
     font-size: 1.1rem;
     line-height: 1.7;
 }
+
+.article-full { padding: .5rem 0; }
+.article-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .3rem 1rem;
+    color: var(--accent-dark);
+    font-size: .9rem;
+    margin: 0 0 .6rem 0;
+}
+.article-author { font-weight: bold; }
+.article-verses { color: var(--accent-dark); font-size: .9rem; margin: 0 0 1.2rem 0; }
+.article-body {
+    font-size: 1.1rem;
+    line-height: 1.75;
+    margin-bottom: 1.5rem;
+}
+.article-body p { margin: 0 0 1rem 0; }
+.article-body h2 {
+    font-family: var(--font-display);
+    color: var(--maroon);
+    font-size: 1.4rem;
+    margin: 1.6rem 0 .8rem 0;
+}
+.article-body h3 {
+    font-family: var(--font-display);
+    color: var(--accent-dark);
+    font-size: 1.15rem;
+    margin: 1.3rem 0 .6rem 0;
+}
+.material-article-link { margin-top: .6rem; }
 
 .question-ask-form { display: flex; flex-direction: column; gap: .3rem; max-width: 36rem; }
 .question-ask-form label { font-weight: bold; margin-top: .8rem; color: var(--accent-dark); }

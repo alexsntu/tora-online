@@ -9,6 +9,22 @@ from django.db import models
 
 YOUTUBE_ID_RE = re.compile(r"(?:v=|youtu\.be/|embed/)([A-Za-z0-9_-]{11})")
 
+_RU_TRANSLIT = {
+    "а": "a", "б": "b", "в": "v", "г": "g", "д": "d", "е": "e", "ё": "e", "ж": "zh",
+    "з": "z", "и": "i", "й": "y", "к": "k", "л": "l", "м": "m", "н": "n", "о": "o",
+    "п": "p", "р": "r", "с": "s", "т": "t", "у": "u", "ф": "f", "х": "h", "ц": "ts",
+    "ч": "ch", "ш": "sh", "щ": "sch", "ъ": "", "ы": "y", "ь": "", "э": "e", "ю": "yu",
+    "я": "ya",
+}
+
+
+def slugify_ru(text):
+    """slugify(), но с транслитерацией кириллицы в латиницу - Django slugify() иначе
+    просто вырезает не-ASCII буквы (у заголовков на русском получился бы пустой слаг)."""
+    transliterated = "".join(_RU_TRANSLIT.get(ch, ch) for ch in text.lower())
+    from django.utils.text import slugify
+    return slugify(transliterated)
+
 
 class Category(models.Model):
     """Раздел библиотеки: Танах, Тора/Невиим/Ктувим внутри него, Талмуд и т.д. (как на Sefaria)."""
@@ -336,6 +352,23 @@ class Material(models.Model):
     url = models.URLField("Ссылка (YouTube / статья)", blank=True, help_text="Ссылка на YouTube (для видеоурока) или на статью")
     url_rutube = models.URLField("Ссылка (RuTube)", blank=True, help_text="Ссылка на RuTube (если есть, для видеоурока)")
     body = models.TextField("Текст статьи / комментарий", blank=True, help_text="Текст статьи или комментарий")
+    article_text = models.TextField(
+        "Текст статьи (отдельная страница)", blank=True,
+        help_text="Полный текст статьи с заголовками - публикуется на отдельной странице в разделе «Статьи», "
+        "независимо от видео-ссылок выше. Можно заполнить в дополнение к видео.",
+    )
+    article_slug = models.SlugField(
+        "Слаг статьи (для ссылки)", max_length=255, blank=True, null=True, unique=True,
+        help_text="Формируется автоматически из заголовка при сохранении, если заполнен текст статьи.",
+    )
+    article_meta_title = models.CharField(
+        "SEO-заголовок статьи", max_length=255, blank=True,
+        help_text="Пусто - формируется автоматически из заголовка материала.",
+    )
+    article_meta_description = models.CharField(
+        "SEO-описание статьи", max_length=300, blank=True,
+        help_text="Показывается в сниппете поисковой выдачи. Пусто - формируется автоматически из текста статьи.",
+    )
     verses = models.ManyToManyField(Verse, verbose_name="Стихи", related_name="materials", blank=True)
     sages = models.ManyToManyField(
         "Sage", verbose_name="Мудрецы Торы (на чьё учение опирается)",
@@ -343,11 +376,12 @@ class Material(models.Model):
     )
     created_at = models.DateTimeField("Дата создания", auto_now_add=True)
 
-    # Закешированные lower()-версии title/body - чтобы поиск (_search_materials в views.py)
+    # Закешированные lower()-версии title/body/article_text - чтобы поиск (_search_materials в views.py)
     # фильтровал на уровне БД (icontains), а не грузил все материалы и сравнивал в Python
     # (SQLite icontains не регистронезависим для кириллицы, отсюда и .lower() на записи).
     title_lower = models.CharField(max_length=255, editable=False, blank=True)
     body_lower = models.TextField(editable=False, blank=True)
+    article_text_lower = models.TextField(editable=False, blank=True)
 
     class Meta:
         ordering = ["-created_at"]
@@ -360,7 +394,20 @@ class Material(models.Model):
     def save(self, *args, **kwargs):
         self.title_lower = self.title.lower()
         self.body_lower = self.body.lower()
+        self.article_text_lower = self.article_text.lower()
+        if self.article_text and not self.article_slug:
+            base_slug = slugify_ru(self.title) or "statya"
+            slug = base_slug
+            n = 2
+            while Material.objects.filter(article_slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{n}"
+                n += 1
+            self.article_slug = slug
         super().save(*args, **kwargs)
+
+    @property
+    def has_article(self):
+        return bool(self.article_text)
 
     @property
     def youtube_embed_url(self):

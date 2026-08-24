@@ -10,6 +10,7 @@ from django.db.models import Count, Q
 from django.http import Http404, HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.html import strip_tags
 from django.utils.text import Truncator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -339,7 +340,9 @@ def _search_materials(query):
     приведённым к нижнему регистру, вместо загрузки всех материалов и сравнения в Python."""
     query = query.lower()
     return list(
-        Material.objects.filter(Q(title_lower__icontains=query) | Q(body_lower__icontains=query))
+        Material.objects.filter(
+            Q(title_lower__icontains=query) | Q(body_lower__icontains=query) | Q(article_text_lower__icontains=query)
+        )
         .distinct()
         .prefetch_related("verses__book", "sages")
     )
@@ -393,6 +396,73 @@ def topics_book_view(request, book_slug):
 
     parashot = _group_entries_by_parasha(entries, _parashot_by_book())
     return render(request, "library/topics_book.html", {"book": book, "parashot": parashot})
+
+
+def articles_view(request):
+    """Раздел «Статьи»: карточки книг, в которых есть материалы с заполненным
+    article_text (независимо от video-ссылок в том же материале) - раскрытие
+    по недельным главам живёт на отдельной странице книги, как в /topics/."""
+    books = (
+        Book.objects.annotate(
+            articles_count=Count("verses__materials", filter=~Q(verses__materials__article_text=""), distinct=True)
+        )
+        .filter(articles_count__gt=0)
+        .order_by("order")
+    )
+    for book in books:
+        book.articles_word = ru_plural(book.articles_count, "статья", "статьи", "статей")
+    return render(request, "library/articles.html", {"books": books})
+
+
+def articles_book_view(request, book_slug):
+    """Список статей внутри одной книги, по недельным главам - как /topics/<книга>/."""
+    book = get_object_or_404(Book, slug=book_slug)
+    materials = Material.objects.filter(verses__book=book).exclude(article_text="").distinct().prefetch_related("verses")
+
+    entries = []
+    for m in materials:
+        for v in m.verses.filter(book=book):
+            entries.append({"verse": v, "material": m})
+    entries.sort(key=lambda e: (e["verse"].chapter, e["verse"].verse))
+
+    parashot = _group_entries_by_parasha(entries, _parashot_by_book())
+    return render(request, "library/articles_book.html", {"book": book, "parashot": parashot})
+
+
+def article_detail_view(request, slug):
+    """Страница одной статьи - полный текст с заголовками, автор всегда
+    Дмитрий Калашник (см. AUTHOR_PERSON_LD), плюс видео-кнопки того же
+    материала, если они заполнены."""
+    material = get_object_or_404(Material.objects.exclude(article_text=""), article_slug=slug)
+    verses = list(material.verses.select_related("book").order_by("book__order", "chapter", "verse"))
+
+    meta_title, meta_description = resolve_meta(
+        material.article_meta_title, material.article_meta_description,
+        f"{material.title} — Tora Online",
+        # strip_tags() голых открывающих/закрывающих тегов не разделяет пробелом -
+        # соседние блоки (</h2><p>) слипаются в одно слово без него.
+        " ".join(strip_tags(material.article_text.replace("<", " <")).split()),
+    )
+    breadcrumbs = breadcrumbs_ld(request, [
+        ("Оглавление", reverse("library:home")),
+        ("Статьи", reverse("library:articles")),
+        (Truncator(material.title).words(8), reverse("library:article_detail", args=[material.article_slug])),
+    ])
+    article_ld = {
+        "@type": "Article",
+        "headline": material.title,
+        "author": AUTHOR_PERSON_LD,
+        "articleBody": " ".join(strip_tags(material.article_text.replace("<", " <")).split()),
+    }
+    return render(
+        request,
+        "library/article_detail.html",
+        {
+            "material": material, "verses": verses,
+            "meta_title": meta_title, "meta_description": meta_description,
+            "structured_data_json": structured_data_json(breadcrumbs, article_ld),
+        },
+    )
 
 
 def sages_view(request):
@@ -660,7 +730,7 @@ def robots_txt_view(request):
 def sitemap_xml_view(request):
     """Простая карта сайта (без django.contrib.sitemaps - список URL невелик
     и не меняется настолько часто, чтобы городить отдельное приложение)."""
-    url_names = ["home", "topics", "sages", "questions", "calendar", "info", "haftarot"]
+    url_names = ["home", "topics", "articles", "sages", "questions", "calendar", "info", "haftarot"]
     paths = [reverse(f"library:{name}") for name in url_names]
 
     for book in Book.objects.all():
@@ -685,6 +755,13 @@ def sitemap_xml_view(request):
     )
     for book in books_with_materials:
         paths.append(reverse("library:topics_book", args=[book.slug]))
+
+    books_with_articles = Book.objects.filter(verses__materials__article_text__gt="").distinct()
+    for book in books_with_articles:
+        paths.append(reverse("library:articles_book", args=[book.slug]))
+
+    for material in Material.objects.exclude(article_text=""):
+        paths.append(reverse("library:article_detail", args=[material.article_slug]))
 
     for sage in Sage.objects.filter(materials__isnull=False).distinct():
         paths.append(reverse("library:sage_detail", args=[sage.slug]))

@@ -1,0 +1,21 @@
+{% extends "library/base.html" %}
+{% block title %}Статьи — Tora Online{% endblock %}
+{% block content %}
+<nav class="breadcrumbs">
+    <a href="{% url 'library:home' %}">← Оглавление</a>
+</nav>
+
+<h1>Статьи</h1>
+<p class="topics-intro">Текстовые статьи Дмитрия Калашника по книгам Торы. Выберите книгу, чтобы увидеть статьи по недельным главам.</p>
+
+<div class="book-grid">
+    {% for book in books %}
+    <a class="book-card" href="{% url 'library:articles_book' book.slug %}">
+        <h3>{{ book.name_ru }}</h3>
+        <p>{{ book.articles_count }} {{ book.articles_word }} — нажмите, чтобы открыть</p>
+    </a>
+    {% empty %}
+    <p>Пока нет статей — добавь текст статьи в админке к нужному комментарию, и он появится здесь автоматически.</p>
+    {% endfor %}
+</div>
+{% endblock %}

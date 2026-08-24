@@ -1,0 +1,36 @@
+{% extends "library/base.html" %}
+{% block title %}Статьи: {{ book.name_ru }} — Tora Online{% endblock %}
+{% block content %}
+<nav class="breadcrumbs">
+    <a href="{% url 'library:articles' %}">← Статьи</a>
+</nav>
+
+<h1>Статьи: {{ book.name_ru }}</h1>
+
+<div class="verses topics-list">
+    {% for parasha_group in parashot %}
+    <details class="book-entry">
+        <summary>
+            {% if parasha_group.parasha %}
+            <strong>{{ parasha_group.parasha.name_ru }}</strong>
+            <span class="range">{{ parasha_group.parasha.start_verse }} — {{ parasha_group.parasha.end_verse }}</span>
+            {% else %}
+            <strong>Без привязки к недельной главе</strong>
+            {% endif %}
+        </summary>
+        <div class="topics-flow">
+            {% for entry in parasha_group.entries %}
+            <a class="topic-entry" href="{% url 'library:article_detail' entry.material.article_slug %}">
+                <span class="topic-entry-title">{{ entry.material.title }}</span>
+                <span class="topic-entry-meta">
+                    <span class="topic-entry-verse">{{ entry.verse }}</span>
+                    {% if entry.material.sages.all %}<span class="topic-entry-sage">{{ entry.material.sages.all|join:", " }}</span>{% endif %}
+                </span>
+            </a>
+            {% endfor %}
+        </div>
+    </details>
+    {% endfor %}
+</div>
+{% include "library/_report_error.html" %}
+{% endblock %}

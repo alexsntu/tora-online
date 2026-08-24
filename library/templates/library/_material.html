@@ -30,4 +30,9 @@
            onclick="fetch('{% url 'library:track_event' %}', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({event_type: 'outbound_click', material_id: {{ m.id }}, target: 'article'}), keepalive: true})">Читать статью →</a>
         {% endif %}
     {% endif %}
+    {% if m.article_text %}
+    <p class="material-article-link">
+        <a href="{% url 'library:article_detail' m.article_slug %}">Читать статью →</a>
+    </p>
+    {% endif %}
 </div>
