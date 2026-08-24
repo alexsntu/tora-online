@@ -112,14 +112,20 @@
     color: #fff;
 }
 
-/* Мини-редактор для WeeklyPost.body (см. admin-richtext.js) - вместо голого textarea. */
+/* Мини-редактор для WeeklyPost.body и Material.article_text (см. admin-richtext.js /
+   admin-article-richtext.js) - вместо голого textarea. */
+.richtext-wrap {
+    width: 100%;
+    max-width: 1100px;
+    box-sizing: border-box;
+}
 .richtext-toolbar {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.3rem;
     margin-bottom: 0.3rem;
 }
 .richtext-toolbar button {
-    width: 2.2rem;
     height: 2.2rem;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -127,12 +133,24 @@
     cursor: pointer;
     font-size: 1rem;
 }
+/* Кнопки-иконки (Ж/К/Ч) - квадратные; кнопки с текстовой подписью (заголовки) -
+   по ширине содержимого, без переноса слов внутри кнопки. */
+.richtext-toolbar button[data-cmd] {
+    width: 2.2rem;
+}
+.richtext-toolbar button[data-block] {
+    width: auto;
+    padding: 0 0.7rem;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
 .richtext-toolbar button:hover {
     background: #f2ede0;
 }
 .richtext-editor {
+    width: 100%;
+    box-sizing: border-box;
     min-height: 12rem;
-    max-width: 900px;
     padding: 0.6rem 0.8rem;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -143,4 +161,7 @@
 .richtext-editor:focus {
     outline: 2px solid #b4890f;
     outline-offset: -1px;
+}
+.richtext-wrap-article .richtext-editor {
+    min-height: 24rem;
 }

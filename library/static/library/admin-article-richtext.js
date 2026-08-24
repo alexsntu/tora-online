@@ -8,7 +8,7 @@
         textarea.style.display = "none";
 
         var wrapper = document.createElement("div");
-        wrapper.className = "richtext-wrap";
+        wrapper.className = "richtext-wrap richtext-wrap-article";
         wrapper.innerHTML =
             '<div class="richtext-toolbar">' +
             '<button type="button" data-cmd="bold" title="Жирный"><b>Ж</b></button>' +
