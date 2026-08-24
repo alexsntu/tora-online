@@ -1,3 +1,20 @@
+/* Taamey Frank CLM - покрывает редкие знаки кантилляции Сифрей Эмет (Теилим/Мишлей/Иов),
+   которых нет в Frank Ruhl Libre; браузер подставляет её посимвольно как fallback. */
+@font-face {
+    font-family: "Taamey Frank CLM";
+    src: url("fonts/TaameyFrankCLM-Medium.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: "Taamey Frank CLM";
+    src: url("fonts/TaameyFrankCLM-Bold.ttf") format("truetype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
 :root {
     --bg: #f3e8ce;
     --paper: #fdf9ee;
@@ -12,7 +29,7 @@
     --verse-highlight: #eceae5;
     --verse-highlight-border: #b3b0a8;
 
-    --font-hebrew: "Frank Ruhl Libre", Georgia, serif;
+    --font-hebrew: "Taamey Frank CLM", "Frank Ruhl Libre", Georgia, serif;
     --font-display: "Frank Ruhl Libre", Georgia, serif;
     --font-body: "PT Serif", Georgia, serif;
 }
