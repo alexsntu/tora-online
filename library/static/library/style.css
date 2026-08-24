@@ -1151,6 +1151,7 @@ summary::marker { color: var(--gold); }
     margin: 0 0 .6rem 0;
 }
 .article-author { font-weight: bold; }
+.article-parasha { color: var(--accent-dark); font-size: .9rem; margin: 0 0 .3rem 0; }
 .article-verses { color: var(--accent-dark); font-size: .9rem; margin: 0 0 1.2rem 0; }
 .article-body {
     font-size: 1.1rem;
@@ -1158,17 +1159,27 @@ summary::marker { color: var(--gold); }
     margin-bottom: 1.5rem;
 }
 .article-body p { margin: 0 0 1rem 0; }
+/* Текст, вставленный в редактор из Word/Google Docs/веб-чатов, тащит с собой инлайн-стили
+   (свой шрифт, размер, белый фон у заголовков) - у инлайн style="" приоритет выше обычных
+   правил, поэтому перебиваем принудительно, чтобы статья всегда выглядела в стиле сайта
+   независимо от источника вставки (та же логика в admin-extra.css для самого редактора). */
+.article-body * {
+    font-family: inherit !important;
+    background: none !important;
+}
 .article-body h2 {
-    font-family: var(--font-display);
-    color: var(--maroon);
-    font-size: 1.4rem;
-    margin: 1.6rem 0 .8rem 0;
+    font-family: var(--font-display) !important;
+    color: var(--maroon) !important;
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    margin: 1.6rem 0 .8rem 0 !important;
 }
 .article-body h3 {
-    font-family: var(--font-display);
-    color: var(--accent-dark);
-    font-size: 1.15rem;
-    margin: 1.3rem 0 .6rem 0;
+    font-family: var(--font-display) !important;
+    color: var(--accent-dark) !important;
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    margin: 1.3rem 0 .6rem 0 !important;
 }
 .material-article-link { margin-top: .6rem; }
 

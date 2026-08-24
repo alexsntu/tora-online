@@ -13,6 +13,12 @@
         <span class="article-sages">По учению: {% for sage in material.sages.all %}<a href="{% url 'library:sages' %}">{{ sage.name_ru }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</span>
         {% endif %}
     </p>
+    {% if parashot %}
+    <p class="article-parasha">
+        Недельная глава:
+        {% for p in parashot %}<a href="{% url 'library:parasha' p.slug %}">{{ p.name_ru }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
+    </p>
+    {% endif %}
     {% if verses %}
     <p class="article-verses">
         Стихи:

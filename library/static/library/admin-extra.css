@@ -165,3 +165,26 @@
 .richtext-wrap-article .richtext-editor {
     min-height: 24rem;
 }
+/* Текст, вставленный из Word/Google Docs/веб-чатов, тащит инлайн-стили (свой шрифт,
+   размер, белый фон под заголовками и т.п. вплоть до scrollbar-width на каждом теге) -
+   у инлайн style="" приоритет выше обычных правил, поэтому переопределяем принудительно,
+   иначе вставленный текст выглядит "огромным" и с чужим оформлением прямо в редакторе. */
+.richtext-wrap-article .richtext-editor * {
+    font-family: inherit !important;
+    background: none !important;
+    color: inherit !important;
+}
+.richtext-wrap-article .richtext-editor h2 {
+    font-size: 24px !important;
+    font-weight: bold !important;
+    margin: 1rem 0 0.5rem !important;
+}
+.richtext-wrap-article .richtext-editor h3 {
+    font-size: 20px !important;
+    font-weight: bold !important;
+    margin: 0.8rem 0 0.4rem !important;
+}
+.richtext-wrap-article .richtext-editor p {
+    font-size: 1rem !important;
+    margin: 0 0 0.6rem !important;
+}

@@ -436,6 +436,13 @@ def article_detail_view(request, slug):
     material = get_object_or_404(Material.objects.exclude(article_text=""), article_slug=slug)
     verses = list(material.verses.select_related("book").order_by("book__order", "chapter", "verse"))
 
+    parashot_by_book = _parashot_by_book()
+    parashot = []
+    for v in verses:
+        p = _parasha_for_verse(v, parashot_by_book)
+        if p and p not in parashot:
+            parashot.append(p)
+
     meta_title, meta_description = resolve_meta(
         material.article_meta_title, material.article_meta_description,
         f"{material.title} — Tora Online",
@@ -458,7 +465,7 @@ def article_detail_view(request, slug):
         request,
         "library/article_detail.html",
         {
-            "material": material, "verses": verses,
+            "material": material, "verses": verses, "parashot": parashot,
             "meta_title": meta_title, "meta_description": meta_description,
             "structured_data_json": structured_data_json(breadcrumbs, article_ld),
         },
