@@ -874,12 +874,18 @@ def report_error_view(request):
         # honeypot - для бота делаем вид, что всё прошло успешно, но ничего не сохраняем
         return redirect(fallback)
 
+    expected = request.session.get("report_error_captcha")
+    captcha_ok = expected is not None and request.POST.get("captcha") == str(expected)
+
     form = ErrorReportForm(request.POST)
-    if form.is_valid():
+    if form.is_valid() and captcha_ok:
         report = form.save(commit=False)
         report.page_url = page_url
         report.save()
+        request.session.pop("report_error_captcha", None)
         messages.success(request, "Спасибо! Сообщение об ошибке отправлено.")
+    elif not captcha_ok:
+        messages.error(request, "Неверно выбрана цифра в проверке - попробуйте ещё раз.")
     else:
         messages.error(request, "Не удалось отправить - опишите ошибку текстом.")
 

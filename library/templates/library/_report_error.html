@@ -8,6 +8,15 @@
             <label for="id_report_website">Сайт</label>
             <input type="text" name="website" id="id_report_website" tabindex="-1" autocomplete="off">
         </div>
+        <label>Какая цифра здесь показана: <strong>{{ report_error_captcha_target }}</strong>?</label>
+        <div class="question-ask-captcha">
+            {% for opt in report_error_captcha_options %}
+            <label class="question-ask-captcha-option">
+                <input type="radio" name="captcha" value="{{ opt }}" required>
+                {{ opt }}
+            </label>
+            {% endfor %}
+        </div>
         <button type="submit" class="channel-link report-error-submit">Отправить</button>
     </form>
 </details>
