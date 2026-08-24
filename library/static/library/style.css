@@ -554,6 +554,40 @@ h1 { font-family: var(--font-display); color: var(--maroon); font-weight: 500; l
 summary { list-style-position: outside; }
 summary::marker { color: var(--gold); }
 
+/* Раскрытие недельной главы в указателе тем/мудрецов - раньше это была просто
+   строка текста со стандартным маленьким треугольником, тяжело точно попасть
+   пальцем на мобильном. Теперь целая карточка-кнопка на всю ширину. */
+.book-entry { margin-bottom: .8rem; }
+.book-entry summary {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: .3rem .8rem;
+    margin-bottom: .6rem;
+    padding: .9rem 1.2rem;
+    background: var(--paper);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-soft);
+    cursor: pointer;
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--maroon);
+    transition: box-shadow .12s ease, transform .12s ease;
+}
+.book-entry summary::-webkit-details-marker { display: none; }
+.book-entry summary::marker { content: ""; }
+.book-entry summary::after {
+    content: "▾";
+    margin-left: auto;
+    color: var(--gold);
+    font-size: .9em;
+    transition: transform .15s ease;
+}
+.book-entry[open] summary::after { transform: rotate(180deg); }
+.book-entry summary:hover { box-shadow: var(--shadow-hover); transform: translateY(-1px); }
+.book-entry summary .range { margin-left: 0; }
+
 .breadcrumbs { margin-bottom: 1rem; }
 .breadcrumbs a { color: var(--accent); text-decoration: none; }
 
