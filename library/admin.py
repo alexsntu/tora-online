@@ -13,8 +13,8 @@ from .models import (
 )
 from .views import analytics_dashboard
 
-admin.site.site_header = "Tora Online — панель управления"
-admin.site.site_title = "Tora Online"
+admin.site.site_header = "Тора онлайн — панель управления"
+admin.site.site_title = "Тора онлайн"
 admin.site.index_title = "Управление сайтом"
 
 _default_get_urls = admin.site.get_urls

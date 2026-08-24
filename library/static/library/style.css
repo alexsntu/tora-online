@@ -1151,8 +1151,6 @@ summary::marker { color: var(--gold); }
     margin: 0 0 .6rem 0;
 }
 .article-author { font-weight: bold; }
-.article-parasha { color: var(--accent-dark); font-size: .9rem; margin: 0 0 .3rem 0; }
-.article-verses { color: var(--accent-dark); font-size: .9rem; margin: 0 0 1.2rem 0; }
 .article-body {
     font-size: 1.1rem;
     line-height: 1.75;

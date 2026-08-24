@@ -138,7 +138,7 @@ def home(request):
 
     website_ld = {
         "@type": "WebSite",
-        "name": "Tora Online для Бней Ноах",
+        "name": "Тора онлайн для Бней Ноах",
         "description": f"{SITE_TAGLINE}: {AUTHOR_DESCRIPTION.lower()}.",
         "url": request.build_absolute_uri(reverse("library:home")),
         "author": AUTHOR_PERSON_LD,
@@ -175,7 +175,7 @@ def book_view(request, book_slug):
     )
     meta_title, meta_description = resolve_meta(
         book.meta_title, book.meta_description,
-        f"{book.name_ru} — Tora Online",
+        f"{book.name_ru} — Тора онлайн",
         book.description_ru or f"Текст книги {book.name_ru} на иврите с параллельным переводом на русский.",
     )
     book_url = reverse("library:book", args=[book.slug])
@@ -237,7 +237,7 @@ def chapter_view(request, book_slug, chapter):
         "next_chapter": chapter + 1 if chapter < max_chapter else None,
         "nav_data": build_nav_data(nav_verses),
         "current_chapter": chapter,
-        "meta_title": f"{title} — Tora Online",
+        "meta_title": f"{title} — Тора онлайн",
         "meta_description": Truncator(f"{title} на иврите с параллельным переводом. {first_verse_text}").chars(300),
         "structured_data_json": structured_data_json(breadcrumbs),
     }
@@ -268,7 +268,7 @@ def parasha_view(request, parasha_slug):
     title = f"Недельная глава «{parasha.name_ru}»"
     meta_title, meta_description = resolve_meta(
         parasha.meta_title, parasha.meta_description,
-        f"{title} — Tora Online",
+        f"{title} — Тора онлайн",
         f"Недельная глава «{parasha.name_ru}»: {start.book.name_ru} {start.chapter}:{start.verse} — "
         f"{end.chapter}:{end.verse}, текст на иврите и русском.",
     )
@@ -445,7 +445,7 @@ def article_detail_view(request, slug):
 
     meta_title, meta_description = resolve_meta(
         material.article_meta_title, material.article_meta_description,
-        f"{material.title} — Tora Online",
+        f"{material.title} — Тора онлайн",
         # strip_tags() голых открывающих/закрывающих тегов не разделяет пробелом -
         # соседние блоки (</h2><p>) слипаются в одно слово без него.
         " ".join(strip_tags(material.article_text.replace("<", " <")).split()),
@@ -501,7 +501,7 @@ def sage_detail_view(request, sage_slug):
 
     meta_title, meta_description = resolve_meta(
         sage.meta_title, sage.meta_description,
-        f"{sage.name_ru} — Tora Online",
+        f"{sage.name_ru} — Тора онлайн",
         sage.bio or f"Комментарии к Торе, опирающиеся на учение {sage.name_ru}.",
     )
     return render(
@@ -536,7 +536,7 @@ def haftarot_view(request):
 
     meta_title, meta_description = resolve_meta(
         "", "",
-        "Афторот (гафтарот) — Tora Online",
+        "Афторот (гафтарот) — Тора онлайн",
         "Гафтарот (чтения из книг Пророков) для каждой недельной главы Торы, для праздничных дат, "
         "Шалош Регалим и Арба Парашийот - ашкеназская и сефардская традиции.",
     )
@@ -557,7 +557,7 @@ def haftarah_view(request, parasha_slug, tradition):
     title = f"Гафтара «{parasha.name_ru}» ({haftarah.get_tradition_display()})"
     meta_title, meta_description = resolve_meta(
         "", "",
-        f"{title} — Tora Online",
+        f"{title} — Тора онлайн",
         f"Гафтара недельной главы «{parasha.name_ru}» ({haftarah.get_tradition_display()} традиция), "
         f"{haftarah.range_display}, текст на иврите и русском.",
     )
@@ -584,7 +584,7 @@ def haftarah_occasion_view(request, occasion_slug, tradition):
     title = f"Гафтара «{occasion.name_ru}» ({haftarah.get_tradition_display()})"
     meta_title, meta_description = resolve_meta(
         "", "",
-        f"{title} — Tora Online",
+        f"{title} — Тора онлайн",
         f"Гафтара «{occasion.name_ru}» ({haftarah.get_tradition_display()} традиция), "
         f"{haftarah.range_display}, текст на иврите и русском.",
     )
@@ -791,7 +791,7 @@ def question_detail_view(request, pk):
     question = get_object_or_404(Question, pk=pk, is_published=True)
     meta_title, meta_description = resolve_meta(
         question.meta_title, question.meta_description,
-        f"{Truncator(question.display_title).words(12)} — Tora Online",
+        f"{Truncator(question.display_title).words(12)} — Тора онлайн",
         question.answer or question.display_title,
     )
     breadcrumbs = breadcrumbs_ld(request, [

@@ -12,19 +12,13 @@
         {% if material.sages.all %}
         <span class="article-sages">По учению: {% for sage in material.sages.all %}<a href="{% url 'library:sages' %}">{{ sage.name_ru }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</span>
         {% endif %}
+        {% if parashot %}
+        <span class="article-parasha">Недельная глава: {% for p in parashot %}<a href="{% url 'library:parasha' p.slug %}">{{ p.name_ru }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+        {% endif %}
+        {% if verses %}
+        <span class="article-verses">Стихи: {% for v in verses %}<a href="{% url 'library:chapter' v.book.slug v.chapter %}#v-{{ v.chapter }}-{{ v.verse }}">{{ v }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+        {% endif %}
     </p>
-    {% if parashot %}
-    <p class="article-parasha">
-        Недельная глава:
-        {% for p in parashot %}<a href="{% url 'library:parasha' p.slug %}">{{ p.name_ru }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
-    </p>
-    {% endif %}
-    {% if verses %}
-    <p class="article-verses">
-        Стихи:
-        {% for v in verses %}<a href="{% url 'library:chapter' v.book.slug v.chapter %}#v-{{ v.chapter }}-{{ v.verse }}">{{ v }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
-    </p>
-    {% endif %}
 
     <div class="article-body">{{ material.article_text|safe }}</div>
 
