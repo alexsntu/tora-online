@@ -157,6 +157,7 @@ def home(request):
             "today": today_info(),
             "questions_preview": questions_preview,
             "weekly_post": weekly_post,
+            "og_image": request.build_absolute_uri(weekly_post.image.url) if weekly_post and weekly_post.image else None,
             "structured_data_json": structured_data_json(website_ld),
         },
     )
