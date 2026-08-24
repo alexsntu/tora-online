@@ -114,12 +114,23 @@
 
         addBtn.addEventListener("click", function () {
             if (!verseSelect.value) return;
+            // Сервер больше не рендерит <option> на каждый стих в базе (см. MaterialForm
+            // в admin.py) - только на уже выбранные, поэтому для нового стиха создаём
+            // <option> сами; на отправку формы это не влияет, т.к. валидация идёт по
+            // полному queryset поля, а не по тому, что было отрендерено изначально.
             var opt = versesSelect.querySelector('option[value="' + verseSelect.value + '"]');
-            if (opt) {
-                opt.selected = true;
-                errorMsg.style.display = "none";
-                renderChosen();
+            if (!opt) {
+                opt = document.createElement("option");
+                opt.value = verseSelect.value;
+                opt.textContent =
+                    bookSelect.options[bookSelect.selectedIndex].textContent +
+                    " " + chapterSelect.value + ":" +
+                    verseSelect.options[verseSelect.selectedIndex].textContent;
+                versesSelect.appendChild(opt);
             }
+            opt.selected = true;
+            errorMsg.style.display = "none";
+            renderChosen();
         });
 
         var form = versesSelect.closest("form");

@@ -149,6 +149,19 @@ class MaterialForm(forms.ModelForm):
         model = Material
         fields = "__all__"
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # По умолчанию ModelMultipleChoiceField рендерит <option> на КАЖДЫЙ Verse в базе
+        # (9000+ стихов всего Танаха) - страница материала весила 500+ КБ и рендерилась
+        # на сервере 3+ секунды на каждое открытие/сохранение, отсюда и "тормозит".
+        # Реальный выбор идёт через виджет (admin-verse-picker.js), которому не нужны
+        # заранее отрендеренные <option> на все стихи - он добавляет их в DOM сам при
+        # выборе. Ограничиваем HTML-рендер только уже выбранными стихами; queryset поля
+        # (self.fields["verses"].queryset) остаётся полным, так что валидация новых
+        # стихов при сохранении по-прежнему работает.
+        selected = self.instance.verses.all() if self.instance.pk else Verse.objects.none()
+        self.fields["verses"].widget.choices = [(v.pk, str(v)) for v in selected]
+
     def clean_verses(self):
         verses = self.cleaned_data.get("verses")
         if not verses:
