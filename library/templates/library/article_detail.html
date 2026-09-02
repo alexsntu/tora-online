@@ -37,14 +37,14 @@
         <a class="platform-link platform-youtube" href="{{ material.url }}" target="_blank" rel="noopener"
            onclick="fetch('{% url 'library:track_event' %}', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({event_type: 'outbound_click', material_id: {{ material.id }}, target: 'youtube'}), keepalive: true})">
             <svg class="platform-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="1" y="4" width="22" height="16" rx="4"/><polygon points="10,8.5 10,15.5 16,12" fill="#fff"/></svg>
-            Смотреть видеоурок на YouTube
+            Смотреть на YouTube
         </a>
         {% endif %}
         {% if material.url_rutube %}
         <a class="platform-link platform-rutube" href="{{ material.url_rutube }}" target="_blank" rel="noopener"
            onclick="fetch('{% url 'library:track_event' %}', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({event_type: 'outbound_click', material_id: {{ material.id }}, target: 'rutube'}), keepalive: true})">
             <svg class="platform-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="1" y="4" width="22" height="16" rx="4"/><polygon points="10,8.5 10,15.5 16,12" fill="#fff"/></svg>
-            Смотреть видеоурок на RuTube
+            Смотреть на RuTube
         </a>
         {% endif %}
     </div>
