@@ -487,7 +487,10 @@ class SiteSettingsAdmin(admin.ModelAdmin):
 class WeeklyPostAdmin(admin.ModelAdmin):
     list_display = ("title", "is_published", "created_at")
     list_filter = ("is_published",)
-    fields = ("title", "image", "body", "url_youtube", "url_rutube", "url_vk", "is_published", "created_at")
+    fields = (
+        "title", "image", "body", "url_youtube", "url_rutube", "url_vk", "url_playlist",
+        "parashot", "is_published", "created_at",
+    )
     readonly_fields = ("created_at",)
 
     class Media:

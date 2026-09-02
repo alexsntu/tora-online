@@ -615,6 +615,14 @@ class WeeklyPost(models.Model):
     url_youtube = models.URLField("Ссылка на YouTube", blank=True)
     url_rutube = models.URLField("Ссылка на RuTube", blank=True)
     url_vk = models.URLField("Ссылка на VK Видео", blank=True)
+    url_playlist = models.URLField(
+        "Ссылка на плейлист «Все видеоуроки»", blank=True,
+        help_text="Ссылка на плейлист YouTube со всеми уроками.",
+    )
+    parashot = models.ManyToManyField(
+        "Parasha", verbose_name="Недельные главы", related_name="weekly_posts", blank=True,
+        help_text="Можно выбрать несколько - для сдвоенных недельных глав (напр. Матот-Масей).",
+    )
     is_published = models.BooleanField("Опубликовать на сайте", default=True)
     created_at = models.DateTimeField("Дата публикации", auto_now_add=True)
 

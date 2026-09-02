@@ -13,7 +13,7 @@
             <h2>{{ weekly_post.title }}</h2>
             <div class="weekly-post-text" :class="{ 'is-collapsed': !expanded }">{{ weekly_post.body|safe }}</div>
             <button type="button" class="weekly-post-toggle" @click="expanded = !expanded" x-text="expanded ? 'Свернуть ▲' : 'Читать полностью ▼'"></button>
-            {% if weekly_post.url_youtube or weekly_post.url_rutube or weekly_post.url_vk %}
+            {% if weekly_post.url_youtube or weekly_post.url_rutube or weekly_post.url_vk or weekly_post.url_playlist %}
             <p class="weekly-post-links-label">Смотреть урок:</p>
             <div class="weekly-post-links">
                 {% if weekly_post.url_youtube %}
@@ -34,6 +34,20 @@
                     VK Видео
                 </a>
                 {% endif %}
+                {% if weekly_post.url_playlist %}
+                <a class="weekly-post-link-btn" href="{{ weekly_post.url_playlist }}" target="_blank" rel="noopener">
+                    <svg class="weekly-post-link-icon" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#7c3223"/><path d="M6 7h9M6 12h9M6 17h5" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><path d="M17 15.5v3l2.6-1.5z" fill="#fff"/></svg>
+                    Смотреть все видеоуроки
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+            {% if weekly_post.parashot.all %}
+            <p class="weekly-post-links-label">Читать недельную главу:</p>
+            <div class="weekly-post-links">
+                {% for parasha in weekly_post.parashot.all %}
+                <a class="weekly-post-link-btn" href="{% url 'library:parasha' parasha.slug %}">{{ parasha.name_ru }}</a>
+                {% endfor %}
             </div>
             {% endif %}
         </div>

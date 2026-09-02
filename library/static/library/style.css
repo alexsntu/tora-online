@@ -1352,6 +1352,16 @@ summary::marker { color: var(--gold); }
     margin: 1.3rem 0 .6rem 0 !important;
 }
 .material-article-link { margin-top: .6rem; }
+.article-copyright {
+    margin-top: 2rem;
+    padding-top: .9rem;
+    border-top: 1px solid var(--border);
+    font-size: .82rem;
+    line-height: 1.6;
+    font-style: italic;
+    color: #a3936a;
+}
+.article-copyright a { color: inherit; }
 
 .question-ask-form { display: flex; flex-direction: column; gap: .3rem; max-width: 36rem; }
 .question-ask-form label { font-weight: bold; margin-top: .8rem; color: var(--accent-dark); }

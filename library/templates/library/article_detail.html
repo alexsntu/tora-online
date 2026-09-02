@@ -49,6 +49,12 @@
         {% endif %}
     </div>
     {% endif %}
+
+    <p class="article-copyright">
+        © Дмитрий Калашник{% if material.created_at %}, {{ material.created_at|date:"Y" }}{% endif %}. Все права защищены.
+        Использование материала (полностью или частично) допускается только с указанием автора и обязательной
+        ссылкой на источник: <a href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">{{ request.get_host }}{{ request.path }}</a>.
+    </p>
 </article>
 {% include "library/_report_error.html" %}
 {% endblock %}
