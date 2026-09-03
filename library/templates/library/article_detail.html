@@ -19,7 +19,7 @@
     <p class="article-meta">
         <span class="article-author">Автор: Дмитрий Калашник</span>
         {% if material.sages.all %}
-        <span class="article-sages">По учению: {% for sage in material.sages.all %}<a href="{% url 'library:sages' %}">{{ sage.name_ru }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+        <span class="article-sages">По учению: {% for sage in material.sages.all %}<a href="{% url 'library:sage_detail' sage.slug %}">{{ sage.name_ru }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</span>
         {% endif %}
         {% if parashot %}
         <span class="article-parasha">Недельная глава: {% for p in parashot %}<a href="{% url 'library:parasha' p.slug %}">{{ p.name_ru }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}</span>
@@ -54,6 +54,7 @@
         © Дмитрий Калашник{% if material.created_at %}, {{ material.created_at|date:"Y" }}{% endif %}. Все права защищены.
         Использование материала (полностью или частично) допускается только с указанием автора и обязательной
         ссылкой на источник: <a href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">{{ request.get_host }}{{ request.path }}</a>.
+        По вопросам использования обращайтесь: <a href="mailto:Dima240@gmail.com">Dima240@gmail.com</a>.
     </p>
 </article>
 {% include "library/_report_error.html" %}

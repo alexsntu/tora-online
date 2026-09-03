@@ -63,11 +63,15 @@ body::before {
 
 .site-header {
     position: relative;
-    padding: 1.4rem 1.5rem 1.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: .9rem 1.5rem 1.1rem;
     background: #fff;
     border-bottom: none;
     box-shadow: none;
-    text-align: center;
+    text-align: left;
 }
 .site-header::after {
     content: "";
@@ -95,18 +99,18 @@ body::before {
     text-decoration: none;
 }
 .site-emblem {
-    width: 1.8rem;
-    height: 1.8rem;
+    width: 3.4rem;
+    height: 3.4rem;
     color: var(--gold);
 }
 
 .site-header-tools {
-    margin-top: .7rem;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     gap: 1rem;
     flex-wrap: wrap;
+    flex-shrink: 0;
 }
 .header-tool-link {
     font-size: .85rem;
@@ -428,9 +432,10 @@ h1 { font-family: var(--font-display); color: var(--maroon); font-weight: 500; l
     .promo-section { grid-template-columns: 1fr; }
     main { padding: 1rem .6rem 3rem; }
     body { font-size: 16px; }
-    .site-header { padding: .9rem .8rem 1.1rem; }
+    .site-header { flex-direction: column; padding: .9rem .8rem 1.1rem; text-align: center; }
+    .site-header-tools { justify-content: center; margin-top: .6rem; }
     .site-title { font-size: 1.15rem; gap: .4rem; }
-    .site-emblem { width: 1.4rem; height: 1.4rem; }
+    .site-emblem { width: 2.1rem; height: 2.1rem; }
     h1 { font-size: 1.4rem; }
     /* Область с текстом Торы - на узком экране каждый рем отступа заметно
        съедает ширину строки, поэтому здесь сокращаем сильнее, чем везде. */

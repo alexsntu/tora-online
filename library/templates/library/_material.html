@@ -3,7 +3,7 @@
     {% if m.sages.all %}
     <p class="material-sages">
         По учению:
-        {% for sage in m.sages.all %}<a href="{% url 'library:sages' %}">{{ sage.name_ru }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
+        {% for sage in m.sages.all %}<a href="{% url 'library:sage_detail' sage.slug %}">{{ sage.name_ru }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}
     </p>
     {% endif %}
     {% if m.body %}<p class="material-body">{{ m.body|linebreaksbr }}</p>{% endif %}
