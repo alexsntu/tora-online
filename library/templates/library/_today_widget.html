@@ -7,6 +7,12 @@
         <strong>{{ today.hebrew_str }}</strong>
         <span class="today-bar-greg">— {{ today.gregorian_str }}</span>
     </span>
+    {% if today.holiday %}
+    <span class="today-bar-sep">✦</span>
+    <span class="today-bar-holiday{% if today.holiday.is_fast %} is-fast{% endif %}">
+        {% if today.holiday.day_num %}{{ today.holiday.name }} (день {{ today.holiday.day_num }}){% else %}{{ today.holiday.name }}{% endif %}
+    </span>
+    {% endif %}
     <span class="today-bar-sep">✦</span>
     <span class="today-bar-parasha">
         Недельная глава:
@@ -26,6 +32,6 @@
     </span>
     {% endif %}
     {% if not hide_calendar_link %}
-    <a class="today-bar-calendar" href="{% url 'library:calendar' %}">Календарь и конвертер дат →</a>
+    <a class="today-bar-calendar" href="{% url 'library:calendar' %}">Календарь и праздники →</a>
     {% endif %}
 </div>

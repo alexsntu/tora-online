@@ -9,6 +9,51 @@
 
 {% include "library/_today_widget.html" with hide_calendar_link=True %}
 
+<section class="hcal-section">
+    <div class="hcal-nav">
+        <a class="hcal-nav-btn" href="?y={{ prev_year }}&amp;m={{ prev_month }}" aria-label="Предыдущий месяц">←</a>
+        <h2 class="hcal-title">{{ cal_month_name }} {{ cal_year }}</h2>
+        <a class="hcal-nav-btn" href="?y={{ next_year }}&amp;m={{ next_month }}" aria-label="Следующий месяц">→</a>
+    </div>
+    {% if not is_current_month %}
+    <p class="hcal-today-link"><a href="{% url 'library:calendar' %}">← Вернуться к текущему месяцу</a></p>
+    {% endif %}
+    <div class="hcal-grid">
+        {% for wd in weekdays_short %}
+        <div class="hcal-weekday">{{ wd }}</div>
+        {% endfor %}
+        {% for week in cal_weeks %}
+            {% for day in week %}
+            <div class="hcal-cell{% if not day.in_month %} is-outside{% endif %}{% if day.is_today %} is-today{% endif %}{% if day.is_shabbat %} is-shabbat{% endif %}{% if day.holiday %} has-holiday{% endif %}">
+                <span class="hcal-cell-greg">{{ day.day }}</span>
+                <span class="hcal-cell-heb">{{ day.hebrew_day }}{% if day.hebrew_month_ru %} {{ day.hebrew_month_ru }}{% endif %}</span>
+                {% if day.holiday %}
+                <span class="hcal-cell-holiday{% if day.holiday.is_fast %} is-fast{% endif %}">{{ day.holiday.name }}{% if day.holiday.day_num %} ({{ day.holiday.day_num }}){% endif %}</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+    <p class="hcal-legend"><span class="hcal-legend-dot is-shabbat"></span> Шабат &nbsp; <span class="hcal-legend-dot is-holiday"></span> Праздник &nbsp; <span class="hcal-legend-dot is-fast"></span> Пост</p>
+</section>
+
+{% if upcoming_holidays %}
+<section class="hcal-holidays">
+    <h2>Ближайшие праздники</h2>
+    <ul class="hcal-holidays-list">
+        {% for h in upcoming_holidays %}
+        <li class="hcal-holiday-item{% if h.is_fast %} is-fast{% endif %}">
+            <span class="hcal-holiday-name">{{ h.name }}</span>
+            <span class="hcal-holiday-dates">
+                {{ h.start_gregorian_str }}{% if h.length > 1 %}, {{ h.length }} дн.{% endif %}
+                <span class="hcal-holiday-heb">({{ h.start_hebrew_str }})</span>
+            </span>
+        </li>
+        {% endfor %}
+    </ul>
+</section>
+{% endif %}
+
 <section class="promo-section">
     <div class="promo-card">
         <h2>Григорианский → Еврейский</h2>

@@ -1,5 +1,6 @@
 import json
 import random
+from datetime import date
 from itertools import groupby
 from pathlib import Path
 
@@ -18,10 +19,14 @@ from django.views.decorators.http import require_POST
 from .forms import ErrorReportForm, QuestionForm
 from .hebrew_calendar import (
     GREGORIAN_MONTH_CHOICES,
+    GREGORIAN_MONTHS_NOM_RU,
     HEBREW_MONTH_CHOICES,
+    WEEKDAYS_SHORT_RU,
     convert_gregorian_to_hebrew,
     convert_hebrew_to_gregorian,
+    month_calendar,
     today_info,
+    upcoming_holidays,
 )
 from .models import (
     AliyahMarker, AnalyticsEvent, Book, Category, ErrorReport, Haftarah, HaftarahOccasion, Material, Parasha,
@@ -674,7 +679,20 @@ def analytics_dashboard(request):
 
 
 def calendar_view(request):
-    """Календарь: сегодняшняя дата + двусторонний конвертер Григорианский/Еврейский."""
+    """Календарь: месячная сетка (григорианская + еврейская дата + праздники),
+    ближайшие праздники и двусторонний конвертер Григорианский/Еврейский."""
+    today_py = date.today()
+    try:
+        cal_year = int(request.GET.get("y", today_py.year))
+        cal_month = int(request.GET.get("m", today_py.month))
+        if not (1 <= cal_month <= 12):
+            raise ValueError
+    except (TypeError, ValueError):
+        cal_year, cal_month = today_py.year, today_py.month
+
+    prev_month, prev_year = (12, cal_year - 1) if cal_month == 1 else (cal_month - 1, cal_year)
+    next_month, next_year = (1, cal_year + 1) if cal_month == 12 else (cal_month + 1, cal_year)
+
     gregorian_result = None
     gregorian_error = None
     if "gd" in request.GET:
@@ -700,6 +718,17 @@ def calendar_view(request):
         "library/calendar.html",
         {
             "today": today_info(),
+            "cal_year": cal_year,
+            "cal_month": cal_month,
+            "cal_month_name": GREGORIAN_MONTHS_NOM_RU[cal_month - 1],
+            "cal_weeks": month_calendar(cal_year, cal_month),
+            "weekdays_short": WEEKDAYS_SHORT_RU,
+            "prev_month": prev_month,
+            "prev_year": prev_year,
+            "next_month": next_month,
+            "next_year": next_year,
+            "is_current_month": cal_year == today_py.year and cal_month == today_py.month,
+            "upcoming_holidays": upcoming_holidays(),
             "gregorian_days": range(1, 32),
             "hebrew_days": range(1, 31),
             "gregorian_months": GREGORIAN_MONTH_CHOICES,

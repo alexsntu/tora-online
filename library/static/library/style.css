@@ -216,6 +216,8 @@ h1 { font-family: var(--font-display); color: var(--maroon); font-weight: 500; l
 .today-bar-date strong { font-family: var(--font-display); color: var(--maroon); }
 .today-bar-greg { color: #8a7a55; }
 .today-bar-sep { color: var(--gold); font-size: .8rem; }
+.today-bar-holiday { color: var(--maroon); font-weight: 700; }
+.today-bar-holiday.is-fast { color: #6b6250; font-weight: 400; font-style: italic; }
 .today-bar-parasha { color: #4a3d24; }
 .today-bar-parasha a, .today-bar-parasha strong {
     font-family: var(--font-display);
@@ -282,6 +284,128 @@ h1 { font-family: var(--font-display); color: var(--maroon); font-weight: 500; l
     border: 1px solid #d99b8a;
     border-radius: 4px;
     color: #7c3223;
+}
+
+.hcal-section {
+    margin-bottom: 1.8rem;
+    padding: 1.2rem 1.4rem;
+    background: var(--paper);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-soft);
+}
+.hcal-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: .3rem;
+}
+.hcal-title {
+    margin: 0;
+    min-width: 12rem;
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    color: var(--maroon);
+}
+.hcal-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.2rem;
+    height: 2.2rem;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--bg);
+    color: var(--accent-dark);
+    text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+.hcal-nav-btn:hover { background: #f2ede0; color: var(--maroon); }
+.hcal-today-link { text-align: center; margin: 0 0 .8rem 0; }
+.hcal-today-link a { color: var(--accent-dark); font-size: .9rem; }
+.hcal-today-link a:hover { color: var(--maroon); }
+
+.hcal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+}
+.hcal-weekday {
+    padding: .3rem 0;
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: .8rem;
+    font-weight: 700;
+    color: var(--accent-dark);
+}
+.hcal-cell {
+    min-height: 4.6rem;
+    padding: .3rem .35rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: .1rem;
+}
+.hcal-cell.is-outside { opacity: .38; }
+.hcal-cell.is-shabbat { background: #f3ede2; }
+.hcal-cell.is-today { border-color: var(--gold); box-shadow: inset 0 0 0 2px var(--gold); }
+.hcal-cell.has-holiday { background: var(--highlight); border-color: var(--highlight-border); }
+.hcal-cell-greg { font-family: var(--font-display); font-weight: 700; color: var(--text); font-size: 1rem; }
+.hcal-cell-heb { font-size: .72rem; color: #8a7a55; }
+.hcal-cell-holiday { font-size: .68rem; line-height: 1.25; color: var(--maroon); font-weight: 600; }
+.hcal-cell-holiday.is-fast { color: #6b6250; font-weight: 400; font-style: italic; }
+
+.hcal-legend { margin: .8rem 0 0 0; font-size: .78rem; color: #8a7a55; text-align: center; }
+.hcal-legend-dot {
+    display: inline-block;
+    width: .6rem;
+    height: .6rem;
+    border-radius: 2px;
+    margin-right: .2rem;
+    vertical-align: middle;
+}
+.hcal-legend-dot.is-shabbat { background: #f3ede2; border: 1px solid var(--border); }
+.hcal-legend-dot.is-holiday { background: var(--highlight); border: 1px solid var(--highlight-border); }
+.hcal-legend-dot.is-fast { background: #e5e0d3; border: 1px solid var(--border); }
+
+.hcal-holidays {
+    margin-bottom: 1.8rem;
+    padding: 1.2rem 1.4rem;
+    background: var(--paper);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-soft);
+}
+.hcal-holidays h2 { margin: 0 0 .8rem 0; font-family: var(--font-display); font-size: 1.2rem; color: var(--maroon); }
+.hcal-holidays-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: .5rem; }
+.hcal-holiday-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: .3rem .7rem;
+    padding: .5rem .7rem;
+    background: var(--highlight);
+    border: 1px solid var(--highlight-border);
+    border-radius: 4px;
+}
+.hcal-holiday-item.is-fast { background: var(--bg); border-color: var(--border); }
+.hcal-holiday-name { font-family: var(--font-display); font-weight: 700; color: var(--maroon); }
+.hcal-holiday-item.is-fast .hcal-holiday-name { color: var(--accent-dark); }
+.hcal-holiday-dates { font-size: .9rem; color: #4a3d24; }
+.hcal-holiday-heb { color: #8a7a55; }
+
+@media (max-width: 640px) {
+    .hcal-section, .hcal-holidays { padding: .9rem .7rem; }
+    .hcal-title { font-size: 1.1rem; min-width: 9rem; }
+    .hcal-grid { gap: 2px; }
+    .hcal-cell { min-height: 3.4rem; padding: .2rem .25rem; border-radius: 3px; }
+    .hcal-cell-greg { font-size: .82rem; }
+    .hcal-cell-heb { font-size: .6rem; }
+    .hcal-cell-holiday { font-size: .56rem; }
+    .hcal-weekday { font-size: .68rem; }
 }
 
 .weekly-post {

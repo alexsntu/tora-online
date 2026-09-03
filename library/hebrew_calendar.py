@@ -1,5 +1,9 @@
 """Еврейский календарь: сегодняшняя дата, конвертация Григорианский/Еврейский,
-недельная глава (парашат hа-шавуа) - на pyluach, без внешних сервисов."""
+недельная глава (парашат hа-шавуа), месячная сетка с праздниками - на pyluach,
+без внешних сервисов."""
+
+import calendar as py_calendar
+import re
 
 from pyluach import dates, parshios
 
@@ -7,6 +11,13 @@ GREGORIAN_MONTHS_RU = [
     "января", "февраля", "марта", "апреля", "мая", "июня",
     "июля", "августа", "сентября", "октября", "ноября", "декабря",
 ]
+
+GREGORIAN_MONTHS_NOM_RU = [
+    "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+    "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь",
+]
+
+WEEKDAYS_SHORT_RU = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
 
 HEBREW_MONTHS_RU = {
     "Nissan": "нисана",
@@ -91,6 +102,116 @@ HEBREW_MONTH_CHOICES = [
 
 GREGORIAN_MONTH_CHOICES = [(i + 1, name.capitalize()) for i, name in enumerate(GREGORIAN_MONTHS_RU)]
 
+# pyluach.dates.HebrewDate.holiday() (англ., см. pyluach.utils) -> русское название.
+HOLIDAY_NAMES_RU = {
+    "Rosh Hashana": "Рош а-Шана",
+    "Yom Kippur": "Йом Кипур",
+    "Succos": "Суккот",
+    "Shmini Atzeres": "Шмини Ацерет",
+    "Simchas Torah": "Симхат Тора",
+    "Chanuka": "Ханука",
+    "Tu B'shvat": "Ту би-Шват",
+    "Purim Katan": "Пурим Катан",
+    "Purim": "Пурим",
+    "Shushan Purim": "Шушан Пурим",
+    "Pesach": "Песах",
+    "Pesach Sheni": "Песах шени",
+    "Lag Ba'omer": "Лаг ба-Омер",
+    "Shavuos": "Шавуот",
+    "Tu B'av": "Ту бе-Ав",
+    "Tzom Gedalia": "Пост Гедалии",
+    "10 of Teves": "10 Тевета",
+    "Taanis Esther": "Пост Эстер",
+    "17 of Tamuz": "17 Таммуза",
+    "9 of Av": "Тиша бе-Ав",
+}
+
+# Постные дни (для отдельного визуального маркера - не такие "радостные", как Йом Тов).
+FAST_DAYS_EN = {"Tzom Gedalia", "10 of Teves", "Taanis Esther", "17 of Tamuz", "9 of Av"}
+
+_HOLIDAY_DAY_PREFIX_RE = re.compile(r"^(\d+)\s+(.*)$")
+
+
+def _split_holiday_name(raw_name):
+    """pyluach отдаёт многодневные праздники как '2 Succos' - разбираем на
+    (номер_дня, базовое_имя); однодневные/посты возвращают (None, имя)."""
+    m = _HOLIDAY_DAY_PREFIX_RE.match(raw_name)
+    if m:
+        return int(m.group(1)), m.group(2)
+    return None, raw_name
+
+
+def holiday_ru_for_hebdate(heb_date, israel=False):
+    """Русское название праздника/поста для данной еврейской даты, или None."""
+    raw = heb_date.holiday(israel=israel, prefix_day=True)
+    if not raw:
+        return None
+    day_num, base_en = _split_holiday_name(raw)
+    return {
+        "name": HOLIDAY_NAMES_RU.get(base_en, base_en),
+        "day_num": day_num,
+        "is_fast": base_en in FAST_DAYS_EN,
+    }
+
+
+def month_calendar(year, month, israel=False):
+    """Сетка григорианского месяца (недели пн-вс) для календарной страницы:
+    каждый день - григорианское число + еврейская дата + праздник (если есть)."""
+    cal = py_calendar.Calendar(firstweekday=0)
+    today_py = dates.GregorianDate.today()
+    weeks = []
+    for week in cal.monthdatescalendar(year, month):
+        row = []
+        for day in week:
+            greg = dates.GregorianDate(day.year, day.month, day.day)
+            heb = greg.to_heb()
+            is_hebrew_month_start = heb.day == 1
+            row.append({
+                "day": day.day,
+                "in_month": day.month == month,
+                "is_today": day.year == today_py.year and day.month == today_py.month and day.day == today_py.day,
+                "is_shabbat": day.weekday() == 5,
+                "hebrew_day": heb.day,
+                "hebrew_month_ru": (
+                    HEBREW_MONTHS_RU.get(heb.month_name(), heb.month_name()) if is_hebrew_month_start else None
+                ),
+                "holiday": holiday_ru_for_hebdate(heb, israel=israel),
+            })
+        weeks.append(row)
+    return weeks
+
+
+def upcoming_holidays(from_greg_date=None, days_ahead=400, israel=False, limit=10):
+    """Список ближайших праздников/постов (первый день каждого + длительность),
+    начиная с указанной даты (по умолчанию - сегодня)."""
+    if from_greg_date is None:
+        from_greg_date = dates.GregorianDate.today()
+    cur = from_greg_date.to_heb()
+    results = []
+    for _ in range(days_ahead):
+        info = holiday_ru_for_hebdate(cur, israel=israel)
+        if info and info["day_num"] in (None, 1):
+            length = 1
+            probe = cur.add(days=1)
+            while True:
+                probe_info = holiday_ru_for_hebdate(probe, israel=israel)
+                if probe_info and probe_info["name"] == info["name"] and probe_info["day_num"] and probe_info["day_num"] > 1:
+                    length += 1
+                    probe = probe.add(days=1)
+                else:
+                    break
+            results.append({
+                "name": info["name"],
+                "is_fast": info["is_fast"],
+                "length": length,
+                "start_gregorian_str": format_gregorian_ru(cur.to_greg()),
+                "start_hebrew_str": format_hebrew_ru(cur),
+            })
+            if len(results) >= limit:
+                break
+        cur = cur.add(days=1)
+    return results
+
 
 def convert_gregorian_to_hebrew(day, month, year):
     greg = dates.GregorianDate(year, month, day)
@@ -158,4 +279,5 @@ def today_info(israel=False):
         "parasha_he": parasha_he,
         "parasha_ru": parasha_obj.name_ru if parasha_obj else parasha_name_ru_fallback(parasha_en),
         "parasha_obj": parasha_obj,
+        "holiday": holiday_ru_for_hebdate(heb_today, israel=israel),
     }
