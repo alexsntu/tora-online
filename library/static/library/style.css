@@ -61,13 +61,19 @@ body::before {
     pointer-events: none;
 }
 
+/* Ширина/шрифт хедера намеренно в px, а не rem - это фирменный блок (лого,
+   название, "О портале", кнопки A-/A+), он не должен раздуваться вместе с
+   текстом при увеличении размера шрифта читателем (та же кнопка A+ меняет
+   font-size на <html>, от которого зависят все rem на сайте, включая сам
+   хедер) - иначе на телефоне лого/шапка становятся непропорционально
+   огромными и название переносится на 2 строки. */
 .site-header {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 1rem;
-    padding: .9rem 1.5rem 1.1rem;
+    gap: 16px;
+    padding: 14px 24px 18px;
     background: #fff;
     border-bottom: none;
     box-shadow: none;
@@ -90,17 +96,17 @@ body::before {
 .site-title {
     display: inline-flex;
     align-items: center;
-    gap: .6rem;
+    gap: 10px;
     font-family: var(--font-display);
-    font-size: 1.5rem;
+    font-size: 24px;
     font-weight: 600;
     letter-spacing: .02em;
     color: var(--maroon);
     text-decoration: none;
 }
 .site-emblem {
-    width: 3.4rem;
-    height: 3.4rem;
+    width: 40px;
+    height: 40px;
     color: var(--gold);
 }
 
@@ -108,29 +114,29 @@ body::before {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 1rem;
+    gap: 16px;
     flex-wrap: wrap;
     flex-shrink: 0;
 }
 .header-tool-link {
-    font-size: .85rem;
+    font-size: 13.6px;
     color: var(--accent-dark);
     text-decoration: none;
     border-bottom: 1px dotted var(--accent-dark);
 }
 .header-tool-link:hover { color: var(--maroon); }
 
-.font-size-control { display: flex; gap: .35rem; }
+.font-size-control { display: flex; gap: 6px; }
 .font-size-control button {
-    min-width: 2.2rem;
-    min-height: 2.2rem;
-    padding: .2rem .4rem;
+    min-width: 32px;
+    min-height: 32px;
+    padding: 3px 6px;
     border: 1px solid var(--border);
     border-radius: 4px;
     background: var(--paper);
     color: var(--accent-dark);
     font-family: var(--font-body);
-    font-size: .85rem;
+    font-size: 13.6px;
     font-weight: bold;
     cursor: pointer;
 }
@@ -556,10 +562,13 @@ h1 { font-family: var(--font-display); color: var(--maroon); font-weight: 500; l
     .promo-section { grid-template-columns: 1fr; }
     main { padding: 1rem .6rem 3rem; }
     body { font-size: 16px; }
-    .site-header { flex-direction: column; padding: .9rem .8rem 1.1rem; text-align: center; }
-    .site-header-tools { justify-content: center; margin-top: .6rem; }
-    .site-title { font-size: 1.15rem; gap: .4rem; }
-    .site-emblem { width: 2.1rem; height: 2.1rem; }
+    .site-header { flex-direction: column; padding: 10px 11px 13px; text-align: center; }
+    .site-header-tools { justify-content: center; margin-top: 6px; gap: 10px; }
+    .site-title { font-size: 16px; gap: 6px; line-height: 1.15; }
+    .site-emblem { width: 29px; height: 29px; }
+    .header-tool-link { font-size: 12.5px; }
+    .font-size-control { gap: 5px; }
+    .font-size-control button { min-width: 30px; min-height: 30px; padding: 2px 5px; font-size: 12.5px; }
     h1 { font-size: 1.4rem; }
     /* Область с текстом Торы - на узком экране каждый рем отступа заметно
        съедает ширину строки, поэтому здесь сокращаем сильнее, чем везде. */
