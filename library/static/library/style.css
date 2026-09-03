@@ -283,6 +283,8 @@ h1 { font-family: var(--font-display); color: var(--maroon); font-weight: 500; l
     border-radius: 4px;
     line-height: 1.6;
 }
+.date-convert-result strong a { color: var(--maroon); text-decoration: none; }
+.date-convert-result strong a:hover { text-decoration: underline; }
 .date-convert-error {
     margin-top: 1rem;
     padding: .8rem 1rem;
@@ -314,6 +316,7 @@ h1 { font-family: var(--font-display); color: var(--maroon); font-weight: 500; l
     font-size: 1.3rem;
     color: var(--maroon);
 }
+.hcal-subtitle { margin: .1rem 0 .3rem 0; text-align: center; font-size: .85rem; color: #8a7a55; }
 .hcal-nav-btn {
     display: inline-flex;
     align-items: center;
@@ -357,13 +360,17 @@ h1 { font-family: var(--font-display); color: var(--maroon); font-weight: 500; l
     gap: .1rem;
 }
 .hcal-cell.is-outside { opacity: .38; }
-.hcal-cell.is-shabbat { background: #f3ede2; }
+.hcal-cell.is-shabbat { background: rgba(124, 50, 35, .13); border-color: rgba(124, 50, 35, .3); }
 .hcal-cell.is-today { border-color: var(--gold); box-shadow: inset 0 0 0 2px var(--gold); }
 .hcal-cell.has-holiday { background: var(--highlight); border-color: var(--highlight-border); }
 .hcal-cell-greg { font-family: var(--font-display); font-weight: 700; color: var(--text); font-size: 1rem; }
 .hcal-cell-heb { font-size: .72rem; color: #8a7a55; }
 .hcal-cell-holiday { font-size: .68rem; line-height: 1.25; color: var(--maroon); font-weight: 600; }
 .hcal-cell-holiday.is-fast { color: #6b6250; font-weight: 400; font-style: italic; }
+.hcal-cell-parasha { font-size: .68rem; line-height: 1.25; }
+.hcal-cell-parasha a { color: var(--accent-dark); font-weight: 600; text-decoration: none; }
+.hcal-cell-parasha a:hover { color: var(--maroon); text-decoration: underline; }
+.hcal-cell-parasha span { color: #8a7a55; font-weight: 600; }
 
 .hcal-legend { margin: .8rem 0 0 0; font-size: .78rem; color: #8a7a55; text-align: center; }
 .hcal-legend-dot {
@@ -374,7 +381,7 @@ h1 { font-family: var(--font-display); color: var(--maroon); font-weight: 500; l
     margin-right: .2rem;
     vertical-align: middle;
 }
-.hcal-legend-dot.is-shabbat { background: #f3ede2; border: 1px solid var(--border); }
+.hcal-legend-dot.is-shabbat { background: rgba(124, 50, 35, .13); border: 1px solid rgba(124, 50, 35, .3); }
 .hcal-legend-dot.is-holiday { background: var(--highlight); border: 1px solid var(--highlight-border); }
 .hcal-legend-dot.is-fast { background: #e5e0d3; border: 1px solid var(--border); }
 
@@ -400,6 +407,8 @@ h1 { font-family: var(--font-display); color: var(--maroon); font-weight: 500; l
 .hcal-holiday-item.is-fast { background: var(--bg); border-color: var(--border); }
 .hcal-holiday-name { font-family: var(--font-display); font-weight: 700; color: var(--maroon); }
 .hcal-holiday-item.is-fast .hcal-holiday-name { color: var(--accent-dark); }
+.hcal-holiday-name a { color: inherit; text-decoration: none; }
+.hcal-holiday-name a:hover { text-decoration: underline; }
 .hcal-holiday-dates { font-size: .9rem; color: #4a3d24; }
 .hcal-holiday-heb { color: #8a7a55; }
 
@@ -562,8 +571,8 @@ h1 { font-family: var(--font-display); color: var(--maroon); font-weight: 500; l
     .promo-section { grid-template-columns: 1fr; }
     main { padding: 1rem .6rem 3rem; }
     body { font-size: 16px; }
-    .site-header { flex-direction: column; padding: 10px 11px 13px; text-align: center; }
-    .site-header-tools { justify-content: center; margin-top: 6px; gap: 10px; }
+    .site-header { flex-direction: column; gap: 2px; padding: 10px 11px 13px; text-align: center; }
+    .site-header-tools { justify-content: center; margin-top: 2px; gap: 10px; }
     .site-title { font-size: 16px; gap: 6px; line-height: 1.15; }
     .site-emblem { width: 29px; height: 29px; }
     .header-tool-link { font-size: 12.5px; }

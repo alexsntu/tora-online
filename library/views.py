@@ -24,9 +24,11 @@ from .hebrew_calendar import (
     WEEKDAYS_SHORT_RU,
     convert_gregorian_to_hebrew,
     convert_hebrew_to_gregorian,
+    hebrew_month_span_ru,
     month_calendar,
     today_info,
     upcoming_holidays,
+    upcoming_parashot,
 )
 from .models import (
     AliyahMarker, AnalyticsEvent, Book, Category, ErrorReport, Haftarah, HaftarahOccasion, Material, Parasha,
@@ -722,7 +724,9 @@ def calendar_view(request):
             "cal_month": cal_month,
             "cal_month_name": GREGORIAN_MONTHS_NOM_RU[cal_month - 1],
             "cal_weeks": month_calendar(cal_year, cal_month),
+            "cal_hebrew_span": hebrew_month_span_ru(cal_year, cal_month),
             "weekdays_short": WEEKDAYS_SHORT_RU,
+            "upcoming_parashot": upcoming_parashot(),
             "prev_month": prev_month,
             "prev_year": prev_year,
             "next_month": next_month,

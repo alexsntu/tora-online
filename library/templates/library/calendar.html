@@ -15,6 +15,7 @@
         <h2 class="hcal-title">{{ cal_month_name }} {{ cal_year }}</h2>
         <a class="hcal-nav-btn" href="?y={{ next_year }}&amp;m={{ next_month }}" aria-label="Следующий месяц">→</a>
     </div>
+    <p class="hcal-subtitle">{{ cal_hebrew_span }}</p>
     {% if not is_current_month %}
     <p class="hcal-today-link"><a href="{% url 'library:calendar' %}">← Вернуться к текущему месяцу</a></p>
     {% endif %}
@@ -30,12 +31,34 @@
                 {% if day.holiday %}
                 <span class="hcal-cell-holiday{% if day.holiday.is_fast %} is-fast{% endif %}">{{ day.holiday.name }}{% if day.holiday.day_num %} ({{ day.holiday.day_num }}){% endif %}</span>
                 {% endif %}
+                {% if day.parasha %}
+                <span class="hcal-cell-parasha">{% if day.parasha.obj %}<a href="{% url 'library:parasha' day.parasha.obj.slug %}">{{ day.parasha.name }}</a>{% else %}<span>{{ day.parasha.name }}</span>{% endif %}</span>
+                {% endif %}
             </div>
             {% endfor %}
         {% endfor %}
     </div>
     <p class="hcal-legend"><span class="hcal-legend-dot is-shabbat"></span> Шабат &nbsp; <span class="hcal-legend-dot is-holiday"></span> Праздник &nbsp; <span class="hcal-legend-dot is-fast"></span> Пост</p>
 </section>
+
+{% if upcoming_parashot %}
+<section class="hcal-holidays">
+    <h2>Ближайшие недельные главы</h2>
+    <ul class="hcal-holidays-list">
+        {% for p in upcoming_parashot %}
+        <li class="hcal-holiday-item">
+            <span class="hcal-holiday-name">
+                {% if p.parasha_obj %}<a href="{% url 'library:parasha' p.parasha_obj.slug %}">{{ p.name_ru }}</a>{% else %}{{ p.name_ru }}{% endif %}
+            </span>
+            <span class="hcal-holiday-dates">
+                {{ p.gregorian_str }}
+                <span class="hcal-holiday-heb">({{ p.hebrew_str }})</span>
+            </span>
+        </li>
+        {% endfor %}
+    </ul>
+</section>
+{% endif %}
 
 {% if upcoming_holidays %}
 <section class="hcal-holidays">
@@ -80,7 +103,7 @@
         {% elif gregorian_result %}
         <p class="date-convert-result">
             Еврейская дата: <strong>{{ gregorian_result.hebrew_str }}</strong><br>
-            Недельная глава: <strong>{{ gregorian_result.parasha_ru }}</strong>
+            Недельная глава: <strong>{% if gregorian_result.parasha_obj %}<a href="{% url 'library:parasha' gregorian_result.parasha_obj.slug %}">{{ gregorian_result.parasha_ru }}</a>{% else %}{{ gregorian_result.parasha_ru }}{% endif %}</strong>
         </p>
         {% endif %}
     </div>
@@ -110,7 +133,7 @@
         {% elif hebrew_result %}
         <p class="date-convert-result">
             Григорианская дата: <strong>{{ hebrew_result.gregorian_str }}</strong><br>
-            Недельная глава: <strong>{{ hebrew_result.parasha_ru }}</strong>
+            Недельная глава: <strong>{% if hebrew_result.parasha_obj %}<a href="{% url 'library:parasha' hebrew_result.parasha_obj.slug %}">{{ hebrew_result.parasha_ru }}</a>{% else %}{{ hebrew_result.parasha_ru }}{% endif %}</strong>
         </p>
         {% endif %}
     </div>
