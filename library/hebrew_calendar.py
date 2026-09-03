@@ -174,8 +174,25 @@ def holiday_ru_for_hebdate(heb_date, israel=False):
     }
 
 
+def parashot_list_for_date(greg_date, israel=False):
+    """Список недельных глав для данной субботы - обычно одна, для сдвоенных
+    недель (Ваякхель-Пкудей, Ницавим-Вайелех и т.п.) - две; каждая - со своей
+    ссылкой (если её книга уже добавлена на сайт), кликабельны по отдельности."""
+    from .models import Parasha
+
+    parasha_en = parshios.getparsha_string(greg_date, israel=israel)
+    if not parasha_en:
+        return []
+    result = []
+    for part_en in (p.strip() for p in parasha_en.split(",")):
+        slug = PARASHA_EN_TO_SLUG.get(part_en)
+        obj = Parasha.objects.filter(slug=slug).first() if slug else None
+        result.append({"name": obj.name_ru if obj else PARASHA_NAMES_RU.get(part_en, part_en), "obj": obj})
+    return result
+
+
 def month_calendar(year, month, israel=False):
-    """Сетка григорианского месяца (недели пн-вс) для календарной страницы:
+    """Сетка григорианского месяца (недели вс-сб) для календарной страницы:
     каждый день - григорианское число + еврейская дата + праздник (если есть);
     по субботам - недельная глава (со ссылкой, если книга уже добавлена)."""
     cal = py_calendar.Calendar(firstweekday=6)  # неделя вс-сб, как в еврейском календаре
@@ -186,28 +203,16 @@ def month_calendar(year, month, israel=False):
         for day in week:
             greg = dates.GregorianDate(day.year, day.month, day.day)
             heb = greg.to_heb()
-            is_hebrew_month_start = heb.day == 1
             is_shabbat = day.weekday() == 5
-            parasha = None
-            if is_shabbat:
-                parasha_en = parshios.getparsha_string(greg, israel=israel)
-                if parasha_en:
-                    parasha_obj = find_parasha_for_date(greg, israel=israel)
-                    parasha = {
-                        "name": parasha_obj.name_ru if parasha_obj else parasha_name_ru_fallback(parasha_en),
-                        "obj": parasha_obj,
-                    }
             row.append({
                 "day": day.day,
                 "in_month": day.month == month,
                 "is_today": day.year == today_py.year and day.month == today_py.month and day.day == today_py.day,
                 "is_shabbat": is_shabbat,
                 "hebrew_day": heb.day,
-                "hebrew_month_ru": (
-                    HEBREW_MONTHS_RU.get(heb.month_name(), heb.month_name()) if is_hebrew_month_start else None
-                ),
+                "hebrew_month_ru": HEBREW_MONTHS_RU.get(heb.month_name(), heb.month_name()),
                 "holiday": holiday_ru_for_hebdate(heb, israel=israel),
-                "parasha": parasha,
+                "parashot": parashot_list_for_date(greg, israel=israel) if is_shabbat else [],
             })
         weeks.append(row)
     return weeks
@@ -234,12 +239,10 @@ def upcoming_parashot(from_greg_date=None, count=8, israel=False):
     cur = from_greg_date.shabbos()
     results = []
     for _ in range(count):
-        parasha_en = parshios.getparsha_string(cur, israel=israel)
-        if parasha_en:
-            parasha_obj = find_parasha_for_date(cur, israel=israel)
+        parts = parashot_list_for_date(cur, israel=israel)
+        if parts:
             results.append({
-                "name_ru": parasha_obj.name_ru if parasha_obj else parasha_name_ru_fallback(parasha_en),
-                "parasha_obj": parasha_obj,
+                "parts": parts,
                 "gregorian_str": format_gregorian_ru(cur),
                 "hebrew_str": format_hebrew_ru(cur.to_heb()),
             })
@@ -290,6 +293,7 @@ def convert_gregorian_to_hebrew(day, month, year):
         "hebrew_str": format_hebrew_ru(heb),
         "parasha_ru": (parasha_obj.name_ru if parasha_obj else parasha_name_ru_fallback(parasha_en)) if parasha_en else None,
         "parasha_obj": parasha_obj,
+        "parashot": parashot_list_for_date(greg),
     }
 
 
@@ -301,6 +305,7 @@ def convert_hebrew_to_gregorian(day, month, year):
     return {
         "gregorian_str": format_gregorian_ru(greg),
         "hebrew_str": format_hebrew_ru(heb),
+        "parashot": parashot_list_for_date(greg),
         "parasha_ru": (parasha_obj.name_ru if parasha_obj else parasha_name_ru_fallback(parasha_en)) if parasha_en else None,
         "parasha_obj": parasha_obj,
     }
@@ -350,5 +355,6 @@ def today_info(israel=False):
         "parasha_he": parasha_he,
         "parasha_ru": parasha_obj.name_ru if parasha_obj else parasha_name_ru_fallback(parasha_en),
         "parasha_obj": parasha_obj,
+        "parashot": parashot_list_for_date(greg_today, israel=israel),
         "holiday": holiday_ru_for_hebdate(heb_today, israel=israel),
     }

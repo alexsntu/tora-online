@@ -26,13 +26,15 @@
         {% for week in cal_weeks %}
             {% for day in week %}
             <div class="hcal-cell{% if not day.in_month %} is-outside{% endif %}{% if day.is_today %} is-today{% endif %}{% if day.is_shabbat %} is-shabbat{% endif %}{% if day.holiday %} has-holiday{% endif %}">
-                <span class="hcal-cell-greg">{{ day.day }}</span>
-                <span class="hcal-cell-heb">{{ day.hebrew_day }}{% if day.hebrew_month_ru %} {{ day.hebrew_month_ru }}{% endif %}</span>
+                <div class="hcal-cell-head">
+                    <span class="hcal-cell-greg">{{ day.day }}</span>
+                    <span class="hcal-cell-heb">{{ day.hebrew_day }} {{ day.hebrew_month_ru }}</span>
+                </div>
                 {% if day.holiday %}
                 <span class="hcal-cell-holiday{% if day.holiday.is_fast %} is-fast{% endif %}">{{ day.holiday.name }}{% if day.holiday.day_num %} ({{ day.holiday.day_num }}){% endif %}</span>
                 {% endif %}
-                {% if day.parasha %}
-                <span class="hcal-cell-parasha">{% if day.parasha.obj %}<a href="{% url 'library:parasha' day.parasha.obj.slug %}">{{ day.parasha.name }}</a>{% else %}<span>{{ day.parasha.name }}</span>{% endif %}</span>
+                {% if day.parashot %}
+                <span class="hcal-cell-parasha">{% for p in day.parashot %}{% if p.obj %}<a href="{% url 'library:parasha' p.obj.slug %}">{{ p.name }}</a>{% else %}<span>{{ p.name }}</span>{% endif %}{% if not forloop.last %}-{% endif %}{% endfor %}</span>
                 {% endif %}
             </div>
             {% endfor %}
@@ -48,7 +50,7 @@
         {% for p in upcoming_parashot %}
         <li class="hcal-holiday-item">
             <span class="hcal-holiday-name">
-                {% if p.parasha_obj %}<a href="{% url 'library:parasha' p.parasha_obj.slug %}">{{ p.name_ru }}</a>{% else %}{{ p.name_ru }}{% endif %}
+                {% for part in p.parts %}{% if part.obj %}<a href="{% url 'library:parasha' part.obj.slug %}">{{ part.name }}</a>{% else %}{{ part.name }}{% endif %}{% if not forloop.last %}-{% endif %}{% endfor %}
             </span>
             <span class="hcal-holiday-dates">
                 {{ p.gregorian_str }}
@@ -103,7 +105,7 @@
         {% elif gregorian_result %}
         <p class="date-convert-result">
             Еврейская дата: <strong>{{ gregorian_result.hebrew_str }}</strong><br>
-            Недельная глава: <strong>{% if gregorian_result.parasha_obj %}<a href="{% url 'library:parasha' gregorian_result.parasha_obj.slug %}">{{ gregorian_result.parasha_ru }}</a>{% else %}{{ gregorian_result.parasha_ru }}{% endif %}</strong>
+            Недельная глава: <strong>{% for p in gregorian_result.parashot %}{% if p.obj %}<a href="{% url 'library:parasha' p.obj.slug %}">{{ p.name }}</a>{% else %}{{ p.name }}{% endif %}{% if not forloop.last %}-{% endif %}{% endfor %}</strong>
         </p>
         {% endif %}
     </div>
@@ -133,7 +135,7 @@
         {% elif hebrew_result %}
         <p class="date-convert-result">
             Григорианская дата: <strong>{{ hebrew_result.gregorian_str }}</strong><br>
-            Недельная глава: <strong>{% if hebrew_result.parasha_obj %}<a href="{% url 'library:parasha' hebrew_result.parasha_obj.slug %}">{{ hebrew_result.parasha_ru }}</a>{% else %}{{ hebrew_result.parasha_ru }}{% endif %}</strong>
+            Недельная глава: <strong>{% for p in hebrew_result.parashot %}{% if p.obj %}<a href="{% url 'library:parasha' p.obj.slug %}">{{ p.name }}</a>{% else %}{{ p.name }}{% endif %}{% if not forloop.last %}-{% endif %}{% endfor %}</strong>
         </p>
         {% endif %}
     </div>

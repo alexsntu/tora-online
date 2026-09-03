@@ -16,11 +16,7 @@
     <span class="today-bar-sep">✦</span>
     <span class="today-bar-parasha">
         Недельная глава:
-        {% if today.parasha_obj %}
-        <a href="{% url 'library:parasha' today.parasha_obj.slug %}">{{ today.parasha_ru }}</a>
-        {% else %}
-        <strong>{{ today.parasha_ru }}</strong>
-        {% endif %}
+        {% for p in today.parashot %}{% if p.obj %}<a href="{% url 'library:parasha' p.obj.slug %}">{{ p.name }}</a>{% else %}<strong>{{ p.name }}</strong>{% endif %}{% if not forloop.last %}-{% endif %}{% endfor %}
     </span>
     {% if today.parasha_obj.haftarot.all %}
     <span class="today-bar-sep">✦</span>
