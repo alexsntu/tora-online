@@ -1,5 +1,5 @@
 {% extends "library/base.html" %}
-{% load static %}
+{% load static library_security %}
 {% block content %}
 {% include "library/_today_widget.html" %}
 
@@ -11,7 +11,7 @@
         {% endif %}
         <div class="weekly-post-content">
             <h2>{{ weekly_post.title }}</h2>
-            <div class="weekly-post-text" :class="{ 'is-collapsed': !expanded }">{{ weekly_post.body|safe }}</div>
+            <div class="weekly-post-text" :class="{ 'is-collapsed': !expanded }">{{ weekly_post.body|safe_richtext }}</div>
             <button type="button" class="weekly-post-toggle" @click="expanded = !expanded" x-text="expanded ? 'Свернуть ▲' : 'Читать полностью ▼'"></button>
             {% if weekly_post.url_youtube or weekly_post.url_rutube or weekly_post.url_vk or weekly_post.url_playlist %}
             <p class="weekly-post-links-label">Смотреть урок:</p>
@@ -97,28 +97,14 @@
     {% endfor %}
 </section>
 
-<section class="about-section">
-    <h2>Указатель тем</h2>
-    <p>Все темы наших комментариев по порядку следования в тексте — быстро найти нужный вопрос.</p>
-    <p style="margin-top: .8rem;"><a class="channel-link" href="{% url 'library:topics' %}">Открыть указатель →</a></p>
-</section>
-
-<section class="about-section">
-    <h2>Статьи</h2>
-    <p>Текстовые статьи по книгам Торы и недельным главам — читаются прямо на сайте.</p>
-    <p style="margin-top: .8rem;"><a class="channel-link" href="{% url 'library:articles' %}">Открыть статьи →</a></p>
-</section>
-
-<section class="about-section">
-    <h2>Указатель мудрецов Торы</h2>
-    <p>Наши комментарии, сгруппированные по мудрецу-первоисточнику — Раши, Ор аХаим аКадош, Зера Шимшон и другие.</p>
-    <p style="margin-top: .8rem;"><a class="channel-link" href="{% url 'library:sages' %}">Открыть указатель →</a></p>
-</section>
-
-<section class="about-section">
-    <h2>Афторот</h2>
-    <p>Гафтарот — чтения из книг Пророков к каждой недельной главе Торы, ашкеназская и сефардская традиции.</p>
-    <p style="margin-top: .8rem;"><a class="channel-link" href="{% url 'library:haftarot' %}">Открыть указатель →</a></p>
+<section class="explore-section" aria-labelledby="explore-heading">
+    <h2 id="explore-heading">Исследовать материалы</h2>
+    <div class="explore-grid">
+        <a href="{% url 'library:topics' %}"><strong>Темы</strong><span>Комментарии по вопросам и порядку текста</span></a>
+        <a href="{% url 'library:articles' %}"><strong>Статьи</strong><span>Полные авторские материалы для чтения</span></a>
+        <a href="{% url 'library:sages' %}"><strong>Мудрецы Торы</strong><span>Материалы по комментаторам и первоисточникам</span></a>
+        <a href="{% url 'library:haftarot' %}"><strong>Афторот</strong><span>Чтения к недельным главам и особым датам</span></a>
+    </div>
 </section>
 
 <section class="qa-widget">

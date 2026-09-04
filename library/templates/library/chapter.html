@@ -81,7 +81,8 @@
             {% endfor %}
             {% if verse.materials.all %}
             <button type="button" class="comment-toggle"
-                    @click="if (open !== {{ verse.id }}) { fetch('{% url 'library:track_event' %}', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({event_type: 'material_open', verse_id: {{ verse.id }}}), keepalive: true}) }; open = (open === {{ verse.id }} ? null : {{ verse.id }})">
+                    @click="if (open !== {{ verse.id }}) { toraTrack({event_type: 'material_open', verse_id: {{ verse.id }}}) }; open = (open === {{ verse.id }} ? null : {{ verse.id }})"
+                    :aria-expanded="open === {{ verse.id }}" aria-controls="materials-{{ verse.id }}">
                 Комментарий
                 <span class="materials-count" aria-label="Комментариев: {{ verse.materials.all|length }}">✦ {{ verse.materials.all|length }}</span>
             </button>
@@ -101,7 +102,7 @@
     </div>
     {% endfor %}
     {% if verse.materials.all %}
-    <div class="materials-panel" x-show="open === {{ verse.id }}" x-cloak>
+    <div class="materials-panel" id="materials-{{ verse.id }}" x-show="open === {{ verse.id }}" x-cloak>
         <button type="button" class="panel-close-btn" @click="open = null">✕ Закрыть</button>
         {% for m in verse.materials.all %}
         {% include "library/_material.html" %}

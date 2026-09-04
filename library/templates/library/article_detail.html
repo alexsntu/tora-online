@@ -1,4 +1,5 @@
 {% extends "library/base.html" %}
+{% load library_security %}
 {% block title %}{{ meta_title }}{% endblock %}
 {% block content %}
 <div class="article-toolbar">
@@ -29,20 +30,20 @@
         {% endif %}
     </p>
 
-    <div class="article-body">{{ material.article_text|safe }}</div>
+    <div class="article-body">{{ material.article_text|safe_richtext }}</div>
 
     {% if material.url or material.url_rutube %}
     <div class="material-links article-video-links">
         {% if material.url %}
         <a class="platform-link platform-youtube" href="{{ material.url }}" target="_blank" rel="noopener"
-           onclick="fetch('{% url 'library:track_event' %}', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({event_type: 'outbound_click', material_id: {{ material.id }}, target: 'youtube'}), keepalive: true})">
+           onclick="toraTrack({event_type: 'outbound_click', material_id: {{ material.id }}, target: 'youtube'})">
             <svg class="platform-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="1" y="4" width="22" height="16" rx="4"/><polygon points="10,8.5 10,15.5 16,12" fill="#fff"/></svg>
             Смотреть на YouTube
         </a>
         {% endif %}
         {% if material.url_rutube %}
         <a class="platform-link platform-rutube" href="{{ material.url_rutube }}" target="_blank" rel="noopener"
-           onclick="fetch('{% url 'library:track_event' %}', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({event_type: 'outbound_click', material_id: {{ material.id }}, target: 'rutube'}), keepalive: true})">
+           onclick="toraTrack({event_type: 'outbound_click', material_id: {{ material.id }}, target: 'rutube'})">
             <svg class="platform-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="1" y="4" width="22" height="16" rx="4"/><polygon points="10,8.5 10,15.5 16,12" fill="#fff"/></svg>
             Смотреть на RuTube
         </a>
