@@ -15,8 +15,4 @@ def report_error_captcha(request):
     options = [target] + decoys
     random.shuffle(options)
     request.session["report_error_captcha"] = target
-    return {
-        "report_error_captcha_target": target,
-        "report_error_captcha_options": options,
-        "canonical_url": request.build_absolute_uri(request.path),
-    }
+    return {"report_error_captcha_target": target, "report_error_captcha_options": options}

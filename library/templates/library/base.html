@@ -16,18 +16,17 @@
     <!-- /Yandex.Metrika counter -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token }}">
     <title>{% block title %}Тора онлайн для Бней Ноах{% endblock %}</title>
     <meta name="theme-color" content="#7c3223">
     <meta name="author" content="Дмитрий Калашник">
     <meta name="description" content="{{ meta_description|default:"Уроки Торы для Бней Ноах от Дмитрия Калашника: авторские уроки на основе комментариев мудрецов с лингвистическим анализом. Электронная библиотека Торы и Танаха на русском и иврите." }}">
-    <link rel="canonical" href="{{ canonical_url }}">
+    <link rel="canonical" href="{{ request.build_absolute_uri }}">
     <!-- Open Graph / Twitter Card - превью ссылки при шаринге в WhatsApp/Telegram/VK/соцсетях.
          og:title/description переиспользуют те же meta_title/meta_description, что и <title>/description выше. -->
     <meta property="og:site_name" content="Тора онлайн для Бней Ноах">
     <meta property="og:type" content="website">
     <meta property="og:locale" content="ru_RU">
-    <meta property="og:url" content="{{ canonical_url }}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
     <meta property="og:title" content="{{ meta_title|default:"Тора онлайн для Бней Ноах" }}">
     <meta property="og:description" content="{{ meta_description|default:"Уроки Торы для Бней Ноах от Дмитрия Калашника: авторские уроки на основе комментариев мудрецов с лингвистическим анализом. Электронная библиотека Торы и Танаха на русском и иврите." }}">
     {% if og_image %}
@@ -77,9 +76,7 @@
             }
         })();
     </script>
-    <script defer src="https://unpkg.com/alpinejs@3.14.9/dist/cdn.min.js"
-            integrity="sha384-9Ax3MmS9AClxJyd5/zafcXXjxmwFhZCdsT6HJoJjarvCaAkJlk5QDzjLJm+Wdx5F"
-            crossorigin="anonymous"></script>
+    <script defer src="https://unpkg.com/alpinejs@3/dist/cdn.min.js"></script>
     <script>
         if ("serviceWorker" in navigator) {
             window.addEventListener("load", function () {
@@ -106,15 +103,6 @@
             </div>
         </div>
     </header>
-    <nav class="primary-nav" aria-label="Основные разделы">
-        <a href="{% url 'library:home' %}">Библиотека</a>
-        <a href="{% url 'library:topics' %}">Темы</a>
-        <a href="{% url 'library:articles' %}">Статьи</a>
-        <a href="{% url 'library:sages' %}">Мудрецы</a>
-        <a href="{% url 'library:haftarot' %}">Афторот</a>
-        <a href="{% url 'library:calendar' %}">Календарь</a>
-        <a href="{% url 'library:questions' %}">Вопросы</a>
-    </nav>
     <main>
         {% if messages %}
         <ul class="site-messages">
@@ -197,19 +185,6 @@
             toast._hideTimer = setTimeout(function () {
                 toast.classList.remove("is-visible");
             }, 2500);
-        }
-        function toraTrack(payload) {
-            var token = document.querySelector('meta[name="csrf-token"]');
-            return fetch("{% url 'library:track_event' %}", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": token ? token.content : ""
-                },
-                body: JSON.stringify(payload),
-                keepalive: true,
-                credentials: "same-origin"
-            }).catch(function () {});
         }
         function toraShare(title, url, btnEl) {
             if (navigator.share) {

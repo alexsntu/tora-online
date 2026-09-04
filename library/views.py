@@ -1,12 +1,10 @@
 import json
 import random
-import hashlib
 from datetime import date
 from itertools import groupby
 from pathlib import Path
 
 from django.conf import settings
-from django.core.cache import cache
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Count, Q
@@ -15,6 +13,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.html import strip_tags
 from django.utils.text import Truncator
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from .forms import ErrorReportForm, QuestionForm
@@ -48,19 +47,6 @@ def ru_plural(n, one, few, many):
     if n1 == 1:
         return one
     return many
-
-
-def _rate_limited(request, namespace, limit, timeout):
-    """Small per-address limiter for write endpoints; nginx remains the outer layer."""
-    address = request.META.get("REMOTE_ADDR", "unknown")
-    digest = hashlib.blake2s(address.encode(), digest_size=12).hexdigest()
-    key = f"rate:{namespace}:{digest}"
-    try:
-        count = cache.incr(key)
-    except ValueError:
-        cache.set(key, 1, timeout=timeout)
-        count = 1
-    return count > limit
 
 
 def service_worker(request):
@@ -626,15 +612,10 @@ def haftarah_occasion_view(request, occasion_slug, tradition):
     })
 
 
+@csrf_exempt
 @require_POST
 def track_event(request):
     """Анонимный beacon-эндпоинт для клиентских событий (открытие комментария, клик на видео)."""
-    if _rate_limited(request, "analytics", 60, 60):
-        return HttpResponse(status=429)
-
-    if request.content_type != "application/json" or len(request.body) > 2048:
-        return HttpResponseBadRequest()
-
     try:
         data = json.loads(request.body)
     except (ValueError, TypeError):
@@ -644,18 +625,10 @@ def track_event(request):
     if event_type not in (AnalyticsEvent.MATERIAL_OPEN, AnalyticsEvent.OUTBOUND_CLICK):
         return HttpResponseBadRequest()
 
-    verse = Verse.objects.select_related("book").filter(pk=data.get("verse_id")).first() if data.get("verse_id") else None
+    verse = Verse.objects.filter(pk=data.get("verse_id")).first() if data.get("verse_id") else None
     material = Material.objects.filter(pk=data.get("material_id")).first() if data.get("material_id") else None
     if verse and not material:
         material = verse.materials.first()
-
-    if event_type == AnalyticsEvent.MATERIAL_OPEN and not (verse and material):
-        return HttpResponseBadRequest()
-    if event_type == AnalyticsEvent.OUTBOUND_CLICK:
-        if not material or data.get("target") not in ("youtube", "rutube", "article"):
-            return HttpResponseBadRequest()
-    if verse and material and not material.verses.filter(pk=verse.pk).exists():
-        return HttpResponseBadRequest()
 
     AnalyticsEvent.objects.create(
         event_type=event_type,
@@ -714,7 +687,7 @@ def calendar_view(request):
     try:
         cal_year = int(request.GET.get("y", today_py.year))
         cal_month = int(request.GET.get("m", today_py.month))
-        if not (1900 <= cal_year <= 2100 and 1 <= cal_month <= 12):
+        if not (1 <= cal_month <= 12):
             raise ValueError
     except (TypeError, ValueError):
         cal_year, cal_month = today_py.year, today_py.month
@@ -895,8 +868,6 @@ def _new_captcha(request):
 
 def question_ask_view(request):
     if request.method == "POST":
-        if _rate_limited(request, "question", 5, 3600):
-            return HttpResponse("Слишком много попыток. Попробуйте позже.", status=429)
         if request.POST.get("website", "").strip():
             # honeypot - для бота делаем вид, что всё прошло успешно, но ничего не сохраняем
             return redirect("library:question_ask_done")
@@ -929,8 +900,6 @@ def question_ask_done_view(request):
 
 @require_POST
 def report_error_view(request):
-    if _rate_limited(request, "error-report", 10, 3600):
-        return HttpResponse("Слишком много попыток. Попробуйте позже.", status=429)
     page_url = request.POST.get("page_url", "")
     fallback = page_url if page_url.startswith("/") and not page_url.startswith("//") else reverse("library:home")
 

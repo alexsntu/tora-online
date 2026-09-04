@@ -39,11 +39,6 @@
 
 * { box-sizing: border-box; }
 
-:focus-visible {
-    outline: 3px solid var(--gold);
-    outline-offset: 3px;
-}
-
 body {
     margin: 0;
     font-family: var(--font-body);
@@ -122,49 +117,6 @@ body::before {
     gap: 16px;
     flex-wrap: wrap;
     flex-shrink: 0;
-}
-.primary-nav {
-    display: flex;
-    justify-content: center;
-    gap: .25rem;
-    padding: .55rem 1rem;
-    overflow-x: auto;
-    background: var(--paper);
-    border-bottom: 1px solid var(--border);
-    scrollbar-width: thin;
-}
-.primary-nav a {
-    flex: 0 0 auto;
-    padding: .45rem .7rem;
-    color: var(--accent-dark);
-    text-decoration: none;
-    border-radius: 999px;
-    font-size: .88rem;
-    font-weight: 700;
-}
-.primary-nav a:hover { background: var(--highlight); }
-
-.explore-section { margin: 2rem 0; }
-.explore-section h2 { color: var(--maroon); font-family: var(--font-display); }
-.explore-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
-.explore-grid a {
-    display: flex;
-    flex-direction: column;
-    gap: .25rem;
-    min-height: 7rem;
-    padding: 1.1rem 1.2rem;
-    color: var(--text);
-    text-decoration: none;
-    background: var(--paper);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-}
-.explore-grid a:hover { border-color: var(--gold); }
-.explore-grid strong { color: var(--maroon); font-size: 1.15rem; }
-.explore-grid span { color: #6a5a3a; line-height: 1.5; }
-@media (max-width: 640px) {
-    .primary-nav { justify-content: flex-start; }
-    .explore-grid { grid-template-columns: 1fr; }
 }
 .header-tool-link {
     font-size: 13.6px;
@@ -1199,7 +1151,7 @@ summary::marker { color: var(--gold); }
     border: none;
     border-radius: 999px;
     padding: .45rem .9rem;
-    min-height: 2.75rem;
+    min-height: 2rem;
     display: inline-flex;
     align-items: center;
     gap: .35rem;
@@ -1233,7 +1185,7 @@ summary::marker { color: var(--gold); }
    смотрелись единым рядом одинаковых по весу кнопок. */
 .translation-alt-toggle {
     padding: .45rem .6rem;
-    min-height: 2.75rem;
+    min-height: 2rem;
     display: inline-flex;
     align-items: center;
     border: 1px solid var(--border);
@@ -1286,7 +1238,7 @@ summary::marker { color: var(--gold); }
        исходные .1rem .4rem давали всего ~20px высоты, заметно меньше
        рекомендованного минимума тач-таргета (44px iOS / 48px Material). */
     padding: .45rem .5rem;
-    min-height: 2.75rem;
+    min-height: 2rem;
     display: inline-flex;
     align-items: center;
     cursor: pointer;
@@ -1300,8 +1252,8 @@ summary::marker { color: var(--gold); }
     border: 1px solid var(--border);
     border-radius: 3px;
     padding: .3rem .45rem;
-    min-height: 2.75rem;
-    min-width: 2.75rem;
+    min-height: 2rem;
+    min-width: 2rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1347,15 +1299,6 @@ summary::marker { color: var(--gold); }
     direction: ltr;
 }
 .panel-close-btn:hover { background: #f2ede0; color: var(--maroon); }
-
-@media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-        scroll-behavior: auto !important;
-        animation-duration: .01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: .01ms !important;
-    }
-}
 
 @media (max-width: 640px) {
     .materials-panel, .rashi-panel { padding: 1rem; }
