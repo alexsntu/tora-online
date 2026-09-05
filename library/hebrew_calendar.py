@@ -348,6 +348,19 @@ def today_info(israel=False):
     parasha_en = parshios.getparsha_string(greg_today, israel=israel)
     parasha_he = parshios.getparsha_string(greg_today, hebrew=True, israel=israel)
     parasha_obj = find_parasha_for_date(greg_today, israel=israel)
+    parashot = parashot_list_for_date(greg_today, israel=israel)
+    shabbat_holiday = None
+    if not parashot:
+        # Недельной главы нет - суббота этой недели совпадает с праздником,
+        # вместо главы в этот день читается праздничный отрывок.
+        shabbat = greg_today.shabbos()
+        shabbat_holiday_info = holiday_ru_for_hebdate(shabbat.to_heb(), israel=israel)
+        if shabbat_holiday_info:
+            shabbat_holiday = {
+                **shabbat_holiday_info,
+                "gregorian_str": format_gregorian_ru(shabbat),
+                "hebrew_str": format_hebrew_ru(shabbat.to_heb()),
+            }
     return {
         "gregorian_str": format_gregorian_ru(greg_today),
         "hebrew_str": format_hebrew_ru(heb_today),
@@ -355,6 +368,7 @@ def today_info(israel=False):
         "parasha_he": parasha_he,
         "parasha_ru": parasha_obj.name_ru if parasha_obj else (parasha_name_ru_fallback(parasha_en) if parasha_en else None),
         "parasha_obj": parasha_obj,
-        "parashot": parashot_list_for_date(greg_today, israel=israel),
+        "parashot": parashot,
+        "shabbat_holiday": shabbat_holiday,
         "holiday": holiday_ru_for_hebdate(heb_today, israel=israel),
     }

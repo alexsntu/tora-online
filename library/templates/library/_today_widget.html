@@ -13,11 +13,18 @@
         {% if today.holiday.day_num %}{{ today.holiday.name }} (день {{ today.holiday.day_num }}){% else %}{{ today.holiday.name }}{% endif %}
     </span>
     {% endif %}
+    {% if today.parashot %}
     <span class="today-bar-sep">✦</span>
     <span class="today-bar-parasha">
         Недельная глава:
         {% for p in today.parashot %}{% if p.obj %}<a href="{% url 'library:parasha' p.obj.slug %}">{{ p.name }}</a>{% else %}<strong>{{ p.name }}</strong>{% endif %}{% if not forloop.last %}-{% endif %}{% endfor %}
     </span>
+    {% elif today.shabbat_holiday %}
+    <span class="today-bar-sep">✦</span>
+    <span class="today-bar-parasha">
+        В эту субботу: {{ today.shabbat_holiday.name }} ({{ today.shabbat_holiday.gregorian_str }})
+    </span>
+    {% endif %}
     {% if today.parasha_obj.haftarot.all %}
     <span class="today-bar-sep">✦</span>
     <span class="today-bar-parasha">
