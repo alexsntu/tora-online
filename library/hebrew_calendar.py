@@ -353,7 +353,7 @@ def today_info(israel=False):
         "hebrew_str": format_hebrew_ru(heb_today),
         "parasha_en": parasha_en,
         "parasha_he": parasha_he,
-        "parasha_ru": parasha_obj.name_ru if parasha_obj else parasha_name_ru_fallback(parasha_en),
+        "parasha_ru": parasha_obj.name_ru if parasha_obj else (parasha_name_ru_fallback(parasha_en) if parasha_en else None),
         "parasha_obj": parasha_obj,
         "parashot": parashot_list_for_date(greg_today, israel=israel),
         "holiday": holiday_ru_for_hebdate(heb_today, israel=israel),
