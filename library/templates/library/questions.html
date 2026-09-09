@@ -12,7 +12,7 @@
 
 <div class="topics-flow">
     {% for q in questions %}
-    <a class="question-card" href="{% url 'library:question_detail' q.pk %}">
+    <a class="question-card" href="{% url 'library:question_detail' q.slug %}">
         <p class="question-card-text">{{ q.display_title|truncatewords:30 }}</p>
         <span class="question-card-date">{{ q.answered_at|date:"d.m.Y" }}</span>
     </a>

@@ -514,6 +514,10 @@ class Question(models.Model):
         "Заголовок (для публикации)", max_length=255, blank=True,
         help_text="Показывается на сайте вместо текста вопроса - заполняется при публикации",
     )
+    slug = models.SlugField(
+        "Слаг (для ссылки)", max_length=255, blank=True, null=True, unique=True,
+        help_text="Формируется автоматически из заголовка при публикации.",
+    )
     asker_name = models.CharField("Имя (не публикуется)", max_length=255, blank=True)
     asker_email = models.EmailField("Email (не публикуется, для связи)", blank=True)
     answer = models.TextField("Ответ", blank=True)
@@ -551,6 +555,14 @@ class Question(models.Model):
             self.answered_at = timezone.now()
         elif not self.answer:
             self.answered_at = None
+        if self.is_published and not self.slug:
+            base_slug = slugify_ru(self.display_title) or "vopros"
+            slug = base_slug
+            n = 2
+            while Question.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{n}"
+                n += 1
+            self.slug = slug
         super().save(*args, **kwargs)
 
 

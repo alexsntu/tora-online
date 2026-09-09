@@ -808,7 +808,7 @@ def sitemap_xml_view(request):
         paths.append(reverse("library:sage_detail", args=[sage.slug]))
 
     for question in Question.objects.filter(is_published=True).exclude(answer=""):
-        paths.append(reverse("library:question_detail", args=[question.pk]))
+        paths.append(reverse("library:question_detail", args=[question.slug]))
 
     urls = "".join(f"<url><loc>{request.build_absolute_uri(p)}</loc></url>" for p in paths)
     xml = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{urls}</urlset>'
@@ -821,8 +821,8 @@ def questions_view(request):
     return render(request, "library/questions.html", {"questions": questions})
 
 
-def question_detail_view(request, pk):
-    question = get_object_or_404(Question, pk=pk, is_published=True)
+def question_detail_view(request, slug):
+    question = get_object_or_404(Question, slug=slug, is_published=True)
     meta_title, meta_description = resolve_meta(
         question.meta_title, question.meta_description,
         f"{Truncator(question.display_title).words(12)} — Тора онлайн",
@@ -831,7 +831,7 @@ def question_detail_view(request, pk):
     breadcrumbs = breadcrumbs_ld(request, [
         ("Оглавление", reverse("library:home")),
         ("Вопросы и ответы", reverse("library:questions")),
-        (Truncator(question.display_title).words(8), reverse("library:question_detail", args=[question.pk])),
+        (Truncator(question.display_title).words(8), reverse("library:question_detail", args=[question.slug])),
     ])
     qa_ld = {
         "@type": "QAPage",

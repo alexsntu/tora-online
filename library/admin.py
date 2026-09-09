@@ -439,10 +439,10 @@ class QuestionAdmin(admin.ModelAdmin):
     list_filter = (QuestionStatusFilter,)
     search_fields = ("text", "answer", "asker_name", "asker_email")
     fields = (
-        "text", "asker_name", "asker_email", "created_at", "answer", "title", "is_published", "answered_at",
+        "text", "asker_name", "asker_email", "created_at", "answer", "title", "slug", "is_published", "answered_at",
         "meta_title", "meta_description",
     )
-    readonly_fields = ("asker_name", "asker_email", "created_at", "answered_at")
+    readonly_fields = ("asker_name", "asker_email", "created_at", "answered_at", "slug")
 
     @admin.display(description="Вопрос")
     def text_preview(self, obj):
