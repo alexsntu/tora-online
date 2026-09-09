@@ -833,6 +833,11 @@ def question_detail_view(request, slug):
         ("Вопросы и ответы", reverse("library:questions")),
         (Truncator(question.display_title).words(8), reverse("library:question_detail", args=[question.slug])),
     ])
+    answered_by_name = question.answered_by or AUTHOR_PERSON_LD["name"]
+    answer_author_ld = (
+        AUTHOR_PERSON_LD if answered_by_name == AUTHOR_PERSON_LD["name"]
+        else {"@type": "Person", "name": answered_by_name}
+    )
     qa_ld = {
         "@type": "QAPage",
         "mainEntity": {
@@ -843,7 +848,7 @@ def question_detail_view(request, slug):
             "acceptedAnswer": {
                 "@type": "Answer",
                 "text": question.answer,
-                "author": AUTHOR_PERSON_LD,
+                "author": answer_author_ld,
             },
         },
     }

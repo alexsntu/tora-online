@@ -8,7 +8,11 @@
 <div class="question-full">
     <h1 class="question-full-text">{{ question.display_title }}</h1>
     <p class="question-full-date">{{ question.answered_at|date:"d.m.Y" }}</p>
+    {% if not question.is_anonymous and question.asker_name %}
+    <p class="question-full-asker">Вопрос задал(а): {{ question.asker_name }}</p>
+    {% endif %}
     <div class="question-full-body">{{ question.text|linebreaksbr }}</div>
+    <p class="question-full-answered-by">Отвечает: {{ question.answered_by|default:"Дмитрий Калашник" }}</p>
     <div class="question-full-answer">{{ question.answer|linebreaksbr }}</div>
 </div>
 

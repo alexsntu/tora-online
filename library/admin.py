@@ -7,6 +7,7 @@ from django.urls import path, reverse
 from axes.admin import AccessAttemptAdmin, IsLockedOutFilter
 from axes.models import AccessAttempt
 
+from .forms import DatalistTextInput
 from .models import (
     AliyahMarker, AnalyticsEvent, Book, Category, Verse, Parasha, Haftarah, HaftarahOccasion, HaftarahVerse,
     OccasionMaftirVerse, Material, ErrorReport, Question, Sage, SiteSettings, Topic, WeeklyPost,
@@ -433,16 +434,29 @@ class QuestionStatusFilter(admin.SimpleListFilter):
         return queryset
 
 
+class QuestionAdminForm(forms.ModelForm):
+    class Meta:
+        model = Question
+        fields = "__all__"
+        widgets = {
+            "answered_by": DatalistTextInput(choices=["Дмитрий Калашник"], attrs={"placeholder": "Дмитрий Калашник"}),
+        }
+
+
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    list_display = ("text_preview", "is_answered", "is_published", "created_at", "answered_at")
-    list_filter = (QuestionStatusFilter,)
+    form = QuestionAdminForm
+    list_display = (
+        "text_preview", "is_answered", "is_published", "wants_email_reply", "created_at", "answered_at",
+    )
+    list_filter = (QuestionStatusFilter, "wants_email_reply")
     search_fields = ("text", "answer", "asker_name", "asker_email")
     fields = (
-        "text", "asker_name", "asker_email", "created_at", "answer", "title", "slug", "is_published", "answered_at",
+        "text", "asker_name", "asker_email", "wants_email_reply", "created_at",
+        "answer", "answered_by", "is_anonymous", "title", "slug", "is_published", "answered_at",
         "meta_title", "meta_description",
     )
-    readonly_fields = ("asker_name", "asker_email", "created_at", "answered_at", "slug")
+    readonly_fields = ("asker_name", "asker_email", "wants_email_reply", "created_at", "answered_at", "slug")
 
     @admin.display(description="Вопрос")
     def text_preview(self, obj):

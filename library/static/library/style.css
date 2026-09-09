@@ -1446,6 +1446,8 @@ summary::marker { color: var(--gold); }
 .question-full { padding: .5rem 0; }
 .question-full-text { margin-bottom: .3rem; }
 .question-full-date { color: var(--accent-dark); font-size: .85rem; font-weight: bold; margin: 0 0 1rem 0; }
+.question-full-asker { color: #a3936a; font-size: .85rem; font-style: italic; margin: 0 0 1rem 0; }
+.question-full-answered-by { color: var(--accent-dark); font-size: .9rem; font-weight: bold; margin: 0 0 .4rem 0; }
 .question-full-body {
     padding: .9rem 1.1rem;
     margin-bottom: 1rem;
@@ -1528,6 +1530,16 @@ summary::marker { color: var(--gold); }
     color: var(--text);
 }
 .question-ask-form textarea { resize: vertical; }
+.question-ask-form label.question-ask-checkbox {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-weight: normal;
+    margin-top: .6rem;
+    color: var(--text);
+    cursor: pointer;
+}
+.question-ask-checkbox input[type="checkbox"] { width: auto; }
 .question-ask-error { color: var(--maroon); font-size: .85rem; margin: 0; }
 .question-ask-honeypot { position: absolute; left: -9999px; top: -9999px; }
 .question-ask-captcha { display: flex; gap: 1rem; }

@@ -518,9 +518,24 @@ class Question(models.Model):
         "Слаг (для ссылки)", max_length=255, blank=True, null=True, unique=True,
         help_text="Формируется автоматически из заголовка при публикации.",
     )
-    asker_name = models.CharField("Имя (не публикуется)", max_length=255, blank=True)
+    asker_name = models.CharField(
+        "Имя", max_length=255, blank=True,
+        help_text="Публикуется на сайте, если не отмечена анонимная публикация.",
+    )
     asker_email = models.EmailField("Email (не публикуется, для связи)", blank=True)
+    wants_email_reply = models.BooleanField(
+        "Ответить на почту", default=False,
+        help_text="Автор вопроса попросил прислать ответ на email.",
+    )
+    is_anonymous = models.BooleanField(
+        "Опубликовать ответ анонимно", default=False,
+        help_text="Если отмечено - имя автора вопроса на сайте не показывается.",
+    )
     answer = models.TextField("Ответ", blank=True)
+    answered_by = models.CharField(
+        "Автор ответа", max_length=255, blank=True, default="Дмитрий Калашник",
+        help_text="Показывается на сайте в начале ответа: «Отвечает: …».",
+    )
     is_published = models.BooleanField("Опубликовать на сайте", default=False)
     created_at = models.DateTimeField("Дата вопроса", auto_now_add=True)
     answered_at = models.DateTimeField("Дата ответа", null=True, blank=True)

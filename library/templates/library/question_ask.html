@@ -24,6 +24,16 @@
     {{ form.asker_email }}
     {% if form.asker_email.errors %}<p class="question-ask-error">{{ form.asker_email.errors|striptags }}</p>{% endif %}
 
+    <label class="question-ask-checkbox">
+        {{ form.wants_email_reply }}
+        {{ form.wants_email_reply.label }}
+    </label>
+
+    <label class="question-ask-checkbox">
+        {{ form.is_anonymous }}
+        {{ form.is_anonymous.label }}
+    </label>
+
     <div class="question-ask-honeypot" aria-hidden="true">
         <label for="id_website">Сайт</label>
         <input type="text" name="website" id="id_website" tabindex="-1" autocomplete="off">
