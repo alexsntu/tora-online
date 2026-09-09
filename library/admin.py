@@ -3,6 +3,7 @@ from django.contrib import admin
 from django.db import models
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import path, reverse
+from django.utils.html import format_html
 
 from axes.admin import AccessAttemptAdmin, IsLockedOutFilter
 from axes.models import AccessAttempt
@@ -325,7 +326,8 @@ MATERIAL_PAGE_SIZES = (10, 25, 50)
 class MaterialAdmin(admin.ModelAdmin):
     form = MaterialForm
     change_list_template = "admin/library/material/change_list.html"
-    list_display = ("title", "type", "has_video", "has_article", "verses_display", "created_at")
+    list_display = ("title_link", "edit_link", "type", "has_video", "has_article", "verses_display", "created_at")
+    list_display_links = None  # заголовок и кнопка "Редактировать" линкуются вручную (см. title_link/edit_link)
     list_filter = (
         "type", MaterialHasVideoFilter, MaterialHasArticleFilter,
         MaterialBookFilter, MaterialChapterFilter, MaterialVerseFilter, "sages",
@@ -351,6 +353,18 @@ class MaterialAdmin(admin.ModelAdmin):
     class Media:
         css = {"all": ("library/admin-extra.css",)}
         js = ("library/admin-verse-picker.js", "library/admin-sage-picker.js", "library/admin-article-richtext.js")
+
+    @admin.display(description="Заголовок", ordering="title")
+    def title_link(self, obj):
+        # Открывается в новой вкладке - рядом есть отдельная кнопка "Редактировать"
+        # (edit_link) для открытия в текущей, см. запрос пользователя.
+        url = reverse("admin:library_material_change", args=[obj.pk])
+        return format_html('<a href="{}" target="_blank" rel="noopener">{}</a>', url, obj.title)
+
+    @admin.display(description="")
+    def edit_link(self, obj):
+        url = reverse("admin:library_material_change", args=[obj.pk])
+        return format_html('<a class="button" href="{}">Редактировать</a>', url)
 
     @admin.display(description="Видео", boolean=True)
     def has_video(self, obj):
