@@ -333,6 +333,16 @@ class MaterialAdmin(admin.ModelAdmin):
     search_fields = ("title", "body", "article_text")
     list_per_page = MATERIAL_PAGE_SIZES[1]  # 25 по умолчанию
     readonly_fields = ("article_slug",)  # заполняется автоматически из заголовка в save()
+    fields = (
+        "type",
+        "url", "url_rutube",
+        "verses",
+        "title",
+        "body",
+        "sages",
+        "article_text",
+        "article_slug", "article_meta_title", "article_meta_description",
+    )
     # verses - выбор через виджет Книга/Глава/Стих (см. admin-verse-picker.js), не filter_horizontal;
     # обязательность (хотя бы 1 стих) проверяется в MaterialForm.clean_verses, не через model.blank=False -
     # required=True на самом (скрытом display:none) select дал бы невидимую браузерную HTML5-валидацию.

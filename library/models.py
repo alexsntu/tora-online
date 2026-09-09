@@ -347,7 +347,7 @@ class Material(models.Model):
         (TYPE_ARTICLE, "Статья"),
     ]
 
-    type = models.CharField("Тип", max_length=10, choices=TYPE_CHOICES)
+    type = models.CharField("Тип", max_length=10, choices=TYPE_CHOICES, default=TYPE_VIDEO)
     title = models.CharField("Заголовок", max_length=255)
     url = models.URLField("Ссылка (YouTube / статья)", blank=True, help_text="Ссылка на YouTube (для видеоурока) или на статью")
     url_rutube = models.URLField("Ссылка (RuTube)", blank=True, help_text="Ссылка на RuTube (если есть, для видеоурока)")
