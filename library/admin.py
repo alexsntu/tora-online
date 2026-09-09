@@ -364,7 +364,7 @@ class MaterialAdmin(admin.ModelAdmin):
     @admin.display(description="")
     def edit_link(self, obj):
         url = reverse("admin:library_material_change", args=[obj.pk])
-        return format_html('<a class="button" href="{}">Редактировать</a>', url)
+        return format_html('<a class="button material-edit-btn" href="{}">Ред.</a>', url)
 
     @admin.display(description="Видео", boolean=True)
     def has_video(self, obj):
