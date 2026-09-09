@@ -1,23 +1,6 @@
 from django import forms
-from django.utils.html import format_html, format_html_join
 
 from .models import ErrorReport, Question
-
-
-class DatalistTextInput(forms.TextInput):
-    """Обычное текстовое поле с выпадающей подсказкой (HTML <datalist>) -
-    можно выбрать один из вариантов или вписать своё значение вручную."""
-
-    def __init__(self, choices=(), attrs=None):
-        super().__init__(attrs)
-        self.choices = choices
-
-    def render(self, name, value, attrs=None, renderer=None):
-        list_id = f"{name}-datalist"
-        final_attrs = {**(attrs or {}), "list": list_id}
-        input_html = super().render(name, value, final_attrs, renderer)
-        options_html = format_html_join("", "<option value=\"{}\">", ((c,) for c in self.choices))
-        return format_html('{}<datalist id="{}">{}</datalist>', input_html, list_id, options_html)
 
 
 class QuestionForm(forms.ModelForm):

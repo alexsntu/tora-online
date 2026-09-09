@@ -53,6 +53,21 @@
     margin: 0.5rem 0 0;
 }
 
+/* Автор ответа (Question.answered_by) - выбор "Дмитрий Калашник"/другой автор,
+   см. admin-answered-by-picker.js. */
+.answered-by-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+.answered-by-picker-select {
+    min-width: 12rem;
+}
+.answered-by-picker-custom {
+    min-width: 16rem;
+}
+
 .sage-picker-list {
     min-width: 16rem;
     max-width: 22rem;

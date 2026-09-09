@@ -7,7 +7,6 @@ from django.urls import path, reverse
 from axes.admin import AccessAttemptAdmin, IsLockedOutFilter
 from axes.models import AccessAttempt
 
-from .forms import DatalistTextInput
 from .models import (
     AliyahMarker, AnalyticsEvent, Book, Category, Verse, Parasha, Haftarah, HaftarahOccasion, HaftarahVerse,
     OccasionMaftirVerse, Material, ErrorReport, Question, Sage, SiteSettings, Topic, WeeklyPost,
@@ -434,18 +433,8 @@ class QuestionStatusFilter(admin.SimpleListFilter):
         return queryset
 
 
-class QuestionAdminForm(forms.ModelForm):
-    class Meta:
-        model = Question
-        fields = "__all__"
-        widgets = {
-            "answered_by": DatalistTextInput(choices=["Дмитрий Калашник"], attrs={"placeholder": "Дмитрий Калашник"}),
-        }
-
-
 @admin.register(Question)
 class QuestionAdmin(admin.ModelAdmin):
-    form = QuestionAdminForm
     list_display = (
         "text_preview", "is_answered", "is_published", "wants_email_reply", "created_at", "answered_at",
     )
@@ -457,6 +446,12 @@ class QuestionAdmin(admin.ModelAdmin):
         "meta_title", "meta_description",
     )
     readonly_fields = ("asker_name", "asker_email", "wants_email_reply", "created_at", "answered_at", "slug")
+    # answered_by - выбор "Дмитрий Калашник" / другой автор через виджет
+    # (см. admin-answered-by-picker.js), тот же паттерн, что admin-sage-picker.js.
+
+    class Media:
+        css = {"all": ("library/admin-extra.css",)}
+        js = ("library/admin-answered-by-picker.js",)
 
     @admin.display(description="Вопрос")
     def text_preview(self, obj):
