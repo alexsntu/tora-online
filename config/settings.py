@@ -82,6 +82,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'axes',
     'library',
+    'django.forms',  # нужно для FORM_RENDERER = TemplatesSetting ниже - иначе шаблоны django/forms/widgets/*.html не находятся
 ]
 
 MIDDLEWARE = [
@@ -107,6 +108,11 @@ AXES_COOLOFF_TIME = 1  # hours
 AXES_LOCKOUT_PARAMETERS = ['ip_address']
 
 ROOT_URLCONF = 'config.urls'
+
+# Форм-виджеты (напр. AdminURLFieldWidget) по умолчанию рендерятся отдельным
+# движком, который не видит DIRS из TEMPLATES ниже - без этой настройки наш
+# templates/admin/widgets/url.html не подхватывается.
+FORM_RENDERER = 'django.forms.renderers.TemplatesSetting'
 
 TEMPLATES = [
     {
