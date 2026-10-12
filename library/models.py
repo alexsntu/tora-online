@@ -160,7 +160,7 @@ class AliyahMarker(models.Model):
 
 
 class HaftarahOccasion(models.Model):
-    """Праздник/особая дата, к которой читается отдельная гафтара - не привязана
+    """Праздник/особая дата, к которой читается отдельная афтора - не привязана
     к недельной главе (см. Haftarah.occasion). Три раздела над недельными главами
     в /haftarot/: даты (Рош а-Шана, Йом-Кипур, Ханука...), Шалош Регалим (Песах,
     Шавуот, Суккот), Арба Парашийот (Шкалим/Захор/Пара/аХодеш)."""
@@ -181,8 +181,8 @@ class HaftarahOccasion(models.Model):
 
     class Meta:
         ordering = ["category", "order"]
-        verbose_name = "особая дата (для гафтары)"
-        verbose_name_plural = "Особые даты (для гафтарот)"
+        verbose_name = "особая дата (для афторы)"
+        verbose_name_plural = "Особые даты (для афторот)"
 
     def __str__(self):
         return self.name_ru
@@ -247,7 +247,7 @@ class OccasionMaftirVerse(models.Model):
 
 
 class Haftarah(models.Model):
-    """Гафтара недельной главы или особой даты - отдельный раздел, не часть обычного
+    """Афтора недельной главы или особой даты - отдельный раздел, не часть обычного
     текста Танаха (книги Пророков-источники не добавляются как Book, весь текст
     живёт только здесь, см. HaftarahVerse). Ровно одно из parasha/occasion заполнено."""
     TRADITION_ASHKENAZI = "ashkenazi"
@@ -270,8 +270,8 @@ class Haftarah(models.Model):
     class Meta:
         ordering = ["parasha__order", "occasion__category", "occasion__order", "tradition"]
         unique_together = [("parasha", "tradition"), ("occasion", "tradition")]
-        verbose_name = "гафтара"
-        verbose_name_plural = "Гафтарот"
+        verbose_name = "афтора"
+        verbose_name_plural = "Афторот"
 
     def __str__(self):
         name = self.parasha.name_ru if self.parasha_id else self.occasion.name_ru
@@ -280,7 +280,7 @@ class Haftarah(models.Model):
     @property
     def range_display(self):
         """Например "Йешаяу 42:5-43:10" - книга(и) и диапазон(ы) глав:стихов, чтобы
-        было понятно, какой именно текст, не открывая саму гафтару. Составная гафтара
+        было понятно, какой именно текст, не открывая саму афтору. Составная афтора
         из нескольких книг или несмежных участков (напр. Вайеце, Итро, Мишпатим) даёт
         несколько сегментов через запятую - границы сегментов проставлены при импорте
         (поле HaftarahVerse.segment), не выводятся эвристикой задним числом, т.к.
@@ -312,11 +312,11 @@ class Haftarah(models.Model):
 
 
 class HaftarahVerse(models.Model):
-    haftarah = models.ForeignKey(Haftarah, verbose_name="Гафтара", related_name="verses", on_delete=models.CASCADE)
+    haftarah = models.ForeignKey(Haftarah, verbose_name="Афтора", related_name="verses", on_delete=models.CASCADE)
     order = models.PositiveSmallIntegerField(
         "Порядок", default=0,
         help_text="Порядок чтения - не всегда совпадает с сортировкой по главе:стиху "
-        "(составная гафтара может переходить на другую книгу и обратно).",
+        "(составная афтора может переходить на другую книгу и обратно).",
     )
     segment = models.PositiveSmallIntegerField(
         "Сегмент", default=0,
@@ -332,8 +332,8 @@ class HaftarahVerse(models.Model):
 
     class Meta:
         ordering = ["order"]
-        verbose_name = "стих гафтары"
-        verbose_name_plural = "Стихи гафтары"
+        verbose_name = "стих афторы"
+        verbose_name_plural = "Стихи афторы"
 
     def __str__(self):
         return f"{self.haftarah} - {self.book_name_ru} {self.chapter}:{self.verse}"

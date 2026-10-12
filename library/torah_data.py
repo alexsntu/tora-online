@@ -45,8 +45,8 @@ BOOKS = {
     ),
 }
 
-# slug -> (name_ru, name_he, sefaria_name) — книги-источники гафтарот (Невиим).
-# Не входят в BOOKS/Category специально: гафтара - отдельный раздел, не часть
+# slug -> (name_ru, name_he, sefaria_name) — книги-источники афторот (Невиим).
+# Не входят в BOOKS/Category специально: афтора - отдельный раздел, не часть
 # обычного текста Танаха на сайте (см. library.models.Haftarah).
 HAFTARAH_BOOKS = {
     "yeshayahu": ("Йешаяу", "יְשַׁעְיָהוּ", "Isaiah"),

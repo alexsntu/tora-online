@@ -12,7 +12,7 @@ TEXTS_RU_HAFTARAH_OCCASIONS_DIR = Path(settings.BASE_DIR) / "texts" / "ru_haftar
 
 class Command(BaseCommand):
     help = (
-        "Импортирует тексты гафтарот особых дат из "
+        "Импортирует тексты афторот особых дат из "
         "texts/ru_haftarah_occasions/<категория>/<дата>/haftarah.txt (категория - "
         "dates/regalim/arba_parshiyot, см. HaftarahOccasion.CATEGORY_CHOICES). "
         "Сама HaftarahOccasion должна быть уже создана (в админке или через shell) - "

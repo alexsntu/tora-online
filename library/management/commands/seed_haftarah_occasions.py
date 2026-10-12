@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 
 from library.models import HaftarahOccasion
 
-# (slug, name_ru, category, order) - особые даты для гафтарот, вне недельного цикла.
+# (slug, name_ru, category, order) - особые даты для афторот, вне недельного цикла.
 # Источник текстов: texts/ru_haftarah_occasions/<category>/<slug>/haftarah.txt
 # (см. import_haftarot_occasions). Порядок внутри категории - как в оглавлении
 # /haftarot/, задан пользователем при загрузке документа с текстами.
@@ -33,7 +33,7 @@ MANIFEST = [
 
 
 class Command(BaseCommand):
-    help = "Создаёт/обновляет HaftarahOccasion (особые даты для гафтарот) из MANIFEST."
+    help = "Создаёт/обновляет HaftarahOccasion (особые даты для афторот) из MANIFEST."
 
     def handle(self, *args, **options):
         for slug, name_ru, category, order in MANIFEST:

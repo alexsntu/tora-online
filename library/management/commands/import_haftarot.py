@@ -96,8 +96,8 @@ def resolve_book_prefix(text):
 
 
 def parse_haftarah_file(path: Path):
-    """Разбирает текстовый файл гафтары. Поддерживает оба варианта источника:
-    - "общий поток" (Берешит, Ноах, Вайера и т.п.): одна книга на всю гафтару,
+    """Разбирает текстовый файл афторы. Поддерживает оба варианта источника:
+    - "общий поток" (Берешит, Ноах, Вайера и т.п.): одна книга на всю афтору,
       текст один, а традиции (Ашкеназим/Сефарадим) - просто разные диапазоны
       глав:стихов внутри него ("Ашкеназим: 42:5-43:10" и т.п.);
     - "раздельные разделы" (Вайеце и т.п.): в тексте есть явные подзаголовки
@@ -267,7 +267,7 @@ def verses_for_tradition(tradition, verses, range_by_tradition):
 
 
 def import_haftarah_file(txt_file: Path, target: dict, stdout, style):
-    """Общий импорт одного файла гафтары в Haftarah(**target) - target это
+    """Общий импорт одного файла афторы в Haftarah(**target) - target это
     {"parasha": obj} или {"occasion": obj}. Используется и import_haftarot
     (недельные главы), и import_haftarot_occasions (особые даты)."""
     range_by_tradition, all_verses = parse_haftarah_file(txt_file)
@@ -324,12 +324,12 @@ def import_haftarah_file(txt_file: Path, target: dict, stdout, style):
         stdout.write(style.WARNING(f"{txt_file}: не удалось определить ни одной традиции"))
         return
 
-    stdout.write(style.SUCCESS(f"{txt_file.parent.name}: гафтара создана/обновлена: {', '.join(created)}"))
+    stdout.write(style.SUCCESS(f"{txt_file.parent.name}: афтора создана/обновлена: {', '.join(created)}"))
 
 
 class Command(BaseCommand):
     help = (
-        "Импортирует тексты гафтарот из texts/ru_haftarah/<недельная_глава>/haftarah.txt "
+        "Импортирует тексты афторот из texts/ru_haftarah/<недельная_глава>/haftarah.txt "
         "(отдельный раздел, не часть обычного текста Танаха) и подтягивает параллельный "
         "иврит с Sefaria (как import_texts, с локальным кэшем)."
     )

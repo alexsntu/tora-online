@@ -520,7 +520,7 @@ def sage_detail_view(request, sage_slug):
 
 
 def haftarot_view(request):
-    """Указатель гафтарот: отдельный раздел, не часть обычного текста Танаха. Четыре
+    """Указатель афторот: отдельный раздел, не часть обычного текста Танаха. Четыре
     подраздела: недельные главы (по книгам Торы, в порядке годового цикла), потом
     три раздела особых дат - Афторот к датам / Шалош Регалим / Арба Парашийот."""
     parashot = (
@@ -544,8 +544,8 @@ def haftarot_view(request):
 
     meta_title, meta_description = resolve_meta(
         "", "",
-        "Афторот (гафтарот) — Тора онлайн",
-        "Гафтарот (чтения из книг Пророков) для каждой недельной главы Торы, для праздничных дат, "
+        "Афторот — Тора онлайн",
+        "Афторот (чтения из книг Пророков) для каждой недельной главы Торы, для праздничных дат, "
         "Шалош Регалим и Арба Парашийот - ашкеназская и сефардская традиции.",
     )
     return render(request, "library/haftarot.html", {
@@ -562,15 +562,15 @@ def haftarah_view(request, parasha_slug, tradition):
     haftarah = get_object_or_404(Haftarah, parasha=parasha, tradition=tradition)
     other_haftarot = parasha.haftarot.exclude(pk=haftarah.pk)
 
-    title = f"Гафтара «{parasha.name_ru}» ({haftarah.get_tradition_display()})"
+    title = f"Афтора «{parasha.name_ru}» ({haftarah.get_tradition_display()})"
     meta_title, meta_description = resolve_meta(
         "", "",
         f"{title} — Тора онлайн",
-        f"Гафтара недельной главы «{parasha.name_ru}» ({haftarah.get_tradition_display()} традиция), "
+        f"Афтора недельной главы «{parasha.name_ru}» ({haftarah.get_tradition_display()} традиция), "
         f"{haftarah.range_display}, текст на иврите и русском.",
     )
     return render(request, "library/haftarah.html", {
-        "heading": f"Гафтара недельной главы «{parasha.name_ru}»",
+        "heading": f"Афтора недельной главы «{parasha.name_ru}»",
         "back_url": reverse("library:parasha", args=[parasha.slug]),
         "back_label": f"К недельной главе «{parasha.name_ru}»",
         "haftarah": haftarah,
@@ -589,15 +589,15 @@ def haftarah_occasion_view(request, occasion_slug, tradition):
     haftarah = get_object_or_404(Haftarah, occasion=occasion, tradition=tradition)
     other_haftarot = occasion.haftarot.exclude(pk=haftarah.pk)
 
-    title = f"Гафтара «{occasion.name_ru}» ({haftarah.get_tradition_display()})"
+    title = f"Афтора «{occasion.name_ru}» ({haftarah.get_tradition_display()})"
     meta_title, meta_description = resolve_meta(
         "", "",
         f"{title} — Тора онлайн",
-        f"Гафтара «{occasion.name_ru}» ({haftarah.get_tradition_display()} традиция), "
+        f"Афтора «{occasion.name_ru}» ({haftarah.get_tradition_display()} традиция), "
         f"{haftarah.range_display}, текст на иврите и русском.",
     )
     return render(request, "library/haftarah.html", {
-        "heading": f"Гафтара «{occasion.name_ru}»",
+        "heading": f"Афтора «{occasion.name_ru}»",
         "back_url": reverse("library:haftarot"),
         "back_label": "Афторот",
         "occasion": occasion,

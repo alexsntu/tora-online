@@ -1,3 +1,4 @@
+import re
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -8,9 +9,9 @@ from django.core.management.base import BaseCommand
 
 from library.torah_data import PARASHOT
 
-# Гугл-доки с гафтарот, один на книгу Торы: вкладка Google Docs = недельная глава.
+# Гугл-доки с афторот, один на книгу Торы: вкладка Google Docs = недельная глава.
 # Экспорт в текст (?format=txt) отдаёт ВСЕ вкладки одним файлом подряд, каждая
-# со своим заголовком "Г̃афтара недельной главы Торы «...»".
+# со своим заголовком "<афтора> недельной главы Торы «...»".
 DOC_IDS = [
     "1YeMEN4iGC9-JP0IUeQOcaubvAJ2f9-jEux8eceXQZwU",  # Берешит
     "1YES1JySEnjgXI2xPbLIK5OUsaUqNSL0JT34DVSYj-Ek",  # Шмот
@@ -21,10 +22,12 @@ DOC_IDS = [
 
 TEXTS_RU_HAFTARAH_DIR = Path(settings.BASE_DIR) / "texts" / "ru_haftarah"
 
-# Обычно "Г̃афтара недельной главы Торы «...»", но у особых гафтарот (напр.
-# суббота "Шува" перед Йом Кипуром) заголовок другой - "Г̃афтара Шаббата «Шува»
-# глава Ваелех". Общее для всех - начинается с "афтара" (без регистра для "Г/г").
-HAFTARAH_HEADER_MARKERS = ("афтара недельной главы торы", "афтара шаббата")
+# Обычно "<афтора> недельной главы Торы «...»", но у особых афторот (напр.
+# суббота "Шува" перед Йом Кипуром) заголовок другой - "<афтора> Шаббата «Шува»
+# глава Ваелех". Само слово в источнике написано не как на сайте (через "Г̃" и
+# "а", см. library/thesaurus.py), поэтому ловим оба написания - и исходное, и
+# каноническое, если документ поправят.
+HAFTARAH_HEADER_RE = re.compile(r"афт[ао]ра (?:недельной главы торы|шаббата)", re.IGNORECASE)
 
 # Заголовок вкладки в документе иногда пишется не так, как у нас в PARASHOT
 # (другой вариант транслитерации/написания) - явные исключения сюда.
@@ -66,7 +69,7 @@ NAME_RU_TO_SLUG = {name_ru: slug for slug, (name_ru, name_he, order) in PARASHOT
 
 class Command(BaseCommand):
     help = (
-        "Скачивает общий документ с гафтарот (Google Docs, вкладка = недельная глава), "
+        "Скачивает общий документ с афторот (Google Docs, вкладка = недельная глава), "
         "раскладывает найденные вкладки по texts/ru_haftarah/<глава>/haftarah.txt "
         "и запускает import_haftarot. Разбор структуры текста (книга, диапазоны, "
         "традиции) - в import_haftarot, здесь только нарезка на вкладки."
@@ -100,10 +103,10 @@ class Command(BaseCommand):
         lines = raw.splitlines()
         header_idxs = [
             i for i, line in enumerate(lines)
-            if any(marker in line.lower() for marker in HAFTARAH_HEADER_MARKERS)
+            if HAFTARAH_HEADER_RE.search(line)
         ]
         if not header_idxs:
-            self.stdout.write(self.style.WARNING(f"Документ {doc_id}: не нашлось ни одной вкладки с гафтарой"))
+            self.stdout.write(self.style.WARNING(f"Документ {doc_id}: не нашлось ни одной вкладки с афторой"))
             return []
 
         written = []
