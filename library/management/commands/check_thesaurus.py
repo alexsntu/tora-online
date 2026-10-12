@@ -17,6 +17,16 @@ FILE_EXCLUDE_NAMES = ("thesaurus.py", "tests.py")
 # прав в админке (они создаются из verbose_name и сами не переименовываются).
 DB_APP_LABELS = ("library", "auth")
 
+# Модели, которые не проверяем. Сообщения об ошибках - это слова посетителя, в них
+# неверное написание процитировано намеренно; статистика - не текст сайта.
+# Тексты Писания (Verse и стихи афторот) - перевод из исходных файлов texts/, а не
+# наш авторский текст: правка в базе слетит при следующем импорте, а названия мест
+# с артиклем внутри - часть самого перевода.
+DB_SKIP_MODELS = {
+    "library.ErrorReport", "library.AnalyticsEvent",
+    "library.Verse", "library.HaftarahVerse", "library.OccasionMaftirVerse",
+}
+
 # Записи, которые не трогаем и не считаем расхождением: (модель, pk).
 DB_EXEMPT = {
     # Вопрос посетителя, в котором оба написания стоят намеренно - не исправлять.
@@ -37,7 +47,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write("Тезаурус:")
         for term in THESAURUS:
-            self.stdout.write(f"  {term.canonical} / {term.plural} ({term.hebrew}) - не пишем: {', '.join(term.wrong)}")
+            name = f"{term.canonical} / {term.plural}" if term.plural else term.canonical
+            self.stdout.write(f"  {name} ({term.hebrew}) - не пишем: {', '.join(term.wrong)}")
 
         file_hits = self.check_files()
         db_hits = self.check_db(fix=options["fix"])
@@ -71,12 +82,15 @@ class Command(BaseCommand):
     def check_db(self, fix):
         hits = 0
         for model in apps.get_models():
-            if model._meta.app_label not in DB_APP_LABELS:
+            if model._meta.app_label not in DB_APP_LABELS or model._meta.label in DB_SKIP_MODELS:
                 continue
+            # Только редактируемые поля: служебные копии для поиска (title_lower и т.п.)
+            # не проверяем, а пересчитываем вслед за исправленным полем, см. ниже.
             fields = [
                 f.name for f in model._meta.concrete_fields
-                if isinstance(f, (models.CharField, models.TextField)) and not f.choices
+                if isinstance(f, (models.CharField, models.TextField)) and f.editable and not f.choices
             ]
+            all_names = {f.name for f in model._meta.concrete_fields}
             if not fields:
                 continue
             for obj in model._default_manager.only("pk", *fields).iterator():
@@ -92,6 +106,9 @@ class Command(BaseCommand):
                         self.stdout.write(
                             f"{model._meta.label} #{obj.pk}, поле {name}: {', '.join(wrong)}"
                         )
+                for name in list(changed):
+                    if f"{name}_lower" in all_names:
+                        changed[f"{name}_lower"] = changed[name].lower()
                 if fix and changed:
                     # update() вместо save(): правим только текст, без побочных
                     # эффектов save() и сигналов.

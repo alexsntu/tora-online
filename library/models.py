@@ -481,7 +481,7 @@ class Topic(models.Model):
 
 class Sage(models.Model):
     """Мудрец Торы (комментатор), на чьё учение опирается материал -
-    Зера Шимшон, Ор аХаим аКадош и т.п. Отдельный указатель, как у тем.
+    Зера Шимшон, Ор а-Хаим а-Кадош и т.п. Отдельный указатель, как у тем.
     Связь с Material - через Material.sages (related_name="materials")."""
 
     name_ru = models.CharField("Имя", max_length=255)

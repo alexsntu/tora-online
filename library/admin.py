@@ -2,8 +2,8 @@ from django import forms
 from django.contrib import admin
 from django.db import models
 from django.http import HttpResponseRedirect, JsonResponse
-from django.urls import path, reverse
-from django.utils.html import format_html
+from django.urls import Resolver404, path, resolve, reverse
+from django.utils.html import format_html, format_html_join
 
 from axes.admin import AccessAttemptAdmin, IsLockedOutFilter
 from axes.models import AccessAttempt
@@ -486,17 +486,87 @@ class QuestionAdmin(admin.ModelAdmin):
         return obj.is_answered
 
 
+def _error_report_edit_targets(page_url):
+    """По адресу страницы, с которой пришло сообщение об ошибке, находит, что
+    именно править в админке: список (подпись, ссылка). Для статьи/вопроса/мудреца/
+    афторы это сама запись, для страницы главы - списки её материалов и стихов
+    (на странице их много, какой именно - видно из описания ошибки)."""
+    try:
+        match = resolve(page_url)
+    except Resolver404:
+        return []
+    if match.app_name != "library":
+        return []
+    kw = match.kwargs
+
+    def change(model, **lookup):
+        obj = model.objects.filter(**lookup).first()
+        if not obj:
+            return []
+        url = reverse(f"admin:library_{model._meta.model_name}_change", args=[obj.pk])
+        return [(f"Редактировать: {model._meta.verbose_name}", url)]
+
+    def materials_of(book, chapter=None):
+        url = reverse("admin:library_material_changelist") + f"?book={book.pk}"
+        if chapter:
+            url += f"&chapter={chapter}"
+        return ("Материалы этой страницы", url)
+
+    name = match.url_name
+    if name == "article_detail":
+        return change(Material, article_slug=kw["slug"])
+    if name == "question_detail":
+        return change(Question, slug=kw["slug"])
+    if name == "sage_detail":
+        return change(Sage, slug=kw["sage_slug"])
+    if name == "haftarah":
+        return change(Haftarah, parasha__slug=kw["parasha_slug"], tradition=kw["tradition"])
+    if name == "haftarah_occasion":
+        return change(Haftarah, occasion__slug=kw["occasion_slug"], tradition=kw["tradition"])
+    if name in ("chapter", "articles_book", "topics_book"):
+        book = Book.objects.filter(slug=kw["book_slug"]).first()
+        if not book:
+            return []
+        if name != "chapter":
+            return [materials_of(book)]
+        verses_url = (
+            reverse("admin:library_verse_changelist") + f"?book__id__exact={book.pk}&chapter={kw['chapter']}"
+        )
+        return [materials_of(book, kw["chapter"]), ("Стихи этой главы", verses_url)]
+    return []
+
+
 @admin.register(ErrorReport)
 class ErrorReportAdmin(admin.ModelAdmin):
-    list_display = ("description_preview", "page_url", "is_resolved", "created_at")
+    list_display = ("description_preview", "fix_links", "page_link", "is_resolved", "created_at")
     list_filter = ("is_resolved",)
     search_fields = ("description", "page_url")
-    fields = ("description", "page_url", "created_at", "is_resolved")
-    readonly_fields = ("description", "page_url", "created_at")
+    fields = ("description", "fix_links", "page_link", "created_at", "is_resolved")
+    readonly_fields = ("description", "fix_links", "page_link", "created_at")
+
+    class Media:
+        css = {"all": ("library/admin-extra.css",)}
 
     @admin.display(description="Описание")
     def description_preview(self, obj):
         return obj.description[:80]
+
+    @admin.display(description="Исправить")
+    def fix_links(self, obj):
+        # В новой вкладке - чтобы сообщение с описанием ошибки оставалось перед глазами.
+        targets = _error_report_edit_targets(obj.page_url)
+        if not targets:
+            return "—"
+        return format_html_join(
+            " ", '<a class="button material-edit-btn" href="{}" target="_blank" rel="noopener">{}</a>',
+            ((url, label) for label, url in targets),
+        )
+
+    @admin.display(description="Страница", ordering="page_url")
+    def page_link(self, obj):
+        if not obj.page_url.startswith("/"):
+            return obj.page_url or "—"
+        return format_html('<a href="{}" target="_blank" rel="noopener">{}</a>', obj.page_url, obj.page_url)
 
 
 @admin.register(SiteSettings)
