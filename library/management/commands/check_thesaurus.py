@@ -17,6 +17,12 @@ FILE_EXCLUDE_NAMES = ("thesaurus.py", "tests.py")
 # прав в админке (они создаются из verbose_name и сами не переименовываются).
 DB_APP_LABELS = ("library", "auth")
 
+# Записи, которые не трогаем и не считаем расхождением: (модель, pk).
+DB_EXEMPT = {
+    # Вопрос посетителя, в котором оба написания стоят намеренно - не исправлять.
+    ("library.Question", 3),
+}
+
 
 class Command(BaseCommand):
     help = (
@@ -74,6 +80,8 @@ class Command(BaseCommand):
             if not fields:
                 continue
             for obj in model._default_manager.only("pk", *fields).iterator():
+                if (model._meta.label, obj.pk) in DB_EXEMPT:
+                    continue
                 changed = {}
                 for name in fields:
                     value = getattr(obj, name)
