@@ -11,3 +11,6 @@ media/
 passenger_wsgi.py
 .restart-app
 zvezdny-bank/
+
+# Локальные бэкапы прода (scripts/backup_prod.sh)
+backups/
